@@ -19,13 +19,17 @@ int main() {
 		}
 	}
 
+	initialize_engine();
+
 	CVM* vm = new CVM();
 	CMFunction* main_function = nullptr;
 
 	vm->label_id = new std::unordered_map<std::string, unsigned int>;
 
 	while (!parsed_tokens.empty()) {
-		CodeMemory* code_memory = get_code_memory(vm->label_id, parsed_tokens);
+		CodeMemory* code_memory = get_code_memory(vm->load_queue, vm->label_id, parsed_tokens);
+
+		if (code_memory == nullptr) continue;
 
 		if (code_memory->get_type() == code_function) {
 			CMFunction* cm_f = ((CMFunction*)code_memory);

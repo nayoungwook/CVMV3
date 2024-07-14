@@ -291,6 +291,41 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			break;
 		}
 
+		case op_array_get: {
+			Operand* peek = this->stack->peek();
+			this->stack->pop();
+			int index = std::stoi(peek->get_data());
+
+			Operand* array_operand = this->stack->peek();
+			this->stack->pop();
+
+			Operand* result = array_operand->get_array_data()[index];
+
+			this->stack->push(result);
+
+			break;
+		}
+
+		case op_array: {
+			int array_size = std::stoi(op->get_operands()[0]->identifier);
+
+			Operand* result = nullptr;
+			std::vector<Operand*> elements;
+
+			for (int i = 0; i < array_size; i++) {
+				Operand* peek = this->stack->peek();
+				this->stack->pop();
+
+				elements.push_back(peek);
+			}
+
+			result = new Operand(elements);
+
+			this->stack->push(result);
+
+			break;
+		}
+
 		case op_load_global: {
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 			Operand* found_op = vm->global_area[id];

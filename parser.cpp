@@ -139,6 +139,14 @@ Operator* get_operator(std::unordered_map<std::string, unsigned int>* label_id, 
 		operands.push_back(pull_token(tokens)); // id
 		pull_token(tokens);
 	}
+	else if (token->identifier == "@ARRAY") {
+		type = op_array;
+
+		operands.push_back(pull_token(tokens)); // array size
+	}
+	else if (token->identifier == "@ARRAY_GET") {
+		type = op_array_get;
+	}
 	else if (token->identifier == "@NEW") {
 		type = op_new;
 
@@ -170,7 +178,7 @@ Operator* get_operator(std::unordered_map<std::string, unsigned int>* label_id, 
 	return result;
 }
 
-CodeMemory* get_code_memory(std::unordered_map<std::string, unsigned int>* label_id, std::vector<Token*>& tokens) {
+CodeMemory* get_code_memory(std::queue<std::pair<std::string, std::string>>& load_queue, std::unordered_map<std::string, unsigned int>* label_id, std::vector<Token*>& tokens) {
 	Token* token = pull_token(tokens);
 
 	if (token->identifier == "FUNC" || token->identifier == "$INITIALIZE" || token->identifier == "$CONSTRUCTOR") {
@@ -235,7 +243,8 @@ CodeMemory* get_code_memory(std::unordered_map<std::string, unsigned int>* label
 			render_function_id = -1;
 
 		while (tokens[0]->identifier != "}") {
-			CMFunction* member_function = (CMFunction*)get_code_memory(label_id, tokens);
+			std::queue<std::pair<std::string, std::string>> empty_queue; // there's nothing going to be queued.
+			CMFunction* member_function = (CMFunction*)get_code_memory(empty_queue, label_id, tokens);
 
 			if (member_function->get_type() == code_constructor) {
 				constructor = (CMConstructor*)member_function;
@@ -288,6 +297,18 @@ CodeMemory* get_code_memory(std::unordered_map<std::string, unsigned int>* label
 		((CMClass*)result)->name = name.substr(1, name.size() - 2);
 
 		return result;
+	}
+	else if (token->identifier == "#LOAD") {
+		std::string name = pull_token(tokens)->identifier;
+
+		std::string path = "", file_path = pull_token(tokens)->identifier;
+		std::wstring current_directory = get_current_directory();
+		path.assign(current_directory.begin(), current_directory.end());
+		path += ("\\" + file_path.substr(1, file_path.size() - 2));
+
+		load_queue.push(std::make_pair(name, path));
+
+		int line_number = std::stoi(pull_token(tokens)->identifier); // line number
 	}
 
 	return nullptr;

@@ -41,6 +41,8 @@ enum operator_type {
 	op_or = 33,
 	op_and = 34,
 	op_push_bool = 35,
+	op_array = 36,
+	op_array_get = 37,
 };
 
 class Operator {
