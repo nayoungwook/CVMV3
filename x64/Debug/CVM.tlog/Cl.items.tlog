@@ -1,0 +1,13 @@
+C:\Users\user\source\repos\Chestnut\CVM\cm_class.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\cm_class.obj
+C:\Users\user\source\repos\Chestnut\CVM\cm_function.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\cm_function.obj
+C:\Users\user\source\repos\Chestnut\CVM\cm_scene.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\cm_scene.obj
+C:\Users\user\source\repos\Chestnut\CVM\cm_window.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\cm_window.obj
+C:\Users\user\source\repos\Chestnut\CVM\code_memory.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\code_memory.obj
+C:\Users\user\source\repos\Chestnut\CVM\cvm.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\cvm.obj
+C:\Users\user\source\repos\Chestnut\CVM\function_frame.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\function_frame.obj
+C:\Users\user\source\repos\Chestnut\CVM\memory.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\memory.obj
+C:\Users\user\source\repos\Chestnut\CVM\operand.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\operand.obj
+C:\Users\user\source\repos\Chestnut\CVM\operator.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\operator.obj
+C:\Users\user\source\repos\Chestnut\CVM\parser.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\parser.obj
+C:\Users\user\source\repos\Chestnut\CVM\stack.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\stack.obj
+C:\Users\user\source\repos\Chestnut\CVM\sys_file.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\sys_file.obj
