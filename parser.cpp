@@ -155,6 +155,11 @@ Operator* get_operator(std::unordered_map<std::string, unsigned int>* label_id, 
 
 		operands.push_back(pull_token(tokens)); // constructor parameter count
 	}
+	else if (token->identifier == "@VECTOR") {
+		type = op_vector;
+
+		operands.push_back(pull_token(tokens)); // vector size
+	}
 	else if (token->identifier == "@CALL_BUILTIN" || token->identifier == "@CALL_GLOBAL" || token->identifier == "@CALL_ATTR") {
 		if (token->identifier == "@CALL_BUILTIN")
 			type = op_call_builtin;

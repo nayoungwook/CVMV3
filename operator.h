@@ -43,6 +43,7 @@ enum operator_type {
 	op_push_bool = 35,
 	op_array = 36,
 	op_array_get = 37,
+	op_vector = 38,
 };
 
 class Operator {

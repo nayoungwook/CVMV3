@@ -14,7 +14,18 @@ void run_function(CVM* vm, FunctionFrame* caller_frame, CMFunction* code_memory,
 	for (int i = 0; i < parameter_count; i++) {
 		Operand* op = caller_frame->stack->peek();
 		caller_frame->stack->pop();
-		frame->local_area.insert(std::make_pair(i, op));
+
+		Operand* copied_op = nullptr;
+
+		if (op->get_type() == operand_vector || op->get_type() == operand_array) {
+			std::vector<Operand*> array_data = op->get_array_data();
+			copied_op = new Operand(array_data, op->get_type());
+		}
+		else {
+			copied_op = new Operand(op->get_data(), op->get_type());
+		}
+
+		frame->local_area.insert(std::make_pair(i, copied_op));
 	}
 
 	frame->run(vm, caller_frame, nullptr);
@@ -319,7 +330,27 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				elements.push_back(peek);
 			}
 
-			result = new Operand(elements);
+			result = new Operand(elements, operand_array);
+
+			this->stack->push(result);
+
+			break;
+		}
+
+		case op_vector: {
+			int vector_size = std::stoi(op->get_operands()[0]->identifier);
+
+			Operand* result = nullptr;
+			std::vector<Operand*> elements;
+
+			for (int i = 0; i < vector_size; i++) {
+				Operand* peek = this->stack->peek();
+				this->stack->pop();
+
+				elements.push_back(peek);
+			}
+
+			result = new Operand(elements, operand_vector);
 
 			this->stack->push(result);
 
@@ -370,6 +401,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					else {
 						std::cout << content;
 					}
+
+					delete data;
 				}
 			}
 			else if (id == 1) { // window
@@ -384,6 +417,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					if (i == 0) title = data->get_data();
 					else if (i == 1) width = (int)std::stod(data->get_data());
 					else if (i == 2) height = (int)std::stod(data->get_data());
+
+					delete data;
 				}
 
 				CMWindow* cm_window = new CMWindow(vm, title, width, height);
@@ -399,7 +434,36 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					Memory* scene = reinterpret_cast<Memory*>(std::stoull(target->get_data()));
 
 					vm->current_scene_memory = scene;
+
+					delete target;
 				}
+			}
+			else if (id == 3) { // image
+				Operand* image = this->stack->peek(); // string data.
+				this->stack->pop();
+
+				Operand* position = this->stack->peek();
+				this->stack->pop();
+
+				std::unordered_map<std::string, CMImage*>::iterator image_data_iter = vm->resources.find(image->get_data());
+
+				assert(image_data_iter != vm->resources.end());
+
+				CMImage* image_data = image_data_iter->second;
+
+				Operand* width = nullptr, * height = nullptr;
+				width = this->stack->peek(), this->stack->pop();
+				height = this->stack->peek(), this->stack->pop();
+
+				float _x = std::stof(position->get_array_data()[0]->get_data()), _y = std::stof(position->get_array_data()[1]->get_data());
+				float _width = std::stof(width->get_data()), _height = std::stof(height->get_data());
+
+				render_image(image_data->get_texture(), image_data->get_vao(), _x, _y, _width, _height, 0);
+
+				delete image;
+				delete position;
+				delete width;
+				delete height;
 			}
 
 			break;
@@ -408,9 +472,18 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		case op_load_attr: {
 			Operand* target = this->stack->peek();
 			this->stack->pop();
+			operand_type type = target->get_type();
 
-			Memory* memory = reinterpret_cast<Memory*>(std::stoull(target->get_data()));
-			this->stack->push(memory->member_variables[std::stoi(op->get_operands()[0]->identifier)]);
+			if (type == operand_address) {
+				Memory* memory = reinterpret_cast<Memory*>(std::stoull(target->get_data()));
+				this->stack->push(memory->member_variables[std::stoi(op->get_operands()[0]->identifier)]);
+			}
+			else if (type == operand_vector) {
+				int index = std::stoi(op->get_operands()[0]->identifier);
+
+				this->stack->push(target->get_array_data()[index]);
+			}
+
 			break;
 		}
 

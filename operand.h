@@ -9,6 +9,7 @@ enum operand_type {
 	operand_bool = 2,
 	operand_address = 3,
 	operand_array = 4,
+	operand_vector = 5,
 };
 
 class Operand {
@@ -23,5 +24,5 @@ public:
 
 	operand_type get_type() const;
 	Operand(std::string const& data, operand_type type);
-	Operand(std::vector<Operand*>& array_data);
+	Operand(std::vector<Operand*>& array_data, operand_type type);
 };
