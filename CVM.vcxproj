@@ -141,6 +141,7 @@
     <ClCompile Include="cm_function.cpp" />
     <ClCompile Include="cm_image.cpp" />
     <ClCompile Include="cm_scene.cpp" />
+    <ClCompile Include="cm_shader.cpp" />
     <ClCompile Include="cm_window.cpp" />
     <ClCompile Include="code_memory.cpp" />
     <ClCompile Include="cvm.cpp" />
@@ -154,12 +155,14 @@
     <ClCompile Include="stack.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="sys_file.cpp" />
+    <ClCompile Include="sys_logger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cm_class.h" />
     <ClInclude Include="cm_function.h" />
     <ClInclude Include="cm_image.h" />
     <ClInclude Include="cm_scene.h" />
+    <ClInclude Include="cm_shader.h" />
     <ClInclude Include="cm_window.h" />
     <ClInclude Include="code_memory.h" />
     <ClInclude Include="cvm.h" />
@@ -173,6 +176,7 @@
     <ClInclude Include="stack.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="sys_file.h" />
+    <ClInclude Include="sys_logger.h" />
     <ClInclude Include="token.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

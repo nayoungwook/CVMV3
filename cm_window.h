@@ -23,3 +23,4 @@ static SDL_GLContext context;
 
 SDL_Window* create_window(std::string const& title, int width, int height);
 void window_loop(CVM* vm, SDL_Window* window);
+void load_default_shader(CVM* vm);

@@ -2,6 +2,7 @@ C:\Users\user\source\repos\Chestnut\CVM\cm_class.cpp;C:\Users\user\source\repos\
 C:\Users\user\source\repos\Chestnut\CVM\cm_function.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\cm_function.obj
 C:\Users\user\source\repos\Chestnut\CVM\cm_image.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\cm_image.obj
 C:\Users\user\source\repos\Chestnut\CVM\cm_scene.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\cm_scene.obj
+C:\Users\user\source\repos\Chestnut\CVM\cm_shader.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\cm_shader.obj
 C:\Users\user\source\repos\Chestnut\CVM\cm_window.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\cm_window.obj
 C:\Users\user\source\repos\Chestnut\CVM\code_memory.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\code_memory.obj
 C:\Users\user\source\repos\Chestnut\CVM\cvm.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\cvm.obj
@@ -15,3 +16,4 @@ C:\Users\user\source\repos\Chestnut\CVM\parser.cpp;C:\Users\user\source\repos\Ch
 C:\Users\user\source\repos\Chestnut\CVM\stack.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\stack.obj
 C:\Users\user\source\repos\Chestnut\CVM\stb_image.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\stb_image.obj
 C:\Users\user\source\repos\Chestnut\CVM\sys_file.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\sys_file.obj
+C:\Users\user\source\repos\Chestnut\CVM\sys_logger.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\sys_logger.obj

@@ -1,12 +1,16 @@
 #include "sys_file.h"
 
-std::vector<std::string> get_file(std::string& file_path) {
-
+std::string get_absolute_path(std::string const& path) {
 	std::string current_path;
 	std::wstring wcurrent_dir = get_current_directory();
 	current_path.assign(wcurrent_dir.begin(), wcurrent_dir.end());
 
-	file_path = current_path + "\\" + file_path;
+	return current_path + "\\" + path;
+}
+
+std::vector<std::string> get_file(std::string& file_path) {
+
+	file_path = get_absolute_path(file_path);
 
 	std::ifstream openFile(file_path.data());
 	std::vector<std::string> result;

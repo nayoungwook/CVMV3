@@ -10,10 +10,11 @@
 #include "operand.h"
 #include "memory.h"
 #include "engine.h"
+#include "sys_logger.h"
+#include "cm_shader.h"
 
 class CVM {
 public:
-
 	std::queue<std::pair<std::string, std::string>> load_queue; // <name , path>
 	std::unordered_map<std::string, CMImage*> resources;
 

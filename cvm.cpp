@@ -48,7 +48,7 @@ int main() {
 	}
 
 	if (main_function == nullptr) {
-		std::cout << "Main Function not found." << std::endl;
+		chestnut_log(L"Main Function not found. Please deaclare it.", log_state::log_error);
 		exit(EXIT_FAILURE);
 	}
 

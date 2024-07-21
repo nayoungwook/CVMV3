@@ -58,6 +58,12 @@ Operator* get_operator(std::unordered_map<std::string, unsigned int>* label_id, 
 		operands.push_back(pull_token(tokens)); // id
 		pull_token(tokens);
 	}
+	else if (token->identifier == "@LOAD_CLASS") {
+		type = op_load_class;
+
+		operands.push_back(pull_token(tokens)); // id
+		pull_token(tokens);
+	}
 	else if (token->identifier == "@ADD") {
 		type = op_add;
 	}

@@ -10,6 +10,7 @@ enum operand_type {
 	operand_address = 3,
 	operand_array = 4,
 	operand_vector = 5,
+	operand_op_address = 6,
 };
 
 class Operand {

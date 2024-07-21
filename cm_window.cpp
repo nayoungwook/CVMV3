@@ -53,11 +53,11 @@ void window_loop(CVM* vm, SDL_Window* window) {
 
 			CMFunction* tick_function =
 				current_scene_cm->public_function->find(tick_funciton_id)->second;
-			run_function(vm, nullptr, tick_function, 0);
+			run_function(vm, nullptr, nullptr, tick_function, 0);
 
 			CMFunction* render_function =
 				current_scene_cm->public_function->find(render_funciton_id)->second;
-			run_function(vm, nullptr, render_function, 0);
+			run_function(vm, nullptr, nullptr, render_function, 0);
 
 		}
 
@@ -93,11 +93,23 @@ SDL_Window* CMWindow::get_window() {
 	return this->_window;
 }
 
+void load_default_shader(CVM* vm) {
+	CMShader* cm = new CMShader("fragment.glsl", "transform.glsl");
+
+	cm->register_uniform_data("uWorldTransform");
+	cm->register_uniform_data("uViewProj");
+
+	Memory* shader_memory = new Memory((CMClass*)cm);
+
+	vm->global_area.insert(std::make_pair(0, create_address_operand(shader_memory)));
+}
+
 CMWindow::CMWindow(CVM* vm, std::string const& title, int width, int height)
 	: CMClass(0, 0, -1, -1, -1) {
 	this->_window = create_window(title, width, height);
 
 	load_images(vm->load_queue, vm->resources);
+	load_default_shader(vm);
 
 	window_loop(vm, this->_window);
 }
