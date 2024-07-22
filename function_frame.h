@@ -14,6 +14,7 @@ public:
 	std::unordered_map<unsigned int, Operand*> local_area;
 	CMFunction* get_code_memory() const;
 	FunctionFrame(CMFunction* code_memory);
+	~FunctionFrame();
 	Stack* stack;
 	void run(CVM* vm, FunctionFrame* caller, Memory* caller_class);
 };

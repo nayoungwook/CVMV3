@@ -7,6 +7,7 @@
 #include "operator.h"
 #include "cm_function.h"
 #include "cm_scene.h"
+#include "cm_object.h"
 #include "cm_image.h"
 #include "sys_file.h"
 #include <assert.h>

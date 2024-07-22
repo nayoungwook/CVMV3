@@ -22,6 +22,9 @@ Operator* get_operator(std::unordered_map<std::string, unsigned int>* label_id, 
 
 		operands.push_back(pull_token(tokens)); // content
 	}
+	else if (token->identifier == "@PUSH_NULL") {
+		type = op_push_null;
+	}
 	else if (token->identifier == "@STORE_GLOBAL") {
 		type = op_store_global;
 
@@ -287,7 +290,10 @@ CodeMemory* get_code_memory(std::queue<std::pair<std::string, std::string>>& loa
 		else if (object_type == "SCENE")
 			result = (CodeMemory*) new CMScene(id, parent_id,
 				init_function_id, tick_function_id, render_function_id);
-
+		else if(object_type == "OBJECT")
+			result = (CodeMemory*) new CMObject(id, parent_id,
+				init_function_id, tick_function_id, render_function_id);
+		
 		((CMClass*)result)->member_functions = member_functions;
 
 		((CMClass*)result)->constructor = constructor;

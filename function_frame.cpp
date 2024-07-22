@@ -8,6 +8,15 @@ FunctionFrame::FunctionFrame(CMFunction* code_memory) : code_memory(code_memory)
 	this->stack = new Stack();
 }
 
+FunctionFrame::~FunctionFrame() {
+	std::unordered_map<unsigned int, Operand*>::iterator local_iter;
+
+	for (local_iter = this->local_area.begin(); local_iter != this->local_area.end(); local_iter++) {
+		delete local_iter->second;
+	}
+	delete stack;
+}
+
 Operand* copy_operand(Operand* op) {
 	Operand* copied_op = nullptr;
 
@@ -73,6 +82,11 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 		case op_push_number: {
 			this->stack->push(new Operand(op->get_operands()[0]->identifier, operand_number));
+			break;
+		}
+
+		case op_push_null: {
+			this->stack->push(new Operand("", operand_null));
 			break;
 		}
 
@@ -516,7 +530,16 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				Memory* memory = reinterpret_cast<Memory*>(std::stoull(vm->global_area[0]->get_data()));
 				CMShader* shader_cm = (CMShader*)memory->get_cm_class();
 
-				render_image(shader_cm, image_data->get_texture(), image_data->get_vao(), _x, _y, f_width, f_height, 0);
+				float f_rotation = .0f;
+
+				if (parameter_count == 5) {
+					Operand* rotation = this->stack->peek();
+					this->stack->pop();
+
+					f_rotation = std::stof(extract_value_of_opernad(rotation)->get_data());
+				}
+
+				render_image(shader_cm, image_data->get_texture(), image_data->get_vao(), _x, _y, f_width, f_height, f_rotation);
 
 				delete image;
 				delete position;

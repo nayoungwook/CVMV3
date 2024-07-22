@@ -84,6 +84,9 @@
     <ClCompile Include="cm_shader.cpp">
       <Filter>소스 파일\code_memory</Filter>
     </ClCompile>
+    <ClCompile Include="cm_object.cpp">
+      <Filter>소스 파일\code_memory</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cvm.h">
@@ -144,6 +147,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="cm_shader.h">
+      <Filter>헤더 파일\code_memory</Filter>
+    </ClInclude>
+    <ClInclude Include="cm_object.h">
       <Filter>헤더 파일\code_memory</Filter>
     </ClInclude>
   </ItemGroup>
