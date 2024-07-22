@@ -52,12 +52,12 @@ void window_loop(CVM* vm, SDL_Window* window) {
 			CMScene* scene = current_scene_cm;
 
 			CMFunction* tick_function =
-				current_scene_cm->public_function->find(tick_funciton_id)->second;
-			run_function(vm, nullptr, nullptr, tick_function, 0);
+				current_scene_cm->member_functions->find(tick_funciton_id)->second;
+			run_function(vm, vm->current_scene_memory, nullptr, tick_function, 0);
 
 			CMFunction* render_function =
-				current_scene_cm->public_function->find(render_funciton_id)->second;
-			run_function(vm, nullptr, nullptr, render_function, 0);
+				current_scene_cm->member_functions->find(render_funciton_id)->second;
+			run_function(vm, vm->current_scene_memory, nullptr, render_function, 0);
 
 		}
 

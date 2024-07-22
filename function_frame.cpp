@@ -345,7 +345,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* array_operand = this->stack->peek();
 			this->stack->pop();
 
-			Operand* result = array_operand->get_array_data()[index];
+			Operand* result = extract_value_of_opernad(array_operand)->get_array_data()[index];
 
 			this->stack->push(result);
 
@@ -413,6 +413,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 		case op_load_class: {
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
+			Operand* found_op = caller_class->member_variables[id];
 
 			this->stack->push(create_op_address_operand(found_op));
 			break;
@@ -507,7 +508,9 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				width = this->stack->peek(), this->stack->pop();
 				height = this->stack->peek(), this->stack->pop();
 
-				float _x = std::stof(position->get_array_data()[0]->get_data()), _y = std::stof(position->get_array_data()[1]->get_data());
+				float _x = std::stof(extract_value_of_opernad(position->get_array_data()[0])->get_data()),
+					_y = std::stof(extract_value_of_opernad(position->get_array_data()[1])->get_data());
+
 				float f_width = std::stof(extract_value_of_opernad(width)->get_data()), f_height = std::stof(extract_value_of_opernad(height)->get_data());
 
 				Memory* memory = reinterpret_cast<Memory*>(std::stoull(vm->global_area[0]->get_data()));

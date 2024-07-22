@@ -240,10 +240,7 @@ CodeMemory* get_code_memory(std::queue<std::pair<std::string, std::string>>& loa
 
 		pull_token(tokens); // {
 
-		std::unordered_map<unsigned int, CMFunction*>* public_function = new std::unordered_map<unsigned int, CMFunction*>;
-		std::unordered_map<unsigned int, CMFunction*>* private_function = new std::unordered_map<unsigned int, CMFunction*>;
-		std::unordered_map<unsigned int, CMFunction*>* protected_function = new std::unordered_map<unsigned int, CMFunction*>;
-		std::unordered_map<unsigned int, CMFunction*>* default_function = new std::unordered_map<unsigned int, CMFunction*>;
+		std::unordered_map<unsigned int, CMFunction*>* member_functions = new std::unordered_map<unsigned int, CMFunction*>;
 
 		CMInitialize* initializer = nullptr;
 		CMConstructor* constructor = nullptr;
@@ -265,7 +262,7 @@ CodeMemory* get_code_memory(std::queue<std::pair<std::string, std::string>>& loa
 			}
 			else {
 				if (member_function->get_access_modifier() == "public") {
-					unsigned int id = (unsigned int)public_function->size();
+					unsigned int id = (unsigned int)member_functions->size();
 					std::string function_name = member_function->name;
 
 					if (function_name == "init")
@@ -275,14 +272,8 @@ CodeMemory* get_code_memory(std::queue<std::pair<std::string, std::string>>& loa
 					else if (function_name == "render")
 						render_function_id = id;
 
-					public_function->insert(std::make_pair(id, member_function));
+					member_functions->insert(std::make_pair(id, member_function));
 				}
-				else if (member_function->get_access_modifier() == "private")
-					private_function->insert(std::make_pair((unsigned int)private_function->size(), member_function));
-				else if (member_function->get_access_modifier() == "protected")
-					protected_function->insert(std::make_pair((unsigned int)protected_function->size(), member_function));
-				else if (member_function->get_access_modifier() == "default")
-					default_function->insert(std::make_pair((unsigned int)default_function->size(), member_function));
 			}
 		}
 
@@ -297,10 +288,7 @@ CodeMemory* get_code_memory(std::queue<std::pair<std::string, std::string>>& loa
 			result = (CodeMemory*) new CMScene(id, parent_id,
 				init_function_id, tick_function_id, render_function_id);
 
-		((CMClass*)result)->public_function = public_function;
-		((CMClass*)result)->private_function = private_function;
-		((CMClass*)result)->protected_function = protected_function;
-		((CMClass*)result)->default_function = default_function;
+		((CMClass*)result)->member_functions = member_functions;
 
 		((CMClass*)result)->constructor = constructor;
 		((CMClass*)result)->initializer = initializer;

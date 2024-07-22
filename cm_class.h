@@ -19,10 +19,7 @@ private:
 public:
 	std::string name = "";
 
-	std::unordered_map<unsigned int, CMFunction*>* public_function;
-	std::unordered_map<unsigned int, CMFunction*>* private_function;
-	std::unordered_map<unsigned int, CMFunction*>* protected_function;
-	std::unordered_map<unsigned int, CMFunction*>* default_function;
+	std::unordered_map<unsigned int, CMFunction*>* member_functions;
 
 	CMInitialize* initializer = nullptr;
 	CMConstructor* constructor = nullptr;
