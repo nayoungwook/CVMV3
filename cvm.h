@@ -13,6 +13,19 @@
 #include "sys_logger.h"
 #include "cm_shader.h"
 
+static const int SHADER_MEMORY = 0;
+
+static const int BUILTIN_PRINT = 0;
+static const int BUILTIN_WINDOW = 1;
+static const int BUILTIN_LOAD_SCENE = 2;
+static const int BUILTIN_IMAGE = 3;
+
+static const int OBJECT_POSITION = 0;
+static const int OBJECT_WIDTH = 1;
+static const int OBJECT_HEIGHT = 2;
+static const int OBJECT_ROTATION = 3;
+static const int OBJECT_SPRITE = 4;
+
 class CVM {
 public:
 	std::queue<std::pair<std::string, std::string>> load_queue; // <name , path>

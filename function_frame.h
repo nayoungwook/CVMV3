@@ -17,6 +17,14 @@ public:
 	~FunctionFrame();
 	Stack* stack;
 	void run(CVM* vm, FunctionFrame* caller, Memory* caller_class);
+
+	void run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+
+
+	void builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+	void builtin_print(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+	void builtin_window(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+	void builtin_load_scene(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 };
 
 Operand* create_address_operand(Memory* op);

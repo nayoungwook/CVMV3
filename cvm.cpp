@@ -40,7 +40,7 @@ int main() {
 
 			vm->global_functions.insert(std::make_pair(cm_f->get_id(), cm_f));
 		}
-		else if (code_memory->get_type() == code_class || code_memory->get_type() == code_scene) {
+		else if (code_memory->get_type() == code_class || code_memory->get_type() == code_scene || code_memory->get_type() == code_object) {
 			CMClass* cm_f = ((CMClass*)code_memory);
 
 			vm->global_class.insert(std::make_pair(cm_f->get_id(), cm_f));

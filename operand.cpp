@@ -8,7 +8,7 @@ Operand::Operand(std::vector<Operand*>& array_data, operand_type type) : array_d
 
 }
 
-std::vector<Operand*> Operand::get_array_data() const {
+std::vector<Operand*>& Operand::get_array_data() {
 	return array_data;
 }
 

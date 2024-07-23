@@ -7,6 +7,7 @@ enum code_type {
 	code_constructor = 3,
 	code_scene = 4,
 	code_object = 5,
+	code_render = 6,
 };
 
 class CodeMemory {

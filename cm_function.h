@@ -28,8 +28,14 @@ public:
 	CMInitialize(std::vector<Operator*>& operators, unsigned int& id, std::string const& return_type,
 		std::vector<std::string>& param_types, std::string const& access_modifier);
 };
+
 class CMConstructor : public CMFunction {
 public:
 	CMConstructor(std::vector<Operator*>& operators, unsigned int& id, std::string const& return_type,
 		std::vector<std::string>& param_types, std::string const& access_modifier);
+};
+
+class CMRender : public CMFunction {
+public:
+	CMRender(std::vector<Operator*>& operators, unsigned int id, std::vector<std::string>& param_types);
 };

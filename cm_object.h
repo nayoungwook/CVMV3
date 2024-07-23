@@ -5,6 +5,8 @@
 #include "code_memory.h"
 #include "cm_function.h"
 
+static const int OBJECT_RENDER_FUNCTION = 0;
+
 class CMObject : public CMClass {
 private:
 public:

@@ -64,7 +64,174 @@ void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CM
 	frame->run(vm, caller_frame, caller_class);
 }
 
+void FunctionFrame::builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	int parameter_count = std::stoi(op->get_operands()[1]->identifier);
+
+	Operand* image = this->stack->peek(); // string data.
+	this->stack->pop();
+
+	Operand* position = this->stack->peek();
+	this->stack->pop();
+
+	std::unordered_map<std::string, CMImage*>::iterator image_data_iter = vm->resources.find(extract_value_of_opernad(image)->get_data());
+
+	assert(image_data_iter != vm->resources.end());
+
+	CMImage* image_data = image_data_iter->second;
+
+	Operand* width = nullptr, * height = nullptr;
+	width = this->stack->peek(), this->stack->pop();
+	height = this->stack->peek(), this->stack->pop();
+
+	float _x = std::stof(extract_value_of_opernad(position->get_array_data()[0])->get_data()),
+		_y = std::stof(extract_value_of_opernad(position->get_array_data()[1])->get_data());
+
+	float f_width = std::stof(extract_value_of_opernad(width)->get_data()), f_height = std::stof(extract_value_of_opernad(height)->get_data());
+
+	Memory* shader_memory = reinterpret_cast<Memory*>(std::stoull(vm->global_area[SHADER_MEMORY]->get_data()));
+	CMShader* shader_cm = (CMShader*)shader_memory->get_cm_class();
+
+	float f_rotation = .0f;
+
+	if (parameter_count == 5) {
+		Operand* rotation = this->stack->peek();
+		this->stack->pop();
+
+		f_rotation = std::stof(extract_value_of_opernad(rotation)->get_data());
+	}
+
+	render_image(shader_cm, image_data->get_texture(), image_data->get_vao(), _x, _y, f_width, f_height, f_rotation);
+
+	delete image;
+	delete position;
+	delete width;
+	delete height;
+}
+
+void FunctionFrame::builtin_print(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	int parameter_count = std::stoi(op->get_operands()[1]->identifier);
+
+	for (int i = 0; i < parameter_count; i++) {
+		Operand* _data = this->stack->peek();
+		this->stack->pop();
+
+		Operand* data = extract_value_of_opernad(_data);
+		operand_type type = data->get_type();
+
+		std::string content = data->get_data();
+
+		if (type == operand_number) {
+			printf("%g", std::stod(content));
+		}
+		else {
+			std::cout << content;
+		}
+
+		delete _data;
+	}
+}
+
+void FunctionFrame::builtin_window(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	int parameter_count = std::stoi(op->get_operands()[1]->identifier);
+
+	std::string title;
+	int width, height;
+
+	for (int i = 0; i < parameter_count; i++) {
+		Operand* _data = this->stack->peek();
+		this->stack->pop();
+
+		Operand* data = extract_value_of_opernad(_data);
+		operand_type type = data->get_type();
+
+		if (i == 0) title = data->get_data();
+		else if (i == 1) width = (int)std::stod(data->get_data());
+		else if (i == 2) height = (int)std::stod(data->get_data());
+
+		delete _data;
+	}
+
+	CMWindow* cm_window = new CMWindow(vm, title, width, height);
+	Memory* win_memory = new Memory(cm_window);
+
+	this->stack->push(create_address_operand(win_memory));
+}
+
+void FunctionFrame::builtin_load_scene(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	int parameter_count = std::stoi(op->get_operands()[1]->identifier);
+
+	for (int i = 0; i < parameter_count; i++) {
+		Operand* _target = this->stack->peek();
+		this->stack->pop();
+
+		Operand* target = extract_value_of_opernad(_target);
+
+		operand_type type = target->get_type();
+		Memory* scene = reinterpret_cast<Memory*>(std::stoull(target->get_data()));
+
+		vm->current_scene_memory = scene;
+
+		delete _target;
+	}
+}
+
+void FunctionFrame::run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	unsigned int id = std::stoi(op->get_operands()[0]->identifier);
+	int parameter_count = std::stoi(op->get_operands()[1]->identifier);
+
+	if (id == BUILTIN_PRINT) { // print
+		this->builtin_print(op, vm, caller, caller_class);
+	}
+	else if (id == BUILTIN_WINDOW) { // window
+		this->builtin_window(op, vm, caller, caller_class);
+	}
+	else if (id == BUILTIN_LOAD_SCENE) { // load_scene
+		this->builtin_load_scene(op, vm, caller, caller_class);
+	}
+	else if (id == BUILTIN_IMAGE) { // image
+		this->builtin_image(op, vm, caller, caller_class);
+	}
+}
+
 void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+
+	if (this->get_code_memory()->get_type() == code_render) {
+		CMObject* caller_object = (CMObject*)caller_class->get_cm_class();
+
+		Memory* shader_memory = reinterpret_cast<Memory*>(std::stoull(vm->global_area[SHADER_MEMORY]->get_data()));
+		CMShader* shader_cm = (CMShader*)shader_memory->get_cm_class();
+
+		Operand* texture_op = caller_class->member_variables[OBJECT_SPRITE];
+
+		if (texture_op->get_type() == operand_null) {
+			std::cout << "error at function_frame\.cpp Debug ID : 01x | texture is not texture memory." << std::endl;
+			exit(EXIT_FAILURE);
+		}
+
+		Operand* position_op = caller_class->member_variables[OBJECT_POSITION];
+
+		float _x = std::stof(extract_value_of_opernad(position_op->get_array_data()[0])->get_data()),
+			_y = std::stof(extract_value_of_opernad(position_op->get_array_data()[1])->get_data());
+
+		Operand* width_op = caller_class->member_variables[OBJECT_WIDTH];
+		Operand* height_op = caller_class->member_variables[OBJECT_HEIGHT];
+
+		float f_width = std::stof(extract_value_of_opernad(width_op)->get_data())
+			, f_height = std::stof(extract_value_of_opernad(height_op)->get_data());
+
+		Operand* rotation_op = caller_class->member_variables[OBJECT_ROTATION];
+		float f_rotation = std::stof(extract_value_of_opernad(rotation_op)->get_data());
+
+		std::unordered_map<std::string, CMImage*>::iterator image_data_iter = vm->resources.find(extract_value_of_opernad(texture_op)->get_data());
+
+		assert(image_data_iter != vm->resources.end());
+
+		CMImage* image_data = image_data_iter->second;
+
+		return 	render_image(shader_cm, image_data->get_texture(), image_data->get_vao(),
+			_x, _y, f_width, f_height, f_rotation);
+	}
+
 	std::vector<Operator*> operators = this->code_memory->get_operators();
 
 	for (int line = 0; line < operators.size(); line++) {
@@ -136,6 +303,39 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			// run initializer
 			run_function(vm, memory, this, code_memory->initializer, 0);
+
+			if (code_memory->get_type() == code_object) {
+
+				// add render function
+				unsigned int render_function_id = ((CMObject*)code_memory)->get_render_function_id();
+				std::vector<Operator*> temp1;
+				std::vector<std::string> temp2;
+				CMFunction* render_function = new CMRender(temp1, render_function_id, temp2);
+				if (code_memory->member_functions->find(render_function_id) != code_memory->member_functions->end())
+					code_memory->member_functions->erase(code_memory->member_functions->find(render_function_id));
+
+				code_memory->member_functions->insert(std::make_pair(render_function_id, render_function));
+
+				// add primitive variables
+				bool position_declared = memory->member_variables.find(OBJECT_POSITION) != memory->member_variables.end();
+				bool width_declared = memory->member_variables.find(OBJECT_WIDTH) != memory->member_variables.end();
+				bool height_declared = memory->member_variables.find(OBJECT_HEIGHT) != memory->member_variables.end();
+				bool rotation_declared = memory->member_variables.find(OBJECT_ROTATION) != memory->member_variables.end();
+				bool texture_declared = memory->member_variables.find(OBJECT_SPRITE) != memory->member_variables.end();
+
+				if (!position_declared) {
+					std::vector<Operand*> position_data;
+					position_data.push_back(new Operand("0", operand_number));
+					position_data.push_back(new Operand("0", operand_number));
+					memory->member_variables.insert(std::make_pair(OBJECT_POSITION, new Operand(position_data, operand_vector)));
+				}
+
+				if (!width_declared) memory->member_variables.insert(std::make_pair(OBJECT_WIDTH, new Operand("100", operand_number)));
+				if (!height_declared) memory->member_variables.insert(std::make_pair(OBJECT_HEIGHT, new Operand("100", operand_number)));
+				if (!rotation_declared) memory->member_variables.insert(std::make_pair(OBJECT_ROTATION, new Operand("0", operand_number)));
+				if (!texture_declared) memory->member_variables.insert(std::make_pair(OBJECT_SPRITE, new Operand("", operand_null)));
+
+			}
 
 			// store in heap
 			vm->heap_area.push_back(memory);
@@ -351,6 +551,35 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			break;
 		}
 
+		case op_store_attr: {
+			Operand* attr_target = this->stack->peek();
+			Operand* target_op = extract_value_of_opernad(attr_target);
+			this->stack->pop();
+
+			Operand* store_value = this->stack->peek();
+			this->stack->pop();
+
+			unsigned int store_id = std::stoi(op->get_operands()[0]->identifier);
+
+			operand_type op_type = target_op->get_type();
+
+			if (op_type == operand_address) {
+				Memory* attr_memory = reinterpret_cast<Memory*>(std::stoull(target_op->get_data()));
+
+				if (attr_memory->member_variables.find(store_id) != attr_memory->member_variables.end())
+					attr_memory->member_variables.erase(attr_memory->member_variables.find(store_id));
+
+				attr_memory->member_variables.insert(std::make_pair(store_id, store_value));
+			}
+			else if (op_type == operand_vector) {
+				Operand* vector_op = target_op;
+
+				vector_op->get_array_data()[store_id] = store_value;
+			}
+
+			break;
+		}
+
 		case op_array_get: {
 			Operand* index_peek = this->stack->peek();
 			this->stack->pop();
@@ -444,114 +673,12 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_call_builtin: {
-			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
-			int parameter_count = std::stoi(op->get_operands()[1]->identifier);
-
-			if (id == 0) { // print
-				for (int i = 0; i < parameter_count; i++) {
-					Operand* _data = this->stack->peek();
-					this->stack->pop();
-
-					Operand* data = extract_value_of_opernad(_data);
-					operand_type type = data->get_type();
-
-					std::string content = data->get_data();
-
-					if (type == operand_number) {
-						printf("%g", std::stod(content));
-					}
-					else {
-						std::cout << content;
-					}
-
-					delete _data;
-				}
-			}
-			else if (id == 1) { // window
-				std::string title;
-				int width, height;
-
-				for (int i = 0; i < parameter_count; i++) {
-					Operand* _data = this->stack->peek();
-					this->stack->pop();
-
-					Operand* data = extract_value_of_opernad(_data);
-					operand_type type = data->get_type();
-
-					if (i == 0) title = data->get_data();
-					else if (i == 1) width = (int)std::stod(data->get_data());
-					else if (i == 2) height = (int)std::stod(data->get_data());
-
-					delete _data;
-				}
-
-				CMWindow* cm_window = new CMWindow(vm, title, width, height);
-				Memory* win_memory = new Memory(cm_window);
-
-				this->stack->push(create_address_operand(win_memory));
-			}
-			else if (id == 2) { // load_scene
-				for (int i = 0; i < parameter_count; i++) {
-					Operand* _target = this->stack->peek();
-					this->stack->pop();
-
-					Operand* target = extract_value_of_opernad(_target);
-
-					operand_type type = target->get_type();
-					Memory* scene = reinterpret_cast<Memory*>(std::stoull(target->get_data()));
-
-					vm->current_scene_memory = scene;
-
-					delete _target;
-				}
-			}
-			else if (id == 3) { // image
-				Operand* image = this->stack->peek(); // string data.
-				this->stack->pop();
-
-				Operand* position = this->stack->peek();
-				this->stack->pop();
-
-				std::unordered_map<std::string, CMImage*>::iterator image_data_iter = vm->resources.find(extract_value_of_opernad(image)->get_data());
-
-				assert(image_data_iter != vm->resources.end());
-
-				CMImage* image_data = image_data_iter->second;
-
-				Operand* width = nullptr, * height = nullptr;
-				width = this->stack->peek(), this->stack->pop();
-				height = this->stack->peek(), this->stack->pop();
-
-				float _x = std::stof(extract_value_of_opernad(position->get_array_data()[0])->get_data()),
-					_y = std::stof(extract_value_of_opernad(position->get_array_data()[1])->get_data());
-
-				float f_width = std::stof(extract_value_of_opernad(width)->get_data()), f_height = std::stof(extract_value_of_opernad(height)->get_data());
-
-				Memory* memory = reinterpret_cast<Memory*>(std::stoull(vm->global_area[0]->get_data()));
-				CMShader* shader_cm = (CMShader*)memory->get_cm_class();
-
-				float f_rotation = .0f;
-
-				if (parameter_count == 5) {
-					Operand* rotation = this->stack->peek();
-					this->stack->pop();
-
-					f_rotation = std::stof(extract_value_of_opernad(rotation)->get_data());
-				}
-
-				render_image(shader_cm, image_data->get_texture(), image_data->get_vao(), _x, _y, f_width, f_height, f_rotation);
-
-				delete image;
-				delete position;
-				delete width;
-				delete height;
-			}
-
+			this->run_builtin(op, vm, caller, caller_class);
 			break;
 		}
 
 		case op_load_attr: {
-			Operand* target = this->stack->peek();
+			Operand* target = extract_value_of_opernad(this->stack->peek());
 			this->stack->pop();
 			operand_type type = target->get_type();
 			Operand* found_op = nullptr;
@@ -583,13 +710,26 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				operands.push_back(op);
 			}
 
-			Operand* target = this->stack->peek();
+			Operand* target_op = this->stack->peek();
+			Operand* target = extract_value_of_opernad(target_op);
 			this->stack->pop();
+
+			for (int i = 0; i < parameter_count; i++) {
+				this->stack->push(operands[i]);
+			}
+
+			if (target->get_type() == operand_null) {
+				std::cout << "error at function_frame\.cpp op_call_attr | Error Code : WWERS" << std::endl;
+				exit(EXIT_FAILURE);
+			}
 
 			Memory* memory = reinterpret_cast<Memory*>(std::stoull(target->get_data()));
 			CMClass* cm = memory->get_cm_class();
+			CMFunction* callee_function = (CMFunction*)cm->member_functions->find(id)->second;
 
-			run_function(vm, memory, this, code_memory, parameter_count);
+			run_function(vm, memory, this, callee_function, parameter_count);
+
+			delete target_op;
 
 			break;
 		}

@@ -22,7 +22,7 @@ private:
 public:
 	void set_data(std::string data);
 	std::string get_data() const;
-	std::vector<Operand*> get_array_data() const;
+	std::vector<Operand*>& get_array_data();
 
 	operand_type get_type() const;
 	Operand(std::string const& data, operand_type type);

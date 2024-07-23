@@ -50,7 +50,7 @@ void window_loop(CVM* vm, SDL_Window* window) {
 			unsigned int render_funciton_id = current_scene_cm->get_render_function_id();
 
 			CMScene* scene = current_scene_cm;
-
+			
 			CMFunction* tick_function =
 				current_scene_cm->member_functions->find(tick_funciton_id)->second;
 			run_function(vm, vm->current_scene_memory, nullptr, tick_function, 0);

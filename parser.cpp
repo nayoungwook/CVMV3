@@ -264,9 +264,10 @@ CodeMemory* get_code_memory(std::queue<std::pair<std::string, std::string>>& loa
 				initializer = (CMInitialize*)member_function;
 			}
 			else {
+				unsigned int id = member_function->get_id();
+				std::string function_name = member_function->name;
+
 				if (member_function->get_access_modifier() == "public") {
-					unsigned int id = (unsigned int)member_functions->size();
-					std::string function_name = member_function->name;
 
 					if (function_name == "init")
 						init_function_id = id;
@@ -275,8 +276,9 @@ CodeMemory* get_code_memory(std::queue<std::pair<std::string, std::string>>& loa
 					else if (function_name == "render")
 						render_function_id = id;
 
-					member_functions->insert(std::make_pair(id, member_function));
 				}
+
+				member_functions->insert(std::make_pair(id, member_function));
 			}
 		}
 
@@ -290,10 +292,10 @@ CodeMemory* get_code_memory(std::queue<std::pair<std::string, std::string>>& loa
 		else if (object_type == "SCENE")
 			result = (CodeMemory*) new CMScene(id, parent_id,
 				init_function_id, tick_function_id, render_function_id);
-		else if(object_type == "OBJECT")
+		else if (object_type == "OBJECT")
 			result = (CodeMemory*) new CMObject(id, parent_id,
 				init_function_id, tick_function_id, render_function_id);
-		
+
 		((CMClass*)result)->member_functions = member_functions;
 
 		((CMClass*)result)->constructor = constructor;
