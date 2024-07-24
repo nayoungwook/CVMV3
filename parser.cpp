@@ -25,6 +25,9 @@ Operator* get_operator(std::unordered_map<std::string, unsigned int>* label_id, 
 	else if (token->identifier == "@PUSH_NULL") {
 		type = op_push_null;
 	}
+	else if (token->identifier == "@PUSH_THIS") {
+		type = op_push_this;
+	}
 	else if (token->identifier == "@STORE_GLOBAL") {
 		type = op_store_global;
 

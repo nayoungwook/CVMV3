@@ -32,3 +32,11 @@ Operand* create_op_address_operand(Operand* op);
 Operand* copy_operand(Operand* op);
 inline Operand* extract_value_of_opernad(Operand* op);
 void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CMFunction* code_memory, int parameter_count);
+Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, double (*cal)(double l, double r));
+
+double cal_add(double lhs, double rhs);
+double cal_sub(double lhs, double rhs);
+double cal_mult(double lhs, double rhs);
+double cal_div(double lhs, double rhs);
+double cal_mod(double lhs, double rhs);
+double cal_pow(double lhs, double rhs);

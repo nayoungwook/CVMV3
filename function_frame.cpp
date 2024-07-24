@@ -193,6 +193,54 @@ void FunctionFrame::run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Me
 	}
 }
 
+Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, double (*cal)(double l, double r)) {
+	Operand* lhs_vector = extract_value_of_opernad(lhs);
+	Operand* rhs_vector = extract_value_of_opernad(rhs);
+
+	std::vector<Operand*> calculated_result;
+
+	for (int i = 0; i < (int)min(lhs_vector->get_array_data().size(), rhs_vector->get_array_data().size()); i++) {
+		double lhs_v = std::stod(lhs_vector->get_array_data()[i]->get_data());
+		double rhs_v = std::stod(rhs_vector->get_array_data()[i]->get_data());
+
+		double calculated_v = cal(lhs_v, rhs_v);
+
+		calculated_result.push_back(new Operand(std::to_string(calculated_v), operand_number));
+	}
+
+	return new Operand(calculated_result, operand_vector);
+}
+
+double cal_add(double lhs, double rhs) {
+	return lhs + rhs;
+}
+
+double cal_sub(double lhs, double rhs) {
+	return lhs - rhs;
+}
+
+double cal_mult(double lhs, double rhs) {
+	return lhs * rhs;
+}
+
+double cal_div(double lhs, double rhs) {
+	if (rhs != 0) {
+		return lhs / rhs;
+	}
+	return 0;
+}
+
+double cal_mod(double lhs, double rhs) {
+	if (rhs != 0) {
+		return (int)lhs % (int)rhs;
+	}
+	return 0;
+}
+
+double cal_pow(double lhs, double rhs) {
+	return pow(lhs, rhs);
+}
+
 void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 	if (this->get_code_memory()->get_type() == code_render) {
@@ -254,6 +302,11 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 		case op_push_null: {
 			this->stack->push(new Operand("", operand_null));
+			break;
+		}
+
+		case op_push_this: {
+			this->stack->push(create_address_operand(caller_class));
 			break;
 		}
 
@@ -413,42 +466,67 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			switch (type) {
 			case op_add:
-				this->stack->push(new Operand(std::to_string(
-					std::stod(extract_value_of_opernad(lhs)->get_data())
-					+ std::stod(extract_value_of_opernad(rhs)->get_data())), operand_number));
+				if (lhs->get_type() == operand_number)
+					this->stack->push(new Operand(std::to_string(
+						std::stod(extract_value_of_opernad(lhs)->get_data())
+						+ std::stod(extract_value_of_opernad(rhs)->get_data())), operand_number));
+				else if (lhs->get_type() == operand_vector)
+					this->stack->push(calcaulte_vector_operand(lhs, rhs, cal_add));
+
 				break;
 			case op_sub:
-				this->stack->push(new Operand(std::to_string(
-					std::stod(extract_value_of_opernad(lhs)->get_data())
-					- std::stod(extract_value_of_opernad(rhs)->get_data())), operand_number));
+				if (lhs->get_type() == operand_number)
+					this->stack->push(new Operand(std::to_string(
+						std::stod(extract_value_of_opernad(lhs)->get_data())
+						- std::stod(extract_value_of_opernad(rhs)->get_data())), operand_number));
+				else if (lhs->get_type() == operand_vector)
+					this->stack->push(calcaulte_vector_operand(lhs, rhs, cal_sub));
+
 				break;
 			case op_mul:
-				this->stack->push(new Operand(std::to_string(
-					std::stod(extract_value_of_opernad(lhs)->get_data())
-					* std::stod(extract_value_of_opernad(rhs)->get_data())), operand_number));
+				if (lhs->get_type() == operand_number)
+					this->stack->push(new Operand(std::to_string(
+						std::stod(extract_value_of_opernad(lhs)->get_data())
+						* std::stod(extract_value_of_opernad(rhs)->get_data())), operand_number));
+				else if (lhs->get_type() == operand_vector)
+					this->stack->push(calcaulte_vector_operand(lhs, rhs, cal_mult));
+
 				break;
 			case op_div:
-				if (rhs == 0) {
-					std::cout << "divided by zero error.";
-					exit(EXIT_FAILURE);
+				if (lhs->get_type() == operand_number) {
+					if (rhs == 0) {
+						std::cout << "divided by zero error.";
+						exit(EXIT_FAILURE);
+					}
+					this->stack->push(new Operand(std::to_string(
+						std::stod(extract_value_of_opernad(lhs)->get_data())
+						/ std::stod(extract_value_of_opernad(rhs)->get_data())), operand_number));
+
 				}
-				this->stack->push(new Operand(std::to_string(
-					std::stod(extract_value_of_opernad(lhs)->get_data())
-					/ std::stod(extract_value_of_opernad(rhs)->get_data())), operand_number));
+				else if (lhs->get_type() == operand_vector)
+					this->stack->push(calcaulte_vector_operand(lhs, rhs, cal_div));
+
 				break;
 			case op_pow:
-				this->stack->push(new Operand(std::to_string(
-					pow(std::stod(extract_value_of_opernad(lhs)->get_data()), std::stod(extract_value_of_opernad(rhs)->get_data()))), operand_number));
-				break;
-
-			case op_mod: {
-				if (rhs == 0) {
-					std::cout << "divided by zero error.";
-					exit(EXIT_FAILURE);
+				if (lhs->get_type() == operand_number) {
+					this->stack->push(new Operand(std::to_string(
+						pow(std::stod(extract_value_of_opernad(lhs)->get_data()), std::stod(extract_value_of_opernad(rhs)->get_data()))), operand_number));
 				}
-				this->stack->push(new Operand(std::to_string(
-					(int)std::stod(extract_value_of_opernad(lhs)->get_data())
-					% (int)std::stod(extract_value_of_opernad(rhs)->get_data())), operand_number));
+				else if (lhs->get_type() == operand_vector)
+					this->stack->push(calcaulte_vector_operand(lhs, rhs, cal_pow));
+				break;
+			case op_mod: {
+				if (lhs->get_type() == operand_number) {
+					if (rhs == 0) {
+						std::cout << "divided by zero error.";
+						exit(EXIT_FAILURE);
+					}
+					this->stack->push(new Operand(std::to_string(
+						(int)std::stod(extract_value_of_opernad(lhs)->get_data())
+						% (int)std::stod(extract_value_of_opernad(rhs)->get_data())), operand_number));
+				}
+				else if (lhs->get_type() == operand_vector)
+					this->stack->push(calcaulte_vector_operand(lhs, rhs, cal_mod));
 				break;
 			}
 
@@ -624,10 +702,11 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			std::vector<Operand*> elements;
 
 			for (int i = 0; i < vector_size; i++) {
-				Operand* peek = this->stack->peek();
+				Operand* _peek = this->stack->peek();
+				Operand* extracted_data = extract_value_of_opernad(_peek);
 				this->stack->pop();
 
-				elements.push_back(peek);
+				elements.push_back(extracted_data);
 			}
 
 			result = new Operand(elements, operand_vector);

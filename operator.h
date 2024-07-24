@@ -46,6 +46,7 @@ enum operator_type {
 	op_vector = 38,
 	op_load_class = 39,
 	op_push_null = 40,
+	op_push_this = 41,
 };
 
 class Operator {
