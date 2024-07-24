@@ -1,7 +1,7 @@
 #pragma once
 
 #include "operand.h"
-#include "cm_class.h"
+#include "code_memory/cm_class.h"
 
 class Memory {
 private:

@@ -51,40 +51,40 @@
     <ClCompile Include="memory.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="cm_class.cpp">
-      <Filter>소스 파일\code_memory</Filter>
-    </ClCompile>
-    <ClCompile Include="cm_function.cpp">
-      <Filter>소스 파일\code_memory</Filter>
-    </ClCompile>
-    <ClCompile Include="cm_scene.cpp">
-      <Filter>소스 파일\code_memory</Filter>
-    </ClCompile>
-    <ClCompile Include="cm_window.cpp">
-      <Filter>소스 파일\code_memory</Filter>
-    </ClCompile>
-    <ClCompile Include="code_memory.cpp">
-      <Filter>소스 파일\code_memory</Filter>
-    </ClCompile>
-    <ClCompile Include="engine.cpp">
-      <Filter>소스 파일\engine</Filter>
-    </ClCompile>
-    <ClCompile Include="stb_image.cpp">
-      <Filter>소스 파일\engine</Filter>
-    </ClCompile>
-    <ClCompile Include="cm_image.cpp">
-      <Filter>소스 파일\code_memory</Filter>
-    </ClCompile>
     <ClCompile Include="Math.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="sys_logger.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="cm_shader.cpp">
+    <ClCompile Include="engine\engine.cpp">
+      <Filter>소스 파일\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\stb_image.cpp">
+      <Filter>소스 파일\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="code_memory\cm_image.cpp">
       <Filter>소스 파일\code_memory</Filter>
     </ClCompile>
-    <ClCompile Include="cm_object.cpp">
+    <ClCompile Include="code_memory\cm_object.cpp">
+      <Filter>소스 파일\code_memory</Filter>
+    </ClCompile>
+    <ClCompile Include="code_memory\cm_scene.cpp">
+      <Filter>소스 파일\code_memory</Filter>
+    </ClCompile>
+    <ClCompile Include="code_memory\cm_shader.cpp">
+      <Filter>소스 파일\code_memory</Filter>
+    </ClCompile>
+    <ClCompile Include="code_memory\cm_window.cpp">
+      <Filter>소스 파일\code_memory</Filter>
+    </ClCompile>
+    <ClCompile Include="code_memory\code_memory.cpp">
+      <Filter>소스 파일\code_memory</Filter>
+    </ClCompile>
+    <ClCompile Include="code_memory\cm_class.cpp">
+      <Filter>소스 파일\code_memory</Filter>
+    </ClCompile>
+    <ClCompile Include="code_memory\cm_function.cpp">
       <Filter>소스 파일\code_memory</Filter>
     </ClCompile>
   </ItemGroup>
@@ -116,41 +116,41 @@
     <ClInclude Include="memory.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="cm_class.h">
-      <Filter>헤더 파일\code_memory</Filter>
-    </ClInclude>
-    <ClInclude Include="cm_function.h">
-      <Filter>헤더 파일\code_memory</Filter>
-    </ClInclude>
-    <ClInclude Include="cm_scene.h">
-      <Filter>헤더 파일\code_memory</Filter>
-    </ClInclude>
-    <ClInclude Include="cm_window.h">
-      <Filter>헤더 파일\code_memory</Filter>
-    </ClInclude>
-    <ClInclude Include="code_memory.h">
-      <Filter>헤더 파일\code_memory</Filter>
-    </ClInclude>
-    <ClInclude Include="engine.h">
-      <Filter>헤더 파일\engine</Filter>
-    </ClInclude>
-    <ClInclude Include="cm_image.h">
-      <Filter>헤더 파일\code_memory</Filter>
-    </ClInclude>
-    <ClInclude Include="stb_image.h">
-      <Filter>헤더 파일\engine</Filter>
-    </ClInclude>
     <ClInclude Include="Math.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="sys_logger.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="cm_shader.h">
+    <ClInclude Include="code_memory\cm_object.h">
       <Filter>헤더 파일\code_memory</Filter>
     </ClInclude>
-    <ClInclude Include="cm_object.h">
+    <ClInclude Include="code_memory\cm_scene.h">
       <Filter>헤더 파일\code_memory</Filter>
+    </ClInclude>
+    <ClInclude Include="code_memory\cm_shader.h">
+      <Filter>헤더 파일\code_memory</Filter>
+    </ClInclude>
+    <ClInclude Include="code_memory\cm_window.h">
+      <Filter>헤더 파일\code_memory</Filter>
+    </ClInclude>
+    <ClInclude Include="code_memory\code_memory.h">
+      <Filter>헤더 파일\code_memory</Filter>
+    </ClInclude>
+    <ClInclude Include="code_memory\cm_class.h">
+      <Filter>헤더 파일\code_memory</Filter>
+    </ClInclude>
+    <ClInclude Include="code_memory\cm_function.h">
+      <Filter>헤더 파일\code_memory</Filter>
+    </ClInclude>
+    <ClInclude Include="code_memory\cm_image.h">
+      <Filter>헤더 파일\code_memory</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\stb_image.h">
+      <Filter>헤더 파일\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\engine.h">
+      <Filter>헤더 파일\engine</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

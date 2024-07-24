@@ -1,7 +1,7 @@
 #pragma once
 
-#include "memory.h"
-#include "operator.h"
+#include "../memory.h"
+#include "../operator.h"
 #include "code_memory.h"
 #include "cm_function.h"
 

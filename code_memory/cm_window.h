@@ -7,8 +7,8 @@
 #include "cm_class.h"
 #include "cm_scene.h"
 #include "memory.h"
-#include "cvm.h"
-#include "function_frame.h"
+#include "../cvm.h"
+#include "../function_frame.h"
 #include "cm_image.h"
 
 class CMWindow : public CMClass {

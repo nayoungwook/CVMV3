@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cstdio>
-#include "cm_function.h"
-#include "cm_window.h"
+#include "code_memory/cm_function.h"
+#include "code_memory/cm_window.h"
 #include "stack.h"
 #include "cvm.h"
 #include "memory.h"

@@ -6,10 +6,10 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "sys_logger.h"
-#include "sys_file.h"
+#include "../sys_logger.h"
+#include "../sys_file.h"
 #include "cm_class.h"
-#include "Math.h"
+#include "../Math.h"
 
 class CMShader : public CodeMemory {
 private:

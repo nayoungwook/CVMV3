@@ -137,16 +137,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="cm_class.cpp" />
-    <ClCompile Include="cm_function.cpp" />
-    <ClCompile Include="cm_image.cpp" />
-    <ClCompile Include="cm_object.cpp" />
-    <ClCompile Include="cm_scene.cpp" />
-    <ClCompile Include="cm_shader.cpp" />
-    <ClCompile Include="cm_window.cpp" />
-    <ClCompile Include="code_memory.cpp" />
+    <ClCompile Include="code_memory\cm_class.cpp" />
+    <ClCompile Include="code_memory\cm_function.cpp" />
+    <ClCompile Include="code_memory\cm_image.cpp" />
+    <ClCompile Include="code_memory\cm_object.cpp" />
+    <ClCompile Include="code_memory\cm_scene.cpp" />
+    <ClCompile Include="code_memory\cm_shader.cpp" />
+    <ClCompile Include="code_memory\cm_window.cpp" />
+    <ClCompile Include="code_memory\code_memory.cpp" />
     <ClCompile Include="cvm.cpp" />
-    <ClCompile Include="engine.cpp" />
+    <ClCompile Include="engine\engine.cpp" />
+    <ClCompile Include="engine\stb_image.cpp" />
     <ClCompile Include="function_frame.cpp" />
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="memory.cpp" />
@@ -154,21 +155,21 @@
     <ClCompile Include="operator.cpp" />
     <ClCompile Include="parser.cpp" />
     <ClCompile Include="stack.cpp" />
-    <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="sys_file.cpp" />
     <ClCompile Include="sys_logger.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cm_class.h" />
-    <ClInclude Include="cm_function.h" />
-    <ClInclude Include="cm_image.h" />
-    <ClInclude Include="cm_object.h" />
-    <ClInclude Include="cm_scene.h" />
-    <ClInclude Include="cm_shader.h" />
-    <ClInclude Include="cm_window.h" />
-    <ClInclude Include="code_memory.h" />
+    <ClInclude Include="code_memory\cm_class.h" />
+    <ClInclude Include="code_memory\cm_function.h" />
+    <ClInclude Include="code_memory\cm_image.h" />
+    <ClInclude Include="code_memory\cm_object.h" />
+    <ClInclude Include="code_memory\cm_scene.h" />
+    <ClInclude Include="code_memory\cm_shader.h" />
+    <ClInclude Include="code_memory\cm_window.h" />
+    <ClInclude Include="code_memory\code_memory.h" />
     <ClInclude Include="cvm.h" />
-    <ClInclude Include="engine.h" />
+    <ClInclude Include="engine\engine.h" />
+    <ClInclude Include="engine\stb_image.h" />
     <ClInclude Include="function_frame.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="memory.h" />
@@ -176,7 +177,6 @@
     <ClInclude Include="operator.h" />
     <ClInclude Include="parser.h" />
     <ClInclude Include="stack.h" />
-    <ClInclude Include="stb_image.h" />
     <ClInclude Include="sys_file.h" />
     <ClInclude Include="sys_logger.h" />
     <ClInclude Include="token.h" />

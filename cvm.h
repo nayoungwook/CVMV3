@@ -6,12 +6,12 @@
 
 #include "sys_file.h"
 #include "parser.h"
-#include "cm_function.h"
+#include "code_memory/cm_function.h"
 #include "operand.h"
 #include "memory.h"
-#include "engine.h"
+#include "engine/engine.h"
 #include "sys_logger.h"
-#include "cm_shader.h"
+#include "code_memory/cm_shader.h"
 
 static const int SHADER_MEMORY = 0;
 
@@ -19,12 +19,6 @@ static const int BUILTIN_PRINT = 0;
 static const int BUILTIN_WINDOW = 1;
 static const int BUILTIN_LOAD_SCENE = 2;
 static const int BUILTIN_IMAGE = 3;
-
-static const int OBJECT_POSITION = 0;
-static const int OBJECT_WIDTH = 1;
-static const int OBJECT_HEIGHT = 2;
-static const int OBJECT_ROTATION = 3;
-static const int OBJECT_SPRITE = 4;
 
 class CVM {
 public:

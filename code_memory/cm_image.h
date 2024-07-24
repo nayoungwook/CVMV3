@@ -5,7 +5,7 @@
 #include <queue>
 #include <iostream>
 #include "cm_class.h"
-#include "stb_image.h"
+#include "../engine/stb_image.h"
 
 class CMImage : public CodeMemory {
 private:

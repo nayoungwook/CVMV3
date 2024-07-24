@@ -1,14 +1,14 @@
 #pragma once
 
 #include "memory.h"
-#include "code_memory.h"
+#include "code_memory/code_memory.h"
 #include <vector>
 #include "token.h"
 #include "operator.h"
-#include "cm_function.h"
-#include "cm_scene.h"
-#include "cm_object.h"
-#include "cm_image.h"
+#include "code_memory/cm_function.h"
+#include "code_memory/cm_scene.h"
+#include "code_memory/cm_object.h"
+#include "code_memory/cm_image.h"
 #include "sys_file.h"
 #include <assert.h>
 #include <queue>
