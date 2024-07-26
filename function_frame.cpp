@@ -245,11 +245,11 @@ Memory* create_object(CVM* vm, CMClass* code_memory, FunctionFrame* frame, unsig
 
 	Memory* memory = new Memory(code_memory);
 
-	// run constructor
-	run_function(vm, memory, frame, code_memory->constructor, constructor_parameter_count);
-
 	// run initializer
 	run_function(vm, memory, frame, code_memory->initializer, 0);
+
+	// run constructor
+	run_function(vm, memory, frame, code_memory->constructor, constructor_parameter_count);
 
 	if (code_memory->get_type() == code_object) {
 
