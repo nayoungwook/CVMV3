@@ -64,6 +64,11 @@ Operator* get_operator(std::unordered_map<std::string, unsigned int>* label_id, 
 		operands.push_back(pull_token(tokens)); // id
 		pull_token(tokens);
 	}
+	else if (token->identifier == "@SUPER_CALL") {
+		type = op_super_call;
+
+		operands.push_back(pull_token(tokens)); // parameter_count
+	}
 	else if (token->identifier == "@LOAD_CLASS") {
 		type = op_load_class;
 

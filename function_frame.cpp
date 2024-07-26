@@ -241,6 +241,51 @@ double cal_pow(double lhs, double rhs) {
 	return pow(lhs, rhs);
 }
 
+Memory* create_object(CVM* vm, CMClass* code_memory, FunctionFrame* frame, unsigned int constructor_parameter_count) {
+
+	Memory* memory = new Memory(code_memory);
+
+	// run constructor
+	run_function(vm, memory, frame, code_memory->constructor, constructor_parameter_count);
+
+	// run initializer
+	run_function(vm, memory, frame, code_memory->initializer, 0);
+
+	if (code_memory->get_type() == code_object) {
+
+		// add render function
+		unsigned int render_function_id = ((CMObject*)code_memory)->get_render_function_id();
+		std::vector<Operator*> temp1;
+		std::vector<std::string> temp2;
+		CMFunction* render_function = new CMRender(temp1, render_function_id, temp2);
+		if (code_memory->member_functions->find(render_function_id) != code_memory->member_functions->end())
+			code_memory->member_functions->erase(code_memory->member_functions->find(render_function_id));
+
+		code_memory->member_functions->insert(std::make_pair(render_function_id, render_function));
+
+		// add primitive variables
+		bool position_declared = memory->member_variables.find(OBJECT_POSITION) != memory->member_variables.end();
+		bool width_declared = memory->member_variables.find(OBJECT_WIDTH) != memory->member_variables.end();
+		bool height_declared = memory->member_variables.find(OBJECT_HEIGHT) != memory->member_variables.end();
+		bool rotation_declared = memory->member_variables.find(OBJECT_ROTATION) != memory->member_variables.end();
+		bool texture_declared = memory->member_variables.find(OBJECT_SPRITE) != memory->member_variables.end();
+
+		if (!position_declared) {
+			std::vector<Operand*> position_data;
+			position_data.push_back(new Operand("0", operand_number));
+			position_data.push_back(new Operand("0", operand_number));
+			memory->member_variables.insert(std::make_pair(OBJECT_POSITION, new Operand(position_data, operand_vector)));
+		}
+
+		if (!width_declared) memory->member_variables.insert(std::make_pair(OBJECT_WIDTH, new Operand("100", operand_number)));
+		if (!height_declared) memory->member_variables.insert(std::make_pair(OBJECT_HEIGHT, new Operand("100", operand_number)));
+		if (!rotation_declared) memory->member_variables.insert(std::make_pair(OBJECT_ROTATION, new Operand("0", operand_number)));
+		if (!texture_declared) memory->member_variables.insert(std::make_pair(OBJECT_SPRITE, new Operand("", operand_null)));
+
+	}
+	return memory;
+}
+
 void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 	if (this->get_code_memory()->get_type() == code_render) {
@@ -349,46 +394,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			CMClass* code_memory = vm->global_class[id];
 
-			Memory* memory = new Memory(code_memory);
-
-			// run constructor
-			run_function(vm, memory, this, code_memory->constructor, parameter_count);
-
-			// run initializer
-			run_function(vm, memory, this, code_memory->initializer, 0);
-
-			if (code_memory->get_type() == code_object) {
-
-				// add render function
-				unsigned int render_function_id = ((CMObject*)code_memory)->get_render_function_id();
-				std::vector<Operator*> temp1;
-				std::vector<std::string> temp2;
-				CMFunction* render_function = new CMRender(temp1, render_function_id, temp2);
-				if (code_memory->member_functions->find(render_function_id) != code_memory->member_functions->end())
-					code_memory->member_functions->erase(code_memory->member_functions->find(render_function_id));
-
-				code_memory->member_functions->insert(std::make_pair(render_function_id, render_function));
-
-				// add primitive variables
-				bool position_declared = memory->member_variables.find(OBJECT_POSITION) != memory->member_variables.end();
-				bool width_declared = memory->member_variables.find(OBJECT_WIDTH) != memory->member_variables.end();
-				bool height_declared = memory->member_variables.find(OBJECT_HEIGHT) != memory->member_variables.end();
-				bool rotation_declared = memory->member_variables.find(OBJECT_ROTATION) != memory->member_variables.end();
-				bool texture_declared = memory->member_variables.find(OBJECT_SPRITE) != memory->member_variables.end();
-
-				if (!position_declared) {
-					std::vector<Operand*> position_data;
-					position_data.push_back(new Operand("0", operand_number));
-					position_data.push_back(new Operand("0", operand_number));
-					memory->member_variables.insert(std::make_pair(OBJECT_POSITION, new Operand(position_data, operand_vector)));
-				}
-
-				if (!width_declared) memory->member_variables.insert(std::make_pair(OBJECT_WIDTH, new Operand("100", operand_number)));
-				if (!height_declared) memory->member_variables.insert(std::make_pair(OBJECT_HEIGHT, new Operand("100", operand_number)));
-				if (!rotation_declared) memory->member_variables.insert(std::make_pair(OBJECT_ROTATION, new Operand("0", operand_number)));
-				if (!texture_declared) memory->member_variables.insert(std::make_pair(OBJECT_SPRITE, new Operand("", operand_null)));
-
-			}
+			Memory* memory = create_object(vm, code_memory, this, parameter_count);
 
 			// store in heap
 			vm->heap_area.push_back(memory);
@@ -747,6 +753,28 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			CMFunction* code_memory = vm->global_functions[id];
 
 			run_function(vm, nullptr, this, code_memory, parameter_count);
+
+			break;
+		}
+
+		case op_super_call: {
+			int parameter_count = std::stoi(op->get_operands()[0]->identifier);
+			unsigned int parent_id = caller_class->get_cm_class()->get_parent_id();
+
+			CMClass* parent_code_memory = vm->global_class[parent_id];
+			CMFunction* parent_constructor = parent_code_memory->constructor;
+			CMFunction* parent_initializer = parent_code_memory->initializer;
+
+			run_function(vm, caller_class, this, parent_constructor, parameter_count);
+
+			run_function(vm, caller_class, this, parent_initializer, 0);
+
+			std::unordered_map<unsigned int, CMFunction*>::iterator member_function_iter = parent_code_memory->member_functions->begin();
+
+			for (; member_function_iter != parent_code_memory->member_functions->end(); member_function_iter++) {
+				if (member_function_iter->second->get_access_modifier() != "private")
+					caller_class->get_cm_class()->member_functions->insert(std::make_pair(member_function_iter->second->get_id(), member_function_iter->second));
+			}
 
 			break;
 		}
