@@ -83,8 +83,8 @@ void FunctionFrame::builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, 
 	width = this->stack->peek(), this->stack->pop();
 	height = this->stack->peek(), this->stack->pop();
 
-	float _x = std::stof(extract_value_of_opernad(position->get_array_data()[0])->get_data()),
-		_y = std::stof(extract_value_of_opernad(position->get_array_data()[1])->get_data());
+	float _x = std::stof(extract_value_of_opernad(position)->get_array_data()[0]->get_data()),
+		_y = std::stof(extract_value_of_opernad(position)->get_array_data()[1]->get_data());
 
 	float f_width = std::stof(extract_value_of_opernad(width)->get_data()), f_height = std::stof(extract_value_of_opernad(height)->get_data());
 
@@ -464,10 +464,13 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		case op_and:
 
 		{
-			Operand* lhs = this->stack->peek();
+			Operand* lhs_op = this->stack->peek();
 			this->stack->pop();
-			Operand* rhs = this->stack->peek();
+			Operand* rhs_op = this->stack->peek();
 			this->stack->pop();
+
+			Operand* lhs = extract_value_of_opernad(lhs_op);
+			Operand* rhs = extract_value_of_opernad(rhs_op);
 
 			switch (type) {
 			case op_add:
@@ -590,8 +593,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				break;
 			}
 			}
-			delete lhs;
-			delete rhs;
+			delete lhs_op;
+			delete rhs_op;
 			break;
 		}
 
