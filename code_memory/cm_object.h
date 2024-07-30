@@ -5,8 +5,6 @@
 #include "code_memory.h"
 #include "cm_function.h"
 
-static const int OBJECT_RENDER_FUNCTION = 0;
-
 static const int OBJECT_POSITION = 0;
 static const int OBJECT_WIDTH = 1;
 static const int OBJECT_HEIGHT = 2;
