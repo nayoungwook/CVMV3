@@ -126,7 +126,6 @@ void FunctionFrame::builtin_print(Operator* op, CVM* vm, FunctionFrame* caller, 
 		else {
 			std::cout << content;
 		}
-
 		delete _data;
 	}
 }
@@ -669,12 +668,12 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			this->stack->pop();
 			int index = std::stoi(extract_value_of_opernad(index_peek)->get_data());
 
-			Operand* array_operand = this->stack->peek();
+			Operand* array_operand = this->stack->peek(); // do not delete it.
 			this->stack->pop();
 
 			Operand* result = extract_value_of_opernad(array_operand)->get_array_data()[index];
 
-			this->stack->push(result);
+			this->stack->push(copy_operand(result));
 
 			delete index_peek;
 
@@ -780,7 +779,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_call_builtin: {
-			this->run_builtin(op, vm, caller, caller_class);
+			this->run_builtin(op, vm, this, caller_class);
 			break;
 		}
 
