@@ -276,14 +276,12 @@ CodeMemory* get_code_memory(std::queue<std::pair<std::string, std::string>>& loa
 				std::string function_name = member_function->name;
 
 				if (member_function->get_access_modifier() == "public") {
-
 					if (function_name == "init")
 						init_function_id = id;
 					else if (function_name == "tick")
 						tick_function_id = id;
 					else if (function_name == "render")
 						render_function_id = id;
-
 				}
 
 				member_functions->insert(std::make_pair(id, member_function));

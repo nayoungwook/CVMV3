@@ -21,8 +21,7 @@ Operand* copy_operand(Operand* op) {
 	Operand* copied_op = nullptr;
 
 	if (op->get_type() == operand_vector || op->get_type() == operand_array) {
-		std::vector<Operand*> array_data = op->get_array_data();
-		copied_op = new Operand(array_data, op->get_type());
+		copied_op = new Operand(op->get_array_data(), op->get_type());
 	}
 	else {
 		copied_op = new Operand(op->get_data(), op->get_type());
@@ -108,6 +107,28 @@ void FunctionFrame::builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, 
 	delete height;
 }
 
+void FunctionFrame::print_operand(Operand* data) {
+	operand_type type = data->get_type();
+	std::string content = data->get_data();
+
+	if (type == operand_number) {
+		printf("%g", std::stod(content));
+	}
+	else if (type == operand_vector) {
+		std::cout << "(";
+		for (int i = 0; i < data->get_array_data().size(); i++) {
+			print_operand(data->get_array_data()[i]);
+			if (i != data->get_array_data().size() - 1) {
+				std::cout << ",";
+			}
+		}
+		std::cout << ")";
+	}
+	else {
+		std::cout << content;
+	}
+}
+
 void FunctionFrame::builtin_print(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 	int parameter_count = std::stoi(op->get_operands()[1]->identifier);
 
@@ -116,16 +137,9 @@ void FunctionFrame::builtin_print(Operator* op, CVM* vm, FunctionFrame* caller, 
 		this->stack->pop();
 
 		Operand* data = extract_value_of_opernad(_data);
-		operand_type type = data->get_type();
 
-		std::string content = data->get_data();
+		this->print_operand(data);
 
-		if (type == operand_number) {
-			printf("%g", std::stod(content));
-		}
-		else {
-			std::cout << content;
-		}
 		delete _data;
 	}
 }
@@ -174,21 +188,55 @@ void FunctionFrame::builtin_load_scene(Operator* op, CVM* vm, FunctionFrame* cal
 	}
 }
 
+void FunctionFrame::builtin_push(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	Operand* _target_array = this->stack->peek();
+	this->stack->pop();
+
+	Operand* target_array = extract_value_of_opernad(_target_array);
+
+	Operand* _target_element = this->stack->peek();
+	this->stack->pop();
+
+	Operand* target_element = extract_value_of_opernad(_target_element);
+
+	target_array->get_array_data().push_back(target_element);
+}
+
+void FunctionFrame::builtin_len(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	Operand* _target_array = this->stack->peek();
+	this->stack->pop();
+
+	Operand* target_array = extract_value_of_opernad(_target_array);
+
+	Operand* result = new Operand(std::to_string(target_array->get_array_data().size()), operand_number);
+
+	caller->stack->push(result);
+	delete _target_array;
+}
+
 void FunctionFrame::run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 	unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 	int parameter_count = std::stoi(op->get_operands()[1]->identifier);
 
-	if (id == BUILTIN_PRINT) { // print
+	switch (id) {
+	case BUILTIN_PRINT: // print
 		this->builtin_print(op, vm, caller, caller_class);
-	}
-	else if (id == BUILTIN_WINDOW) { // window
+		break;
+	case BUILTIN_WINDOW:// window
 		this->builtin_window(op, vm, caller, caller_class);
-	}
-	else if (id == BUILTIN_LOAD_SCENE) { // load_scene
+		break;
+	case BUILTIN_LOAD_SCENE: // load_scene
 		this->builtin_load_scene(op, vm, caller, caller_class);
-	}
-	else if (id == BUILTIN_IMAGE) { // image
+		break;
+	case BUILTIN_IMAGE: // image
 		this->builtin_image(op, vm, caller, caller_class);
+		break;
+	case BUILTIN_PUSH: // push
+		this->builtin_push(op, vm, caller, caller_class);
+		break;
+	case BUILTIN_LEN: // len
+		this->builtin_len(op, vm, caller, caller_class);
+		break;
 	}
 }
 
@@ -599,7 +647,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_store_global: {
-			Operand* peek = this->stack->peek();
+			Operand* peek = copy_operand(extract_value_of_opernad(this->stack->peek()));
 			this->stack->pop();
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 
@@ -612,7 +660,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_store_class: {
-			Operand* peek = this->stack->peek();
+			Operand* peek = copy_operand(extract_value_of_opernad(this->stack->peek()));
 			this->stack->pop();
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 
@@ -625,7 +673,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_store_local: {
-			Operand* peek = this->stack->peek();
+			Operand* peek = copy_operand(extract_value_of_opernad(this->stack->peek()));
 			this->stack->pop();
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 
@@ -638,19 +686,18 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_store_attr: {
-			Operand* attr_target = this->stack->peek();
-			Operand* target_op = extract_value_of_opernad(attr_target);
+			Operand* attr_target = extract_value_of_opernad(this->stack->peek());
 			this->stack->pop();
 
-			Operand* store_value = this->stack->peek();
+			Operand* store_value = copy_operand(extract_value_of_opernad(this->stack->peek()));
 			this->stack->pop();
 
 			unsigned int store_id = std::stoi(op->get_operands()[0]->identifier);
 
-			operand_type op_type = target_op->get_type();
+			operand_type op_type = attr_target->get_type();
 
 			if (op_type == operand_address) {
-				Memory* attr_memory = reinterpret_cast<Memory*>(std::stoull(target_op->get_data()));
+				Memory* attr_memory = reinterpret_cast<Memory*>(std::stoull(attr_target->get_data()));
 
 				if (attr_memory->member_variables.find(store_id) != attr_memory->member_variables.end())
 					attr_memory->member_variables.erase(attr_memory->member_variables.find(store_id));
@@ -658,7 +705,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				attr_memory->member_variables.insert(std::make_pair(store_id, store_value));
 			}
 			else if (op_type == operand_vector) {
-				Operand* vector_op = target_op;
+				Operand* vector_op = attr_target;
 
 				vector_op->get_array_data()[store_id] = store_value;
 			}

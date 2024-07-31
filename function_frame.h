@@ -13,6 +13,7 @@ private:
 public:
 	std::unordered_map<unsigned int, Operand*> local_area;
 	CMFunction* get_code_memory() const;
+	void print_operand(Operand* operand);
 	FunctionFrame(CMFunction* code_memory);
 	~FunctionFrame();
 	Stack* stack;
@@ -25,6 +26,8 @@ public:
 	void builtin_print(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 	void builtin_window(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 	void builtin_load_scene(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+	void builtin_push(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+	void builtin_len(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 };
 
 Operand* create_address_operand(Memory* op);
