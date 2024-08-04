@@ -20,6 +20,8 @@ FunctionFrame::~FunctionFrame() {
 Operand* copy_operand(Operand* op) {
 	Operand* copied_op = nullptr;
 
+	op = extract_value_of_opernad(op);
+
 	if (op->get_type() == operand_vector || op->get_type() == operand_array) {
 		copied_op = new Operand(op->get_array_data(), op->get_type());
 	}
@@ -35,7 +37,9 @@ inline Operand* extract_value_of_opernad(Operand* op) {
 	Operand* result = op;
 
 	if (op->get_type() == operand_op_address) {
-		result = reinterpret_cast<Operand*>(std::stoull(op->get_data()));
+		while (result->get_type() == operand_op_address) {
+			result = reinterpret_cast<Operand*>(std::stoull(op->get_data()));
+		}
 	}
 
 	return result;
@@ -183,6 +187,10 @@ void FunctionFrame::builtin_load_scene(Operator* op, CVM* vm, FunctionFrame* cal
 		Memory* scene = reinterpret_cast<Memory*>(std::stoull(target->get_data()));
 
 		vm->current_scene_memory = scene;
+
+		CMFunction* init_function =
+			scene->get_cm_class()->member_functions->find(scene->get_cm_class()->get_init_function_id())->second;
+		run_function(vm, vm->current_scene_memory, nullptr, init_function, 0);
 
 		delete _target;
 	}
@@ -377,7 +385,6 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 	for (int line = 0; line < operators.size(); line++) {
 		Operator* op = operators[line];
 		operator_type type = op->get_type();
-
 		switch (type) {
 		case op_push_string: {
 			std::string data = op->get_operands()[0]->identifier;
@@ -451,6 +458,14 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			break;
 		}
 
+		case op_keybaord: {
+			std::string key = to_upper_all(op->get_operands()[0]->identifier);
+			std::string result = vm->key_data.find(key) != vm->key_data.end() ? "true" : "false";
+
+			this->stack->push(new Operand(result, operand_bool));
+			break;
+		}
+
 		case op_if: {
 			Operand* condition = this->stack->peek();
 			this->stack->pop();
@@ -514,6 +529,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		{
 			Operand* lhs_op = this->stack->peek();
 			this->stack->pop();
+
 			Operand* rhs_op = this->stack->peek();
 			this->stack->pop();
 
@@ -524,8 +540,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			case op_add:
 				if (lhs->get_type() == operand_number)
 					this->stack->push(new Operand(std::to_string(
-						std::stod(extract_value_of_opernad(lhs)->get_data())
-						+ std::stod(extract_value_of_opernad(rhs)->get_data())), operand_number));
+						std::stod(lhs->get_data())
+						+ std::stod(rhs->get_data())), operand_number));
 				else if (lhs->get_type() == operand_vector)
 					this->stack->push(calcaulte_vector_operand(lhs, rhs, cal_add));
 
@@ -533,8 +549,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			case op_sub:
 				if (lhs->get_type() == operand_number)
 					this->stack->push(new Operand(std::to_string(
-						std::stod(extract_value_of_opernad(lhs)->get_data())
-						- std::stod(extract_value_of_opernad(rhs)->get_data())), operand_number));
+						std::stod(lhs->get_data())
+						- std::stod(rhs->get_data())), operand_number));
 				else if (lhs->get_type() == operand_vector)
 					this->stack->push(calcaulte_vector_operand(lhs, rhs, cal_sub));
 
@@ -542,21 +558,22 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			case op_mul:
 				if (lhs->get_type() == operand_number)
 					this->stack->push(new Operand(std::to_string(
-						std::stod(extract_value_of_opernad(lhs)->get_data())
-						* std::stod(extract_value_of_opernad(rhs)->get_data())), operand_number));
+						std::stod(lhs->get_data())
+						* std::stod(rhs->get_data())), operand_number));
 				else if (lhs->get_type() == operand_vector)
 					this->stack->push(calcaulte_vector_operand(lhs, rhs, cal_mult));
 
 				break;
 			case op_div:
 				if (lhs->get_type() == operand_number) {
-					if (rhs == 0) {
+					if (std::stod(rhs->get_data()) == 0) {
 						std::cout << "divided by zero error.";
 						exit(EXIT_FAILURE);
 					}
+
 					this->stack->push(new Operand(std::to_string(
-						std::stod(extract_value_of_opernad(lhs)->get_data())
-						/ std::stod(extract_value_of_opernad(rhs)->get_data())), operand_number));
+						std::stod(lhs->get_data())
+						/ std::stod(rhs->get_data())), operand_number));
 
 				}
 				else if (lhs->get_type() == operand_vector)
@@ -566,7 +583,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			case op_pow:
 				if (lhs->get_type() == operand_number) {
 					this->stack->push(new Operand(std::to_string(
-						pow(std::stod(extract_value_of_opernad(lhs)->get_data()), std::stod(extract_value_of_opernad(rhs)->get_data()))), operand_number));
+						pow(std::stod(lhs->get_data()), std::stod(rhs->get_data()))), operand_number));
 				}
 				else if (lhs->get_type() == operand_vector)
 					this->stack->push(calcaulte_vector_operand(lhs, rhs, cal_pow));
@@ -578,8 +595,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 						exit(EXIT_FAILURE);
 					}
 					this->stack->push(new Operand(std::to_string(
-						(int)std::stod(extract_value_of_opernad(lhs)->get_data())
-						% (int)std::stod(extract_value_of_opernad(rhs)->get_data())), operand_number));
+						(int)std::stod(lhs->get_data())
+						% (int)std::stod(rhs->get_data())), operand_number));
 				}
 				else if (lhs->get_type() == operand_vector)
 					this->stack->push(calcaulte_vector_operand(lhs, rhs, cal_mod));
@@ -587,44 +604,48 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			}
 
 			case op_greater: {
-				bool result = std::stod(extract_value_of_opernad(lhs)->get_data()) < std::stod(extract_value_of_opernad(rhs)->get_data());
+				bool result = std::stod(lhs->get_data()) < std::stod(rhs->get_data());
 				this->stack->push(new Operand(result ? "true" : "false", operand_bool));
 				break;
 			}
 
 			case op_lesser: {
-				bool result = std::stod(extract_value_of_opernad(lhs)->get_data()) > std::stod(extract_value_of_opernad(rhs)->get_data());
+				bool result = std::stod(lhs->get_data()) > std::stod(rhs->get_data());
 				this->stack->push(new Operand(result ? "true" : "false", operand_bool));
 				break;
 			}
 
 			case op_eq_lesser: {
-				bool result = std::stod(extract_value_of_opernad(lhs)->get_data()) >= std::stod(extract_value_of_opernad(rhs)->get_data());
+				bool result = std::stod(lhs->get_data()) >= std::stod(rhs->get_data());
 				this->stack->push(new Operand(result ? "true" : "false", operand_bool));
 				break;
 			}
 
 			case op_eq_greater: {
-				bool result = std::stod(extract_value_of_opernad(lhs)->get_data()) <= std::stod(extract_value_of_opernad(rhs)->get_data());
+				bool result = std::stod(lhs->get_data()) <= std::stod(rhs->get_data());
 				this->stack->push(new Operand(result ? "true" : "false", operand_bool));
 				break;
 			}
 
 			case op_equal: {
-				bool result = extract_value_of_opernad(lhs)->get_data() == extract_value_of_opernad(rhs)->get_data();
+				bool result = lhs->get_data() == rhs->get_data();
+
+				if (lhs->get_type() == operand_number)
+					result = std::stod(lhs->get_data()) == std::stod(rhs->get_data());
+
 				this->stack->push(new Operand(result ? "true" : "false", operand_bool));
 				break;
 			}
 
 			case op_not_equal: {
-				bool result = extract_value_of_opernad(lhs)->get_data() != extract_value_of_opernad(rhs)->get_data();
+				bool result = lhs->get_data() != rhs->get_data();
 				this->stack->push(new Operand(result ? "true" : "false", operand_bool));
 				break;
 			}
 
 			case op_or: {
-				bool _lhs = extract_value_of_opernad(lhs)->get_data() == "true";
-				bool _rhs = extract_value_of_opernad(rhs)->get_data() == "true";
+				bool _lhs = lhs->get_data() == "true";
+				bool _rhs = rhs->get_data() == "true";
 				bool result = _lhs || _rhs;
 
 				this->stack->push(new Operand(result ? "true" : "false", operand_bool));
@@ -633,8 +654,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			}
 
 			case op_and: {
-				bool _lhs = extract_value_of_opernad(lhs)->get_data() == "true";
-				bool _rhs = extract_value_of_opernad(rhs)->get_data() == "true";
+				bool _lhs = lhs->get_data() == "true";
+				bool _rhs = rhs->get_data() == "true";
 				bool result = _lhs && _rhs;
 
 				this->stack->push(new Operand(result ? "true" : "false", operand_bool));

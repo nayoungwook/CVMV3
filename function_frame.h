@@ -3,6 +3,7 @@
 #include <cstdio>
 #include "code_memory/cm_function.h"
 #include "code_memory/cm_window.h"
+#include "sys_util.h"
 #include "stack.h"
 #include "cvm.h"
 #include "memory.h"

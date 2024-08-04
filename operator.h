@@ -48,6 +48,7 @@ enum operator_type {
 	op_push_null = 40,
 	op_push_this = 41,
 	op_super_call = 42,
+	op_keybaord = 43,
 };
 
 class Operator {

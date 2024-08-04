@@ -1,4 +1,2 @@
-﻿  function_frame.cpp
-C:\Users\user\source\repos\Chestnut\CVM\function_frame.cpp(347,17): warning C4129: '.': 인식할 수 없는 문자 이스케이프 시퀀스입니다.
-C:\Users\user\source\repos\Chestnut\CVM\function_frame.cpp(878,18): warning C4129: '.': 인식할 수 없는 문자 이스케이프 시퀀스입니다.
+﻿  cm_window.cpp
   CVM.vcxproj -> C:\Users\user\source\repos\Chestnut\x64\Debug\CVM.exe

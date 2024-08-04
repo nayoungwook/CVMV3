@@ -157,6 +157,7 @@
     <ClCompile Include="stack.cpp" />
     <ClCompile Include="sys_file.cpp" />
     <ClCompile Include="sys_logger.cpp" />
+    <ClCompile Include="sys_util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="code_memory\cm_class.h" />
@@ -179,6 +180,7 @@
     <ClInclude Include="stack.h" />
     <ClInclude Include="sys_file.h" />
     <ClInclude Include="sys_logger.h" />
+    <ClInclude Include="sys_util.h" />
     <ClInclude Include="token.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

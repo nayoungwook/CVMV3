@@ -1,7 +1,11 @@
 #include "operand.h"
 
 Operand::Operand(std::string const& data, operand_type type) : data(data), type(type) {
-
+	if (type == operand_number) {
+		if ((int)std::stod(data) == std::stod(data)) {
+			this->data = std::to_string((int)std::stod(data));
+		}
+	}
 }
 
 Operand::Operand(std::vector<Operand*>& array_data, operand_type type) : array_data(array_data), type(type) {

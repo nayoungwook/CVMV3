@@ -9,6 +9,7 @@
 #include "memory.h"
 #include "../cvm.h"
 #include "../function_frame.h"
+#include "../sys_util.h"
 #include "cm_image.h"
 
 class CMWindow : public CMClass {

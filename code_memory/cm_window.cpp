@@ -22,20 +22,17 @@ void window_loop(CVM* vm, SDL_Window* window) {
 			case SDL_QUIT:
 				_running = false;
 				break;
-				/*
-							case SDL_KEYDOWN:
-							{
-								std::string key = SDL_GetKeyName(event.key.keysym.sym);
-								machine->key_data.insert(to_upper_all(key));
-								break;
-							}
-
-							case SDL_KEYUP: {
-								std::string key = SDL_GetKeyName(event.key.keysym.sym);
-								machine->key_data.erase(to_upper_all(key));
-								break;
-							}
-				*/
+			case SDL_KEYDOWN:
+			{
+				std::string key = SDL_GetKeyName(event.key.keysym.sym);
+				vm->key_data.insert(to_upper_all(key));
+				break;
+			}
+			case SDL_KEYUP: {
+				std::string key = SDL_GetKeyName(event.key.keysym.sym);
+				vm->key_data.erase(to_upper_all(key));
+				break;
+			}
 			}
 		}
 
@@ -50,7 +47,7 @@ void window_loop(CVM* vm, SDL_Window* window) {
 			unsigned int render_funciton_id = current_scene_cm->get_render_function_id();
 
 			CMScene* scene = current_scene_cm;
-			
+
 			CMFunction* tick_function =
 				current_scene_cm->member_functions->find(tick_funciton_id)->second;
 			run_function(vm, vm->current_scene_memory, nullptr, tick_function, 0);

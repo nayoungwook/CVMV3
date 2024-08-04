@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <unordered_map>
+#include <unordered_set>
 #include <queue>
 
 #include "sys_file.h"
@@ -35,6 +36,8 @@ public:
 	std::vector<Memory*> heap_area;
 
 	std::unordered_map<std::string, unsigned int>* label_id;
+
+	std::unordered_set<std::string> key_data;
 
 	static Memory* current_scene_memory;
 };

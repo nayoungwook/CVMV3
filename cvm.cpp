@@ -48,7 +48,7 @@ int main() {
 	}
 
 	if (main_function == nullptr) {
-		chestnut_log(L"Main Function not found. Please deaclare it.", log_state::log_error);
+		CHESTNUT_LOG(L"Main Function not found. Please deaclare it.", log_level::log_error);
 		exit(EXIT_FAILURE);
 	}
 

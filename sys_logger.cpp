@@ -1,6 +1,6 @@
 #include "sys_logger.h"
 
-void chestnut_log(const std::wstring& content, log_state c) {
+void CHESTNUT_LOG(const std::wstring& content, log_level c) {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
 	const auto now = std::chrono::system_clock::now();

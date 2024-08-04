@@ -189,6 +189,10 @@ Operator* get_operator(std::unordered_map<std::string, unsigned int>* label_id, 
 		pull_token(tokens);
 		operands.push_back(pull_token(tokens)); // parameter_count
 	}
+	else if (token->identifier == "@KEYBOARD") {
+		operands.push_back(pull_token(tokens)); // key
+		type = op_keybaord;
+	}
 
 	std::string line_number_str = pull_token(tokens)->identifier;
 

@@ -10,24 +10,24 @@ CMShader::CMShader(std::string const& _frag_path, std::string const& _vert_path)
 		std::wstring msg = L"Compilation error in shader : ";
 		msg.assign(frag_path.begin(), frag_path.end());
 
-		chestnut_log(msg, log_state::log_error);
+		CHESTNUT_LOG(msg, log_level::log_error);
 	}
 	else {
 		std::wstring msg = L"Compilation succeed in shader : ";
 		msg.assign(frag_path.begin(), frag_path.end());
-		chestnut_log(msg, log_state::log_success);
+		CHESTNUT_LOG(msg, log_level::log_success);
 	}
 
 	if (!compile_shader(vert, vert_path, GL_VERTEX_SHADER)) {
 		std::wstring msg = L"Compilation error in shader : ";
 		msg.assign(vert_path.begin(), vert_path.end());
 
-		chestnut_log(msg, log_state::log_error);
+		CHESTNUT_LOG(msg, log_level::log_error);
 	}
 	else {
 		std::wstring msg = L"Compilation succeed in shader : ";
 		msg.assign(vert_path.begin(), vert_path.end());
-		chestnut_log(msg, log_state::log_success);
+		CHESTNUT_LOG(msg, log_level::log_success);
 	}
 
 	this->program = create_program(frag, vert);
