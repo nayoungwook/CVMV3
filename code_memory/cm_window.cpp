@@ -1,11 +1,160 @@
 #include "cm_window.h"
 
+void register_source_code(CVM* vm, std::string const& loaded_file) {
+	std::string name = loaded_file;
+	std::wstring wname;
+	wname.assign(name.begin(), name.end());
+
+	CHESTNUT_LOG(L"code refreshed : " + wname, log_level::log_okay);
+
+	std::vector<std::string> file = get_file(name);
+
+	std::vector<Token*> parsed_tokens = parse_tokens(file);
+
+	while (!parsed_tokens.empty()) {
+		CodeMemory* code_memory = get_code_memory(vm->load_queue, vm->label_id, parsed_tokens);
+
+		if (code_memory == nullptr) continue;
+
+		if (code_memory->get_type() == code_function) {
+			CMFunction* cm_f = ((CMFunction*)code_memory);
+			std::unordered_map<unsigned int, CMFunction*>::iterator global_function_iterator;
+
+			bool function_exist = false;
+			unsigned int found_function_id = -1;
+
+			for (global_function_iterator = vm->global_functions.begin();
+				global_function_iterator != vm->global_functions.end(); global_function_iterator++) {
+				function_exist = true;
+				found_function_id = global_function_iterator->first;
+			}
+
+			if (function_exist) {
+				vm->global_functions.erase(found_function_id);
+				vm->global_functions.insert(std::make_pair(found_function_id, cm_f));
+			}
+			else {
+				vm->global_functions.insert(std::make_pair(cm_f->get_id(), cm_f));
+			}
+		}
+		else if (
+			code_memory->get_type() == code_class ||
+			code_memory->get_type() == code_scene || code_memory->get_type() == code_object) {
+
+			CMClass* cm_f = ((CMClass*)code_memory);
+
+			// find if class already exist.
+
+			bool class_already_exist = false;
+			unsigned int found_class_id = -1;
+
+			std::string class_name = cm_f->name;
+			std::unordered_map<unsigned int, CMClass*>::iterator class_iterator;
+
+			for (class_iterator = vm->global_class.begin();
+				class_iterator != vm->global_class.end(); class_iterator++) {
+				if (class_iterator->second->name == class_name) {
+					class_already_exist = true;
+					found_class_id = class_iterator->first;
+				}
+			}
+
+			if (class_already_exist) {
+				std::unordered_map<unsigned int, CMFunction*>::iterator cm_member_function_iterator;
+
+				for (cm_member_function_iterator = cm_f->member_functions->begin();
+					cm_member_function_iterator != cm_f->member_functions->end(); cm_member_function_iterator++) {
+
+					bool member_function_already_exist = false;
+					unsigned int found_member_function_id = -1;
+
+					std::unordered_map<unsigned int, CMFunction*>::iterator exist_member_function_iterator;
+
+					for (exist_member_function_iterator = vm->global_class[found_class_id]->member_functions->begin();
+						exist_member_function_iterator != vm->global_class[found_class_id]->member_functions->end();
+						exist_member_function_iterator++) {
+						if (exist_member_function_iterator->second->name == cm_member_function_iterator->second->name) { // exist same name
+							member_function_already_exist = true;
+							found_member_function_id = exist_member_function_iterator->first;
+						}
+					}
+
+					if (member_function_already_exist) {
+						vm->global_class[found_class_id]->member_functions->erase(found_member_function_id);
+						vm->global_class[found_class_id]->member_functions->insert(
+							std::make_pair(found_member_function_id, cm_member_function_iterator->second));
+					}
+					else {
+						vm->global_class[found_class_id]->member_functions->insert(
+							std::make_pair(cm_member_function_iterator->first, cm_member_function_iterator->second));
+					}
+
+				}
+			}
+			else {
+				vm->global_class.insert(std::make_pair(cm_f->get_id(), cm_f));
+			}
+		}
+	}
+}
+
 void window_loop(CVM* vm, SDL_Window* window) {
 	SDL_Event event;
 
 	bool _running = true;
 	int tick_count = 0;
 	int backup_ticks = 0, current_ticks = 0;
+
+	filewatch::FileWatch<std::wstring> watch(
+		get_current_directory(),
+		[](const std::wstring& path, const filewatch::Event change_type) {
+			switch (change_type)
+			{
+			case filewatch::Event::modified:
+				bool is_cir = true;
+				bool is_cn = true;
+				std::string cir = ".cir";
+				std::string cn = ".cn";
+				std::string str_path;
+				str_path.assign(path.begin(), path.end());
+
+				if (str_path.length() >= 3) {
+					for (int i = 3; i >= 0; i--) {
+						if (str_path[str_path.length() - 1 - i] != cir[3 - i]) {
+							is_cir = false;
+						}
+
+						if (i != 3) {
+							if (str_path[str_path.length() - 1 - i] != cn[2 - i]) {
+								is_cn = false;
+							}
+						}
+					}
+				}
+				else {
+					is_cir = false;
+				}
+
+				if (is_cir) {
+					CHESTNUT_LOG(L"cir File modified : " + path, log_level::log_default);
+					changed_files.push(std::string(path.begin(), path.end()));
+				}
+
+				if (is_cn) {
+					CHESTNUT_LOG(L"cn File modified : " + path.substr(0, path.length() - 3), log_level::log_default);
+
+					std::wstring wcommand = get_current_directory() + L"\\"
+						+ L"chestnutcompiler -compile " + path.substr(0, path.length() - 3);
+					std::string command;
+					command.assign(wcommand.begin(), wcommand.end());
+
+					system(command.c_str());
+				}
+
+				break;
+			}
+		}
+	);
 
 	while (_running) {
 		//	if (current_ticks - backup_ticks != 0)
@@ -58,13 +207,18 @@ void window_loop(CVM* vm, SDL_Window* window) {
 
 		}
 
+		while (!changed_files.empty()) {
+			CHESTNUT_LOG(L"File refreshed", log_level::log_default);
+			register_source_code(vm, changed_files.front());
+			changed_files.pop();
+		}
+
 		SDL_GL_SwapWindow(window);
 		if ((1000 / 60) > (SDL_GetTicks() - start_time))
 		{
 			SDL_Delay((1000 / 60) - (SDL_GetTicks() - start_time)); //Yay stable framerate!
 		}
 	}
-
 }
 
 SDL_Window* create_window(std::string const& title, int width, int height) {

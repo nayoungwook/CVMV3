@@ -19,8 +19,7 @@ public:
 	std::vector<std::string> get_param_types() const;
 
 	unsigned int get_id() const;
-	CMFunction(std::vector<Operator*>& operators, unsigned int& id, std::string const& return_type,
-		std::vector<std::string>& param_types, std::string const& access_modifier);
+	CMFunction(std::string const& name, std::vector<Operator*>& operators, unsigned int& id, std::string const& return_type, std::vector<std::string>& param_types, std::string const& access_modifier);
 };
 
 class CMInitialize : public CMFunction {

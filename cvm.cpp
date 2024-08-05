@@ -9,15 +9,7 @@ int main() {
 
 	std::string path = "main.cir";
 	std::vector<std::string> file = get_file(path);
-	std::vector<Token*> parsed_tokens;
-
-	for (std::string _f : file) {
-		std::vector<Token*> tkns = extract_tokens(_f);
-
-		for (Token* tkn : tkns) {
-			parsed_tokens.push_back(tkn);
-		}
-	}
+	std::vector<Token*> parsed_tokens = parse_tokens(file);
 
 	initialize_engine();
 
@@ -40,7 +32,9 @@ int main() {
 
 			vm->global_functions.insert(std::make_pair(cm_f->get_id(), cm_f));
 		}
-		else if (code_memory->get_type() == code_class || code_memory->get_type() == code_scene || code_memory->get_type() == code_object) {
+		else if (
+			code_memory->get_type() == code_class || 
+			code_memory->get_type() == code_scene || code_memory->get_type() == code_object) {
 			CMClass* cm_f = ((CMClass*)code_memory);
 
 			vm->global_class.insert(std::make_pair(cm_f->get_id(), cm_f));

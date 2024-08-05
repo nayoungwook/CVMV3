@@ -20,8 +20,7 @@ static const int BUILTIN_PRINT = 0;
 static const int BUILTIN_WINDOW = 1;
 static const int BUILTIN_LOAD_SCENE = 2;
 static const int BUILTIN_IMAGE = 3;
-static const int BUILTIN_PUSH = 4;
-static const int BUILTIN_LEN = 5;
+static const int BUILTIN_BACKGROUND= 4;
 
 class CVM {
 public:

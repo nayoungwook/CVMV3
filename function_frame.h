@@ -27,8 +27,7 @@ public:
 	void builtin_print(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 	void builtin_window(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 	void builtin_load_scene(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
-	void builtin_push(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
-	void builtin_len(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+	void builtin_background(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 };
 
 Operand* create_address_operand(Memory* op);
@@ -45,3 +44,5 @@ double cal_mult(double lhs, double rhs);
 double cal_div(double lhs, double rhs);
 double cal_mod(double lhs, double rhs);
 double cal_pow(double lhs, double rhs);
+
+bool operand_compare(Operand* op1, Operand* op2);

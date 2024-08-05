@@ -241,7 +241,7 @@ CodeMemory* get_code_memory(std::queue<std::pair<std::string, std::string>>& loa
 		else  if (token->identifier == "$CONSTRUCTOR")
 			result = (CodeMemory*) new CMConstructor(operators, id, return_type, params, access_modifier);
 		else
-			result = (CodeMemory*) new CMFunction(operators, id, return_type, params, access_modifier);
+			result = (CodeMemory*) new CMFunction(name, operators, id, return_type, params, access_modifier);
 
 		((CMFunction*)result)->name = name.substr(1, name.size() - 2);
 

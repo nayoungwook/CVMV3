@@ -35,5 +35,4 @@ void render_image(CMShader* shader, unsigned int texture_id, unsigned int vao, f
 
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-
 }

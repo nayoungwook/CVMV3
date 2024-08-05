@@ -171,6 +171,7 @@
     <ClInclude Include="cvm.h" />
     <ClInclude Include="engine\engine.h" />
     <ClInclude Include="engine\stb_image.h" />
+    <ClInclude Include="FileWatcher.hpp" />
     <ClInclude Include="function_frame.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="memory.h" />

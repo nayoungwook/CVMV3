@@ -196,30 +196,30 @@ void FunctionFrame::builtin_load_scene(Operator* op, CVM* vm, FunctionFrame* cal
 	}
 }
 
-void FunctionFrame::builtin_push(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
-	Operand* _target_array = this->stack->peek();
+void FunctionFrame::builtin_background(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	int parameter_count = std::stoi(op->get_operands()[1]->identifier);
+
+	Operand* _r = this->stack->peek(); // r
+	this->stack->pop();
+	Operand* _g = this->stack->peek(); // g
+	this->stack->pop();
+	Operand* _b = this->stack->peek(); // b
 	this->stack->pop();
 
-	Operand* target_array = extract_value_of_opernad(_target_array);
+	Operand* r = extract_value_of_opernad(_r),
+		* g = extract_value_of_opernad(_g),
+		* b = extract_value_of_opernad(_b);
 
-	Operand* _target_element = this->stack->peek();
-	this->stack->pop();
+	float r_f = std::stof(r->get_data());
+	float g_f = std::stof(g->get_data());
+	float b_f = std::stof(b->get_data());
 
-	Operand* target_element = extract_value_of_opernad(_target_element);
+	glClearColor(r_f, g_f, b_f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
 
-	target_array->get_array_data().push_back(target_element);
-}
-
-void FunctionFrame::builtin_len(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
-	Operand* _target_array = this->stack->peek();
-	this->stack->pop();
-
-	Operand* target_array = extract_value_of_opernad(_target_array);
-
-	Operand* result = new Operand(std::to_string(target_array->get_array_data().size()), operand_number);
-
-	caller->stack->push(result);
-	delete _target_array;
+	delete _r;
+	delete _g;
+	delete _b;
 }
 
 void FunctionFrame::run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
@@ -239,11 +239,8 @@ void FunctionFrame::run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Me
 	case BUILTIN_IMAGE: // image
 		this->builtin_image(op, vm, caller, caller_class);
 		break;
-	case BUILTIN_PUSH: // push
-		this->builtin_push(op, vm, caller, caller_class);
-		break;
-	case BUILTIN_LEN: // len
-		this->builtin_len(op, vm, caller, caller_class);
+	case BUILTIN_BACKGROUND: // image
+		this->builtin_background(op, vm, caller, caller_class);
 		break;
 	}
 }
@@ -341,6 +338,19 @@ Memory* create_object(CVM* vm, CMClass* code_memory, FunctionFrame* frame, unsig
 	return memory;
 }
 
+bool operand_compare(Operand* op1, Operand* op2) {
+
+	if (op1->get_type() != op2->get_type()) return false;
+
+	if (op1->get_type() == operand_address) {
+		return
+			reinterpret_cast<Memory*>(std::stoull(op1->get_data())) ==
+			reinterpret_cast<Memory*>(std::stoull(op2->get_data()));
+	}
+
+	return op1 == op2;
+}
+
 void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 	if (this->get_code_memory()->get_type() == code_render) {
@@ -385,7 +395,9 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 	for (int line = 0; line < operators.size(); line++) {
 		Operator* op = operators[line];
 		operator_type type = op->get_type();
+
 		switch (type) {
+
 		case op_push_string: {
 			std::string data = op->get_operands()[0]->identifier;
 			data = data.substr(1, data.size() - 2);
@@ -900,11 +912,50 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				exit(EXIT_FAILURE);
 			}
 
-			Memory* memory = reinterpret_cast<Memory*>(std::stoull(target->get_data()));
-			CMClass* cm = memory->get_cm_class();
-			CMFunction* callee_function = (CMFunction*)cm->member_functions->find(id)->second;
+			if (target->get_type() == operand_array) {
+				if (id == 0) { // array.push( e )
+					Operand* _target_element = this->stack->peek();
+					this->stack->pop();
 
-			run_function(vm, memory, this, callee_function, parameter_count);
+					Operand* target_element = extract_value_of_opernad(_target_element);
+
+					target->get_array_data().push_back(target_element);
+				}
+				else if (id == 1) { // array.size()
+					Operand* result = new Operand(std::to_string(target->get_array_data().size()), operand_number);
+
+					this->stack->push(result);
+				}
+				else if (id == 2) { // array.remove( e )
+					Operand* _target_element = this->stack->peek();
+					this->stack->pop();
+
+					Operand* target_element = extract_value_of_opernad(_target_element);
+					std::vector<Operand*>* _array = &target->get_array_data();
+
+					int index = 0;
+
+					for (Operand* _element : (*_array)) {
+						if (operand_compare(extract_value_of_opernad(_element), target_element)) {
+							break;
+						}
+						index++;
+					}
+
+					if (index == _array->size()) { // Failed to find element in array.
+
+					}
+
+					_array->erase(_array->begin() + index);
+				}
+			}
+			else {
+				Memory* memory = reinterpret_cast<Memory*>(std::stoull(target->get_data()));
+				CMClass* cm = memory->get_cm_class();
+				CMFunction* callee_function = (CMFunction*)cm->member_functions->find(id)->second;
+
+				run_function(vm, memory, this, callee_function, parameter_count);
+			}
 
 			delete target_op;
 

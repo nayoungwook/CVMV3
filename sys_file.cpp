@@ -8,6 +8,19 @@ std::string get_absolute_path(std::string const& path) {
 	return current_path + "\\" + path;
 }
 
+std::vector<Token*> parse_tokens(std::vector<std::string> file) {
+	std::vector<Token*> parsed_tokens;
+	for (std::string _f : file) {
+		std::vector<Token*> tkns = extract_tokens(_f);
+
+		for (Token* tkn : tkns) {
+			parsed_tokens.push_back(tkn);
+		}
+	}
+	
+	return parsed_tokens;
+}
+
 std::vector<std::string> get_file(std::string& file_path) {
 
 	file_path = get_absolute_path(file_path);

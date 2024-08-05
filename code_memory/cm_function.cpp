@@ -1,25 +1,26 @@
 #include "cm_function.h"
 
-CMFunction::CMFunction(std::vector<Operator*>& operators, unsigned int& id, std::string const& return_type,
+CMFunction::CMFunction(std::string const& name, std::vector<Operator*>& operators,
+	unsigned int& id, std::string const& return_type,
 	std::vector<std::string>& param_types, std::string const& access_modifier)
-	: operators(operators), id(id), return_type(return_type), param_types(param_types), access_modifier(access_modifier) {
+	: name(name), operators(operators), id(id), return_type(return_type), param_types(param_types), access_modifier(access_modifier) {
 	this->type = code_function;
 }
 
 CMInitialize::CMInitialize(std::vector<Operator*>& operators, unsigned int& id, std::string const& return_type,
 	std::vector<std::string>& param_types, std::string const& access_modifier)
-	: CMFunction(operators, id, return_type, param_types, access_modifier) {
+	: CMFunction("initialize", operators, id, return_type, param_types, access_modifier) {
 	this->type = code_initialize;
 }
 
 CMConstructor::CMConstructor(std::vector<Operator*>& operators, unsigned int& id, std::string const& return_type,
 	std::vector<std::string>& param_types, std::string const& access_modifier)
-	: CMFunction(operators, id, return_type, param_types, access_modifier) {
+	: CMFunction("constructor", operators, id, return_type, param_types, access_modifier) {
 	this->type = code_constructor;
 }
 
 CMRender::CMRender(std::vector<Operator*>& operators, unsigned int id, std::vector<std::string>& param_types)
-	: CMFunction(operators, id, "void", param_types, "public") {
+	: CMFunction("render", operators, id, "void", param_types, "public") {
 	this->type = code_render;
 }
 

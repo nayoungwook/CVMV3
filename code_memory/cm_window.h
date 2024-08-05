@@ -10,7 +10,10 @@
 #include "../cvm.h"
 #include "../function_frame.h"
 #include "../sys_util.h"
+#include "../sys_file.h"
 #include "cm_image.h"
+
+#include "../FileWatcher.hpp"
 
 class CMWindow : public CMClass {
 private:
@@ -25,3 +28,6 @@ static SDL_GLContext context;
 SDL_Window* create_window(std::string const& title, int width, int height);
 void window_loop(CVM* vm, SDL_Window* window);
 void load_default_shader(CVM* vm);
+
+static std::queue<std::string> changed_files;
+void register_source_code(CVM* machine, std::string const& loaded_file);

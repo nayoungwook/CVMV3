@@ -158,5 +158,8 @@
     <ClInclude Include="sys_util.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="FileWatcher.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
