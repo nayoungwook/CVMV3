@@ -5,8 +5,6 @@ void register_source_code(CVM* vm, std::string const& loaded_file) {
 	std::wstring wname;
 	wname.assign(name.begin(), name.end());
 
-	CHESTNUT_LOG(L"code refreshed : " + wname, log_level::log_okay);
-
 	std::vector<std::string> file = get_file(name);
 
 	std::vector<Token*> parsed_tokens = parse_tokens(file);
@@ -21,17 +19,14 @@ void register_source_code(CVM* vm, std::string const& loaded_file) {
 			std::unordered_map<unsigned int, CMFunction*>::iterator global_function_iterator;
 
 			bool function_exist = false;
-			unsigned int found_function_id = -1;
 
 			for (global_function_iterator = vm->global_functions.begin();
 				global_function_iterator != vm->global_functions.end(); global_function_iterator++) {
 				function_exist = true;
-				found_function_id = global_function_iterator->first;
 			}
 
 			if (function_exist) {
-				vm->global_functions.erase(found_function_id);
-				vm->global_functions.insert(std::make_pair(found_function_id, cm_f));
+				vm->global_functions[cm_f->get_id()] = cm_f;
 			}
 			else {
 				vm->global_functions.insert(std::make_pair(cm_f->get_id(), cm_f));
@@ -41,61 +36,34 @@ void register_source_code(CVM* vm, std::string const& loaded_file) {
 			code_memory->get_type() == code_class ||
 			code_memory->get_type() == code_scene || code_memory->get_type() == code_object) {
 
-			CMClass* cm_f = ((CMClass*)code_memory);
+			CMClass* cm_c = ((CMClass*)code_memory);
 
 			// find if class already exist.
+			vm->global_class.insert(std::make_pair(cm_c->get_id(), cm_c));
 
-			bool class_already_exist = false;
-			unsigned int found_class_id = -1;
+			for (int i = 0; i < vm->heap_area.size(); i++) {
+				if (vm->heap_area[i]->get_cm_class()->name == cm_c->name) {
+					CMFunction* initializer = vm->heap_area[i]->get_cm_class()->initializer;
+					run_function(vm, vm->heap_area[i], nullptr, initializer, 0);
 
-			std::string class_name = cm_f->name;
-			std::unordered_map<unsigned int, CMClass*>::iterator class_iterator;
+					vm->heap_area[i]->set_cm_class(cm_c);
 
-			for (class_iterator = vm->global_class.begin();
-				class_iterator != vm->global_class.end(); class_iterator++) {
-				if (class_iterator->second->name == class_name) {
-					class_already_exist = true;
-					found_class_id = class_iterator->first;
+					if (cm_c->get_type() == code_object) {
+						unsigned int render_function_id = ((CMObject*)cm_c)->get_render_function_id();
+						std::vector<Operator*> temp1;
+						std::vector<std::string> temp2;
+						CMFunction* render_function = new CMRender(temp1, render_function_id, temp2);
+						if (cm_c->member_functions->find(render_function_id) != cm_c->member_functions->end())
+							cm_c->member_functions->erase(cm_c->member_functions->find(render_function_id));
+
+						cm_c->member_functions->insert(std::make_pair(render_function_id, render_function));
+					}
 				}
-			}
-
-			if (class_already_exist) {
-				std::unordered_map<unsigned int, CMFunction*>::iterator cm_member_function_iterator;
-
-				for (cm_member_function_iterator = cm_f->member_functions->begin();
-					cm_member_function_iterator != cm_f->member_functions->end(); cm_member_function_iterator++) {
-
-					bool member_function_already_exist = false;
-					unsigned int found_member_function_id = -1;
-
-					std::unordered_map<unsigned int, CMFunction*>::iterator exist_member_function_iterator;
-
-					for (exist_member_function_iterator = vm->global_class[found_class_id]->member_functions->begin();
-						exist_member_function_iterator != vm->global_class[found_class_id]->member_functions->end();
-						exist_member_function_iterator++) {
-						if (exist_member_function_iterator->second->name == cm_member_function_iterator->second->name) { // exist same name
-							member_function_already_exist = true;
-							found_member_function_id = exist_member_function_iterator->first;
-						}
-					}
-
-					if (member_function_already_exist) {
-						vm->global_class[found_class_id]->member_functions->erase(found_member_function_id);
-						vm->global_class[found_class_id]->member_functions->insert(
-							std::make_pair(found_member_function_id, cm_member_function_iterator->second));
-					}
-					else {
-						vm->global_class[found_class_id]->member_functions->insert(
-							std::make_pair(cm_member_function_iterator->first, cm_member_function_iterator->second));
-					}
-
-				}
-			}
-			else {
-				vm->global_class.insert(std::make_pair(cm_f->get_id(), cm_f));
 			}
 		}
 	}
+
+	CHESTNUT_LOG(L"code refreshed : " + wname, log_level::log_okay);
 }
 
 void window_loop(CVM* vm, SDL_Window* window) {
@@ -117,6 +85,8 @@ void window_loop(CVM* vm, SDL_Window* window) {
 				std::string cn = ".cn";
 				std::string str_path;
 				str_path.assign(path.begin(), path.end());
+
+				if (str_path[0] == '#') break;
 
 				if (str_path.length() >= 3) {
 					for (int i = 3; i >= 0; i--) {

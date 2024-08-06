@@ -14,5 +14,4 @@ int Operator::get_line_number() const {
 
 Operator::Operator(operator_type type, std::vector<Token*>& operands, int line_number)
 	: type(type), operands(operands), line_number(line_number) {
-
 }

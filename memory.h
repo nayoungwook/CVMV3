@@ -12,5 +12,6 @@ public:
 	void store_parent_memory(Memory* memory);
 	Memory* get_parent_memory();
 	CMClass* get_cm_class();
+	void set_cm_class(CMClass* cm_class);
 	Memory(CMClass* cm_class);
 };

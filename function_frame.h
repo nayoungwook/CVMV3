@@ -38,6 +38,8 @@ void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CM
 Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, double (*cal)(double l, double r));
 Memory* create_object(CVM* vm, CMClass* code_memory, FunctionFrame* frame, unsigned int constructor_parameter_count);
 
+const std::string get_type_string_of_operand(Operand* op);
+
 double cal_add(double lhs, double rhs);
 double cal_sub(double lhs, double rhs);
 double cal_mult(double lhs, double rhs);

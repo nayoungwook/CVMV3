@@ -53,13 +53,59 @@ Operand* create_op_address_operand(Operand* op) {
 	return new Operand(std::to_string((unsigned long long)(void**) op), operand_op_address);
 }
 
+const std::string get_type_string_of_operand(Operand* op) {
+	std::string type_string_operand = "";
+
+	Operand* extracted_op = extract_value_of_opernad(op);
+
+	switch (extracted_op->get_type()) {
+	case operand_number:
+		type_string_operand = "number";
+		break;
+	case operand_array:
+		type_string_operand = "array";
+		break;
+	case operand_address:
+		type_string_operand
+			= reinterpret_cast<Memory*>(std::stoull(extracted_op->get_data()))->get_cm_class()->name;
+		break;
+	case operand_bool:
+		type_string_operand = "bool";
+		break;
+	case operand_string:
+		type_string_operand = "string";
+		break;
+	case operand_vector:
+		type_string_operand = "vector";
+		break;
+	}
+
+	return type_string_operand;
+}
+
 void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CMFunction* code_memory, int parameter_count) {
 	FunctionFrame* frame = new FunctionFrame(code_memory);
+
+	if (parameter_count != code_memory->get_param_types().size()) {
+		std::cout << "Error with function parameter : " << code_memory->name << std::endl;
+		exit(EXIT_FAILURE);
+	}
 
 	for (int i = 0; i < parameter_count; i++) {
 		Operand* op = caller_frame->stack->peek();
 		caller_frame->stack->pop();
 
+		std::string type_string_of_operand = get_type_string_of_operand(op);
+
+		if (code_memory->get_param_types()[i] != type_string_of_operand) {
+			//			std::wstring w_function_name;
+			//			w_function_name.assign(code_memory->name.begin(), code_memory->name.end());
+
+			//			CHESTNUT_THROW_ERROR(L"We don\'t have function \'" + w_function_name + L"\' with this parameter.", "NO_FUNCTION_WITH_PARAMETER", "008", ast->line_number);
+
+			std::cout << "Error with function parameter : " << code_memory->name << std::endl;
+			exit(EXIT_FAILURE);
+		}
 
 		frame->local_area.insert(std::make_pair(i, copy_operand(op)));
 	}
@@ -115,10 +161,11 @@ void FunctionFrame::print_operand(Operand* data) {
 	operand_type type = data->get_type();
 	std::string content = data->get_data();
 
-	if (type == operand_number) {
+	switch (type) {
+	case operand_number:
 		printf("%g", std::stod(content));
-	}
-	else if (type == operand_vector) {
+		break;
+	case operand_vector:
 		std::cout << "(";
 		for (int i = 0; i < data->get_array_data().size(); i++) {
 			print_operand(data->get_array_data()[i]);
@@ -127,9 +174,20 @@ void FunctionFrame::print_operand(Operand* data) {
 			}
 		}
 		std::cout << ")";
-	}
-	else {
+		break;
+	case operand_array:
+		std::cout << "[";
+		for (int i = 0; i < data->get_array_data().size(); i++) {
+			print_operand(data->get_array_data()[i]);
+			if (i != data->get_array_data().size() - 1) {
+				std::cout << ",";
+			}
+		}
+		std::cout << "]";
+		break;
+	default:
 		std::cout << content;
+		break;
 	}
 }
 
@@ -697,10 +755,10 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			this->stack->pop();
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 
-			if (caller_class->member_variables.find(id) != caller_class->member_variables.end())
-				caller_class->member_variables[id] = peek;
-			else
+			if (caller_class->member_variables.find(id) == caller_class->member_variables.end()) {
+				//std::cout << "new variable declared." << op->get_operands()[0]->identifier << std::endl;
 				caller_class->member_variables.insert(std::make_pair(id, peek));
+			}
 
 			break;
 		}
@@ -826,6 +884,17 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* found_op = caller_class->member_variables[id];
 
 			this->stack->push(create_op_address_operand(found_op));
+			break;
+		}
+
+		case op_call_class: {
+			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
+			int parameter_count = std::stoi(op->get_operands()[1]->identifier);
+
+			CMFunction* code_memory = caller_class->get_cm_class()->member_functions->find(id)->second;
+
+			run_function(vm, nullptr, this, code_memory, parameter_count);
+
 			break;
 		}
 

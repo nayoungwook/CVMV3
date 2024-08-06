@@ -4,6 +4,10 @@ CMClass* Memory::get_cm_class() {
 	return cm_class;
 }
 
+void Memory::set_cm_class(CMClass* cm_class) {
+	this->cm_class = cm_class;
+}
+
 Memory::Memory(CMClass* cm_class) : cm_class(cm_class) {
 
 }

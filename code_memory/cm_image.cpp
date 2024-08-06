@@ -19,7 +19,12 @@ void load_images(std::queue<std::pair<std::string, std::string>>& load_queue, st
 
 		std::pair<unsigned int, unsigned int> result = create_texture_id(q.second, 100, 100, 0);
 
-		resources.insert(std::make_pair(q.first, new CMImage(result.first, result.second)));
+		if (resources.find(q.first) == resources.end()) {
+			resources.insert(std::make_pair(q.first, new CMImage(result.first, result.second)));
+		}
+		else {
+			resources[q.first] = new CMImage(result.first, result.second);
+		}
 	}
 }
 

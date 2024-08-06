@@ -177,16 +177,18 @@ Operator* get_operator(std::unordered_map<std::string, unsigned int>* label_id, 
 
 		operands.push_back(pull_token(tokens)); // vector size
 	}
-	else if (token->identifier == "@CALL_BUILTIN" || token->identifier == "@CALL_GLOBAL" || token->identifier == "@CALL_ATTR") {
+	else if (token->identifier == "@CALL_BUILTIN" || token->identifier == "@CALL_GLOBAL" || token->identifier == "@CALL_ATTR" || token->identifier == "@CALL_CLASS") {
 		if (token->identifier == "@CALL_BUILTIN")
 			type = op_call_builtin;
 		else if (token->identifier == "@CALL_GLOBAL")
 			type = op_call_global;
 		else if (token->identifier == "@CALL_ATTR")
 			type = op_call_attr;
+		else if (token->identifier == "@CALL_CLASS")
+			type = op_call_class;
 
 		operands.push_back(pull_token(tokens)); // id
-		pull_token(tokens);
+		pull_token(tokens); // ( name )
 		operands.push_back(pull_token(tokens)); // parameter_count
 	}
 	else if (token->identifier == "@KEYBOARD") {
@@ -214,13 +216,12 @@ CodeMemory* get_code_memory(std::queue<std::pair<std::string, std::string>>& loa
 
 		std::vector<std::string> params;
 
+		std::string return_type = pull_token(tokens)->identifier;
+
 		while (tokens[0]->identifier != "{") {
+			pull_token(tokens); // name
 			params.push_back(pull_token(tokens)->identifier);
 		}
-
-		std::string return_type = params[params.size() - 1];
-
-		params.erase(params.begin() + params.size() - 1);
 
 		pull_token(tokens); // {
 
