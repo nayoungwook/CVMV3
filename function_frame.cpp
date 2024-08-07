@@ -135,7 +135,8 @@ void FunctionFrame::builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, 
 	float _x = std::stof(extract_value_of_opernad(position)->get_array_data()[0]->get_data()),
 		_y = std::stof(extract_value_of_opernad(position)->get_array_data()[1]->get_data());
 
-	float f_width = std::stof(extract_value_of_opernad(width)->get_data()), f_height = std::stof(extract_value_of_opernad(height)->get_data());
+	float f_width = std::stof(extract_value_of_opernad(width)->get_data()),
+		f_height = std::stof(extract_value_of_opernad(height)->get_data());
 
 	Memory* shader_memory = reinterpret_cast<Memory*>(std::stoull(vm->global_area[SHADER_MEMORY]->get_data()));
 	CMShader* shader_cm = (CMShader*)shader_memory->get_cm_class();
