@@ -310,7 +310,8 @@ Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, double (*cal)(doub
 
 	std::vector<Operand*> calculated_result;
 
-	for (int i = 0; i < (int)min(lhs_vector->get_array_data().size(), rhs_vector->get_array_data().size()); i++) {
+	size_t min_vector_size = (size_t)min(lhs_vector->get_array_data().size(), rhs_vector->get_array_data().size());
+	for (int i = 0; i < min_vector_size; i++) {
 		double lhs_v = std::stod(lhs_vector->get_array_data()[i]->get_data());
 		double rhs_v = std::stod(rhs_vector->get_array_data()[i]->get_data());
 
@@ -760,6 +761,9 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				//std::cout << "new variable declared." << op->get_operands()[0]->identifier << std::endl;
 				caller_class->member_variables.insert(std::make_pair(id, peek));
 			}
+			else {
+				caller_class->member_variables[id] = peek;
+			}
 
 			break;
 		}
@@ -894,7 +898,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			CMFunction* code_memory = caller_class->get_cm_class()->member_functions->find(id)->second;
 
-			run_function(vm, nullptr, this, code_memory, parameter_count);
+			run_function(vm, caller_class, this, code_memory, parameter_count);
 
 			break;
 		}
