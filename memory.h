@@ -9,6 +9,7 @@ private:
 	Memory* parent_memory = nullptr;
 public:
 	std::unordered_map<unsigned int, Operand*> member_variables;
+	std::unordered_map<unsigned int, std::string> member_variable_names;
 	void store_parent_memory(Memory* memory);
 	Memory* get_parent_memory();
 	CMClass* get_cm_class();

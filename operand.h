@@ -28,4 +28,6 @@ public:
 	operand_type get_type() const;
 	Operand(std::string const& data, operand_type type);
 	Operand(std::vector<Operand*>& array_data, operand_type type);
+
+	std::string variable_name = "";
 };

@@ -422,7 +422,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		Operand* texture_op = caller_class->member_variables[OBJECT_SPRITE];
 
 		if (texture_op->get_type() == operand_null) {
-			std::cout << "error at function_frame\.cpp Debug ID : 01x | texture is not texture memory." << std::endl;
+			std::cout << "error at function_frame\.cpp Debug ID : 01x | texture is null." << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
@@ -744,10 +744,14 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			this->stack->pop();
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 
+			std::string name = op->get_operands()[1]->identifier;
+
 			if (vm->global_area.find(id) != vm->global_area.end())
 				vm->global_area[id] = peek;
 			else
 				vm->global_area.insert(std::make_pair(id, peek));
+
+			vm->global_area[id]->variable_name = name;
 
 			break;
 		}
@@ -757,12 +761,18 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			this->stack->pop();
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 
+			std::string name = op->get_operands()[1]->identifier;
+
+			peek->variable_name = name;
+
 			if (caller_class->member_variables.find(id) == caller_class->member_variables.end()) {
 				//std::cout << "new variable declared." << op->get_operands()[0]->identifier << std::endl;
 				caller_class->member_variables.insert(std::make_pair(id, peek));
+				caller_class->member_variable_names.insert(std::make_pair(id, op->get_operands()[1]->identifier));
 			}
 			else {
 				caller_class->member_variables[id] = peek;
+				caller_class->member_variable_names[id] = op->get_operands()[1]->identifier;
 			}
 
 			break;
@@ -773,10 +783,16 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			this->stack->pop();
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 
-			if (local_area.find(id) != local_area.end())
+			std::string name = "";
+
+			if (local_area.find(id) != local_area.end()) {
 				local_area[id] = peek;
+				name = local_area[id]->variable_name;
+			}
 			else
 				local_area.insert(std::make_pair(id, peek));
+
+			local_area[id]->variable_name = name;
 
 			break;
 		}
@@ -794,11 +810,15 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			if (op_type == operand_address) {
 				Memory* attr_memory = reinterpret_cast<Memory*>(std::stoull(attr_target->get_data()));
+				std::string name = "";
 
-				if (attr_memory->member_variables.find(store_id) != attr_memory->member_variables.end())
+				if (attr_memory->member_variables.find(store_id) != attr_memory->member_variables.end()) {
+					name = attr_memory->member_variables[store_id]->variable_name;
 					attr_memory->member_variables.erase(attr_memory->member_variables.find(store_id));
+				}
 
 				attr_memory->member_variables.insert(std::make_pair(store_id, store_value));
+				attr_memory->member_variables[store_id]->variable_name = name;
 			}
 			else if (op_type == operand_vector) {
 				Operand* vector_op = attr_target;
@@ -887,6 +907,10 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		case op_load_class: {
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 			Operand* found_op = caller_class->member_variables[id];
+
+			if (found_op == nullptr) {
+				CHESTNUT_LOG(L"Unexpected critical error has been occured. at loadding member variable", log_level::log_error);
+			}
 
 			this->stack->push(create_op_address_operand(found_op));
 			break;

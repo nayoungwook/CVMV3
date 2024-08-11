@@ -38,7 +38,7 @@ Operator* get_operator(std::unordered_map<std::string, unsigned int>* label_id, 
 		type = op_store_class;
 
 		operands.push_back(pull_token(tokens)); // id
-		pull_token(tokens);
+		operands.push_back(pull_token(tokens)); // ( name )
 	}
 	else if (token->identifier == "@STORE_ATTR") {
 		type = op_store_attr;

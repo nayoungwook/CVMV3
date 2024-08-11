@@ -1,5 +1,16 @@
 #include "cm_window.h"
 
+void register_render_function_code(CMClass* cm_c) {
+	unsigned int render_function_id = ((CMObject*)cm_c)->get_render_function_id();
+	std::vector<Operator*> temp1;
+	std::vector<std::string> temp2;
+	CMFunction* render_function = new CMRender(temp1, render_function_id, temp2);
+	if (cm_c->member_functions->find(render_function_id) != cm_c->member_functions->end())
+		cm_c->member_functions->erase(cm_c->member_functions->find(render_function_id));
+
+	cm_c->member_functions->insert(std::make_pair(render_function_id, render_function));
+}
+
 void register_source_code(CVM* vm, std::string const& loaded_file) {
 	std::string name = loaded_file;
 	std::wstring wname;
@@ -43,23 +54,47 @@ void register_source_code(CVM* vm, std::string const& loaded_file) {
 
 			for (int i = 0; i < vm->heap_area.size(); i++) {
 				if (vm->heap_area[i]->get_cm_class()->name == cm_c->name) {
-					CMFunction* initializer = vm->heap_area[i]->get_cm_class()->initializer;
-					run_function(vm, vm->heap_area[i], nullptr, initializer, 0);
+					Memory* target_memory = vm->heap_area[i];
 
-					vm->heap_area[i]->set_cm_class(cm_c);
+					// backing up memories for check already declared memory ( with name. )
+					std::unordered_map<std::string, Operand*> backup_members;
+					std::unordered_map<unsigned int, Operand*>::iterator member_variable_iterator;
 
-					if (cm_c->get_type() == code_object) {
-						unsigned int render_function_id = ((CMObject*)cm_c)->get_render_function_id();
-						std::vector<Operator*> temp1;
-						std::vector<std::string> temp2;
-						CMFunction* render_function = new CMRender(temp1, render_function_id, temp2);
-						if (cm_c->member_functions->find(render_function_id) != cm_c->member_functions->end())
-							cm_c->member_functions->erase(cm_c->member_functions->find(render_function_id));
-
-						cm_c->member_functions->insert(std::make_pair(render_function_id, render_function));
+					for (member_variable_iterator = target_memory->member_variables.begin();
+						member_variable_iterator != target_memory->member_variables.end(); member_variable_iterator++) {
+						backup_members.insert(std::make_pair(member_variable_iterator->second->variable_name, member_variable_iterator->second));
 					}
+
+					// change class code memory and run initialize function for declare new variables.
+					target_memory->set_cm_class(cm_c);
+
+					CMFunction* initializer = target_memory->get_cm_class()->initializer;
+					run_function(vm, target_memory, nullptr, initializer, 0);
+
+					// re-register already declared memories
+					std::unordered_map<unsigned int, Operand*>::iterator member_variable_name_iterator;
+					for (member_variable_name_iterator = target_memory->member_variables.begin();
+						member_variable_name_iterator != target_memory->member_variables.end();
+						member_variable_name_iterator++) {
+						if (backup_members.find(member_variable_name_iterator->second->variable_name) != backup_members.end()) {
+							Operand* changed_memory = member_variable_name_iterator->second;
+							member_variable_name_iterator->second = backup_members[member_variable_name_iterator->second->variable_name];
+						}
+					}
+
+					if (cm_c->get_type() == code_object)
+						register_render_function_code(cm_c);
 				}
 			}
+
+			std::wstring w_object_name;
+			w_object_name.assign(cm_c->name.begin(), cm_c->name.end());
+			if (cm_c->get_type() == code_object)
+				CHESTNUT_LOG(L"object reloaded : " + w_object_name, log_level::log_okay);
+			else if (cm_c->get_type() == code_scene)
+				CHESTNUT_LOG(L"scene reloaded : " + w_object_name, log_level::log_okay);
+			else if (cm_c->get_type() == code_class)
+				CHESTNUT_LOG(L"class reloaded : " + w_object_name, log_level::log_okay);
 		}
 	}
 
@@ -86,7 +121,7 @@ void window_loop(CVM* vm, SDL_Window* window) {
 				std::string str_path;
 				str_path.assign(path.begin(), path.end());
 
-				if (str_path[0] == '#') break;
+				if (!(std::isalpha(str_path[0]) || str_path[0] == '_')) break;
 
 				if (str_path.length() >= 3) {
 					for (int i = 3; i >= 0; i--) {
@@ -155,6 +190,12 @@ void window_loop(CVM* vm, SDL_Window* window) {
 			}
 		}
 
+		while (!changed_files.empty()) {
+			CHESTNUT_LOG(L"File refreshed", log_level::log_default);
+			register_source_code(vm, changed_files.front());
+			changed_files.pop();
+		}
+
 		glClearColor(0.05f, 0.05f, 0.06f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
@@ -175,12 +216,6 @@ void window_loop(CVM* vm, SDL_Window* window) {
 				current_scene_cm->member_functions->find(render_funciton_id)->second;
 			run_function(vm, vm->current_scene_memory, nullptr, render_function, 0);
 
-		}
-
-		while (!changed_files.empty()) {
-			CHESTNUT_LOG(L"File refreshed", log_level::log_default);
-			register_source_code(vm, changed_files.front());
-			changed_files.pop();
 		}
 
 		SDL_GL_SwapWindow(window);

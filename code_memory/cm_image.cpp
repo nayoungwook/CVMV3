@@ -17,7 +17,7 @@ void load_images(std::queue<std::pair<std::string, std::string>>& load_queue, st
 		std::pair<std::string, std::string> q = load_queue.front();
 		load_queue.pop();
 
-		std::pair<unsigned int, unsigned int> result = create_texture_id(q.second, 100, 100, 0);
+		std::pair<unsigned int, unsigned int> result = create_texture_id(q.second, 128, 128, 0);
 
 		if (resources.find(q.first) == resources.end()) {
 			resources.insert(std::make_pair(q.first, new CMImage(result.first, result.second)));
@@ -39,7 +39,7 @@ std::pair<unsigned int, unsigned int> create_texture_id(std::string const& path,
 	unsigned int texture;
 
 	bytes = stbi_load(path.c_str(), &width, &height, &channel, 4);
-
+	
 	if (!bytes) {
 		std::cout << "Error! stb_image failed to load image : " << path << std::endl;
 		exit(1);

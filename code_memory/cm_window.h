@@ -31,3 +31,4 @@ void load_default_shader(CVM* vm);
 
 static std::queue<std::string> changed_files;
 void register_source_code(CVM* machine, std::string const& loaded_file);
+void register_render_function_code(CMClass* cm_c);
