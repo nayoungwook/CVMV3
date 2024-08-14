@@ -115,7 +115,6 @@ void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CM
 
 void FunctionFrame::builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 	int parameter_count = std::stoi(op->get_operands()[1]->identifier);
-
 	Operand* image = this->stack->peek(); // string data.
 	this->stack->pop();
 
@@ -132,8 +131,10 @@ void FunctionFrame::builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, 
 	width = this->stack->peek(), this->stack->pop();
 	height = this->stack->peek(), this->stack->pop();
 
-	float _x = std::stof(extract_value_of_opernad(position)->get_array_data()[0]->get_data()),
-		_y = std::stof(extract_value_of_opernad(position)->get_array_data()[1]->get_data());
+	std::vector<Operand*> position_array = extract_value_of_opernad(position)->get_array_data();
+
+	float _x = std::stof(position_array[0]->get_data()),
+		_y = std::stof(position_array[1]->get_data());
 
 	float f_width = std::stof(extract_value_of_opernad(width)->get_data()),
 		f_height = std::stof(extract_value_of_opernad(height)->get_data());
@@ -148,6 +149,7 @@ void FunctionFrame::builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, 
 		this->stack->pop();
 
 		f_rotation = std::stof(extract_value_of_opernad(rotation)->get_data());
+		delete rotation;
 	}
 
 	render_image(shader_cm, image_data->get_texture(), image_data->get_vao(), _x, _y, f_width, f_height, f_rotation);
@@ -446,8 +448,12 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 		CMImage* image_data = image_data_iter->second;
 
-		return 	render_image(shader_cm, image_data->get_texture(), image_data->get_vao(),
+
+		render_image(shader_cm, image_data->get_texture(), image_data->get_vao(),
 			_x, _y, f_width, f_height, f_rotation);
+
+		delete this;
+		return;
 	}
 
 	std::vector<Operator*> operators = this->code_memory->get_operators();
@@ -740,7 +746,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_store_global: {
-			Operand* peek = copy_operand(extract_value_of_opernad(this->stack->peek()));
+			Operand* peek_op = this->stack->peek();
+			Operand* peek = copy_operand(extract_value_of_opernad(peek_op));
 			this->stack->pop();
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 
@@ -753,11 +760,14 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			vm->global_area[id]->variable_name = name;
 
+			delete peek_op;
+
 			break;
 		}
 
 		case op_store_class: {
-			Operand* peek = copy_operand(extract_value_of_opernad(this->stack->peek()));
+			Operand* peek_op = this->stack->peek();
+			Operand* peek = copy_operand(extract_value_of_opernad(peek_op));
 			this->stack->pop();
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 
@@ -771,21 +781,26 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				caller_class->member_variable_names.insert(std::make_pair(id, op->get_operands()[1]->identifier));
 			}
 			else {
+				delete caller_class->member_variables[id];
 				caller_class->member_variables[id] = peek;
 				caller_class->member_variable_names[id] = op->get_operands()[1]->identifier;
 			}
+
+			delete peek_op;
 
 			break;
 		}
 
 		case op_store_local: {
-			Operand* peek = copy_operand(extract_value_of_opernad(this->stack->peek()));
+			Operand* peek_op = this->stack->peek();
+			Operand* peek = copy_operand(extract_value_of_opernad(peek_op));
 			this->stack->pop();
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 
 			std::string name = "";
 
 			if (local_area.find(id) != local_area.end()) {
+				delete local_area[id];
 				local_area[id] = peek;
 				name = local_area[id]->variable_name;
 			}
@@ -794,14 +809,18 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			local_area[id]->variable_name = name;
 
+			delete peek_op;
+
 			break;
 		}
 
 		case op_store_attr: {
-			Operand* attr_target = extract_value_of_opernad(this->stack->peek());
+			Operand* attr_target_op = this->stack->peek();
+			Operand* attr_target = extract_value_of_opernad(attr_target_op);
 			this->stack->pop();
 
-			Operand* store_value = copy_operand(extract_value_of_opernad(this->stack->peek()));
+			Operand* store_value_op = this->stack->peek();
+			Operand* store_value = copy_operand(extract_value_of_opernad(store_value_op));
 			this->stack->pop();
 
 			unsigned int store_id = std::stoi(op->get_operands()[0]->identifier);
@@ -814,6 +833,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 				if (attr_memory->member_variables.find(store_id) != attr_memory->member_variables.end()) {
 					name = attr_memory->member_variables[store_id]->variable_name;
+					delete attr_memory->member_variables[store_id];
 					attr_memory->member_variables.erase(attr_memory->member_variables.find(store_id));
 				}
 
@@ -822,9 +842,12 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			}
 			else if (op_type == operand_vector) {
 				Operand* vector_op = attr_target;
-
+				delete vector_op->get_array_data()[store_id];
 				vector_op->get_array_data()[store_id] = store_value;
 			}
+
+			delete attr_target_op;
+			delete store_value_op;
 
 			break;
 		}
@@ -965,7 +988,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_load_attr: {
-			Operand* target = extract_value_of_opernad(this->stack->peek());
+			Operand* target_op = this->stack->peek();
+			Operand* target = extract_value_of_opernad(target_op);
 			this->stack->pop();
 			operand_type type = target->get_type();
 			Operand* found_op = nullptr;
@@ -982,6 +1006,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			this->stack->push(create_op_address_operand(found_op));
 
+			delete target_op;
 			break;
 		}
 

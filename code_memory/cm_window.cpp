@@ -162,8 +162,8 @@ void window_loop(CVM* vm, SDL_Window* window) {
 	);
 
 	while (_running) {
-		//	if (current_ticks - backup_ticks != 0)
-		//		std::cout << 1000 / (current_ticks - backup_ticks) << std::endl;
+//		if (current_ticks - backup_ticks != 0)
+//			std::cout << 1000 / (current_ticks - backup_ticks) << std::endl;
 
 		backup_ticks = current_ticks;
 		tick_count = SDL_GetTicks();
