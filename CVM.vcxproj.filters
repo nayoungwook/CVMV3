@@ -90,6 +90,9 @@
     <ClCompile Include="sys_util.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="code_memory\cm_camera.cpp">
+      <Filter>소스 파일\code_memory</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cvm.h">
@@ -160,6 +163,9 @@
     </ClInclude>
     <ClInclude Include="FileWatcher.hpp">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="code_memory\cm_camera.h">
+      <Filter>헤더 파일\code_memory</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

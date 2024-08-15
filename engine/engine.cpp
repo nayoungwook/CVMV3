@@ -20,7 +20,7 @@ void initialize_engine() {
 
 }
 
-void render_image(CMShader* shader, unsigned int texture_id, unsigned int vao, float x, float y, float width, float height, float rotation) {
+void render_image(CMShader* shader, unsigned int texture_id, unsigned int vao, float x, float y, float width, float height, float rotation, int proj_width, int proj_height) {
 
 	SDL_Point rotation_center = {
 		(int)width / 2, (int)height / 2
@@ -31,7 +31,7 @@ void render_image(CMShader* shader, unsigned int texture_id, unsigned int vao, f
 	glBindTexture(GL_TEXTURE_2D, texture_id);
 
 	shader->set_matrix_uniform("uWorldTransform", world_transform);
-	shader->set_matrix_uniform("uViewProj", Matrix4::CreateSimpleViewProj(800, 600));
+	shader->set_matrix_uniform("uViewProj", Matrix4::CreateSimpleViewProj(proj_width, proj_height));
 
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);

@@ -39,6 +39,7 @@ Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, double (*cal)(doub
 Memory* create_object(CVM* vm, CMClass* code_memory, FunctionFrame* frame, unsigned int constructor_parameter_count);
 
 const std::string get_type_string_of_operand(Operand* op);
+void check_type_for_store(CVM* vm, std::string const& type1, std::string const& type2);
 
 double cal_add(double lhs, double rhs);
 double cal_sub(double lhs, double rhs);

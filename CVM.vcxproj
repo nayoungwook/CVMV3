@@ -137,6 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="code_memory\cm_camera.cpp" />
     <ClCompile Include="code_memory\cm_class.cpp" />
     <ClCompile Include="code_memory\cm_function.cpp" />
     <ClCompile Include="code_memory\cm_image.cpp" />
@@ -160,6 +161,7 @@
     <ClCompile Include="sys_util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="code_memory\cm_camera.h" />
     <ClInclude Include="code_memory\cm_class.h" />
     <ClInclude Include="code_memory\cm_function.h" />
     <ClInclude Include="code_memory\cm_image.h" />

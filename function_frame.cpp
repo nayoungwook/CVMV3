@@ -152,7 +152,7 @@ void FunctionFrame::builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, 
 		delete rotation;
 	}
 
-	render_image(shader_cm, image_data->get_texture(), image_data->get_vao(), _x, _y, f_width, f_height, f_rotation);
+	render_image(shader_cm, image_data->get_texture(), image_data->get_vao(), _x, _y, f_width, f_height, f_rotation, vm->proj_width, vm->proj_height);
 
 	delete image;
 	delete position;
@@ -213,7 +213,7 @@ void FunctionFrame::builtin_window(Operator* op, CVM* vm, FunctionFrame* caller,
 	int parameter_count = std::stoi(op->get_operands()[1]->identifier);
 
 	std::string title;
-	int width, height;
+	int width = 0, height = 0;
 
 	for (int i = 0; i < parameter_count; i++) {
 		Operand* _data = this->stack->peek();
@@ -225,6 +225,9 @@ void FunctionFrame::builtin_window(Operator* op, CVM* vm, FunctionFrame* caller,
 		if (i == 0) title = data->get_data();
 		else if (i == 1) width = (int)std::stod(data->get_data());
 		else if (i == 2) height = (int)std::stod(data->get_data());
+
+		vm->proj_width = width;
+		vm->proj_height = height;
 
 		delete _data;
 	}
@@ -413,6 +416,14 @@ bool operand_compare(Operand* op1, Operand* op2) {
 	return op1 == op2;
 }
 
+void check_type_for_store(CVM* vm, std::string const& type1, std::string const& type2) {
+	if (type1 == type2) return;
+
+	bool both_object = true;
+
+
+}
+
 void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 	if (this->get_code_memory()->get_type() == code_render) {
@@ -448,9 +459,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 		CMImage* image_data = image_data_iter->second;
 
-
 		render_image(shader_cm, image_data->get_texture(), image_data->get_vao(),
-			_x, _y, f_width, f_height, f_rotation);
+			_x, _y, f_width, f_height, f_rotation, vm->proj_width, vm->proj_height);
 
 		delete this;
 		return;
@@ -463,7 +473,6 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		operator_type type = op->get_type();
 
 		switch (type) {
-
 		case op_push_string: {
 			std::string data = op->get_operands()[0]->identifier;
 			data = data.substr(1, data.size() - 2);
@@ -781,7 +790,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				caller_class->member_variable_names.insert(std::make_pair(id, op->get_operands()[1]->identifier));
 			}
 			else {
-				delete caller_class->member_variables[id];
+	//			delete caller_class->member_variables[id];
 				caller_class->member_variables[id] = peek;
 				caller_class->member_variable_names[id] = op->get_operands()[1]->identifier;
 			}
@@ -798,16 +807,21 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 
 			std::string name = "";
+			std::string type = "";
 
 			if (local_area.find(id) != local_area.end()) {
 				delete local_area[id];
 				local_area[id] = peek;
 				name = local_area[id]->variable_name;
+				type = get_type_string_of_operand(local_area[id]);
 			}
-			else
+			else {
 				local_area.insert(std::make_pair(id, peek));
+			}
 
 			local_area[id]->variable_name = name;
+
+			check_type_for_store(vm, get_type_string_of_operand(peek), type);
 
 			delete peek_op;
 

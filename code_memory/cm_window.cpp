@@ -268,4 +268,5 @@ CMWindow::CMWindow(CVM* vm, std::string const& title, int width, int height)
 	load_default_shader(vm);
 
 	window_loop(vm, this->_window);
+
 }

@@ -38,5 +38,7 @@ public:
 
 	std::unordered_set<std::string> key_data;
 
+	int proj_width, proj_height;
+
 	static Memory* current_scene_memory;
 };
