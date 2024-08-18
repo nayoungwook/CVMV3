@@ -29,6 +29,6 @@ SDL_Window* create_window(std::string const& title, int width, int height);
 void window_loop(CVM* vm, SDL_Window* window);
 void load_default_shader(CVM* vm);
 
-static std::queue<std::string> changed_files;
+static std::vector<std::string> changed_files;
 void register_source_code(CVM* machine, std::string const& loaded_file);
 void register_render_function_code(CMClass* cm_c);

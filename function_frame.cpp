@@ -790,7 +790,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				caller_class->member_variable_names.insert(std::make_pair(id, op->get_operands()[1]->identifier));
 			}
 			else {
-	//			delete caller_class->member_variables[id];
+				delete caller_class->member_variables[id];
 				caller_class->member_variables[id] = peek;
 				caller_class->member_variable_names[id] = op->get_operands()[1]->identifier;
 			}

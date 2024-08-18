@@ -52,43 +52,19 @@ void register_source_code(CVM* vm, std::string const& loaded_file) {
 			// find if class already exist.
 			vm->global_class.insert(std::make_pair(cm_c->get_id(), cm_c));
 
+			// erorr with the update.
+			/*
+			힙 영역을 모두 탐색 후 업데이트 하면,
+			해당 메모리를 참조하고 있던 다른 메모리의 상태가 좆됨.
+			힙 탐색 말고 다른 방식으로 코드를 업데이트 해야할듯 함.
+			코드 메모리의 값 말고 주소를 계속 참조하는 방식으로 바꿔야 할듯 함.
+			*/
 			for (int i = 0; i < vm->heap_area.size(); i++) {
-				if (vm->heap_area[i]->get_cm_class()->name == cm_c->name) {
-					Memory* target_memory = vm->heap_area[i];
-
-					// backing up memories for check already declared memory ( with name. )
-					std::unordered_map<std::string, Operand*> backup_members;
-					std::unordered_map<unsigned int, Operand*>::iterator member_variable_iterator;
-
-					for (member_variable_iterator = target_memory->member_variables.begin();
-						member_variable_iterator != target_memory->member_variables.end(); member_variable_iterator++) {
-						backup_members.insert(std::make_pair(member_variable_iterator->second->variable_name, member_variable_iterator->second));
-					}
-
-					// change class code memory and run initialize function for declare new variables.
-					target_memory->set_cm_class(cm_c);
-
-					CMFunction* initializer = target_memory->get_cm_class()->initializer;
-					run_function(vm, target_memory, nullptr, initializer, 0);
-
-					// re-register already declared memories
-					std::unordered_map<unsigned int, Operand*>::iterator member_variable_name_iterator;
-					for (member_variable_name_iterator = target_memory->member_variables.begin();
-						member_variable_name_iterator != target_memory->member_variables.end();
-						member_variable_name_iterator++) {
-						if (backup_members.find(member_variable_name_iterator->second->variable_name) != backup_members.end()) {
-							Operand* changed_memory = member_variable_name_iterator->second;
-							member_variable_name_iterator->second = backup_members[member_variable_name_iterator->second->variable_name];
-						}
-					}
-
-					if (cm_c->get_type() == code_object)
-						register_render_function_code(cm_c);
-				}
 			}
 
 			std::wstring w_object_name;
 			w_object_name.assign(cm_c->name.begin(), cm_c->name.end());
+
 			if (cm_c->get_type() == code_object)
 				CHESTNUT_LOG(L"object reloaded : " + w_object_name, log_level::log_okay);
 			else if (cm_c->get_type() == code_scene)
@@ -142,7 +118,8 @@ void window_loop(CVM* vm, SDL_Window* window) {
 
 				if (is_cir) {
 					CHESTNUT_LOG(L"cir File modified : " + path, log_level::log_default);
-					changed_files.push(std::string(path.begin(), path.end()));
+
+					changed_files.push_back(std::string(path.begin(), path.end()));
 				}
 
 				if (is_cn) {
@@ -162,8 +139,8 @@ void window_loop(CVM* vm, SDL_Window* window) {
 	);
 
 	while (_running) {
-//		if (current_ticks - backup_ticks != 0)
-//			std::cout << 1000 / (current_ticks - backup_ticks) << std::endl;
+		//		if (current_ticks - backup_ticks != 0)
+		//			std::cout << 1000 / (current_ticks - backup_ticks) << std::endl;
 
 		backup_ticks = current_ticks;
 		tick_count = SDL_GetTicks();
@@ -193,7 +170,7 @@ void window_loop(CVM* vm, SDL_Window* window) {
 		while (!changed_files.empty()) {
 			CHESTNUT_LOG(L"File refreshed", log_level::log_default);
 			register_source_code(vm, changed_files.front());
-			changed_files.pop();
+			changed_files.erase(changed_files.begin());
 		}
 
 		glClearColor(0.05f, 0.05f, 0.06f, 1.0f);
