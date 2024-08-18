@@ -1,6 +1,8 @@
 #include "operand.h"
 
 Operand::Operand(std::string const& data, operand_type type) : data(data), type(type) {
+	std::vector<Operand*> _v;
+
 	if (type == operand_number) {
 		if ((int)std::stod(data) == std::stod(data)) {
 			this->data = std::to_string((int)std::stod(data));
@@ -11,8 +13,8 @@ Operand::Operand(std::string const& data, operand_type type) : data(data), type(
 Operand::~Operand() {
 }
 
-Operand::Operand(std::vector<Operand*>& array_data, operand_type type) : array_data(array_data), type(type) {
-
+Operand::Operand(std::vector<Operand*>& array_data, operand_type type) : type(type) {
+	this->array_data = array_data;
 }
 
 std::vector<Operand*>& Operand::get_array_data() {

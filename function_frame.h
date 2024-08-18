@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdio>
+#include <random>
 #include "code_memory/cm_function.h"
 #include "code_memory/cm_window.h"
 #include "sys_util.h"
@@ -28,6 +29,13 @@ public:
 	void builtin_window(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 	void builtin_load_scene(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 	void builtin_background(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+	void builtin_random(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+	void builtin_sin(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+	void builtin_cos(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+	void builtin_tan(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+	void builtin_atan(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+	void builtin_abs(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+	void builtin_random_range(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 };
 
 Operand* create_address_operand(Memory* op);

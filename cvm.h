@@ -21,6 +21,13 @@ static const int BUILTIN_WINDOW = 1;
 static const int BUILTIN_LOAD_SCENE = 2;
 static const int BUILTIN_IMAGE = 3;
 static const int BUILTIN_BACKGROUND= 4;
+static const int BUILTIN_RANDOM= 5;
+static const int BUILTIN_SIN= 6;
+static const int BUILTIN_COS= 7;
+static const int BUILTIN_TAN= 8;
+static const int BUILTIN_ATAN= 9;
+static const int BUILTIN_ABS= 10;
+static const int BUILTIN_RANDOM_RANGE= 11;
 
 class CVM {
 public:

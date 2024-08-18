@@ -18,6 +18,7 @@ FunctionFrame::~FunctionFrame() {
 }
 
 Operand* copy_operand(Operand* op) {
+
 	Operand* copied_op = nullptr;
 
 	op = extract_value_of_opernad(op);
@@ -38,7 +39,7 @@ inline Operand* extract_value_of_opernad(Operand* op) {
 
 	if (op->get_type() == operand_op_address) {
 		while (result->get_type() == operand_op_address) {
-			result = reinterpret_cast<Operand*>(std::stoull(op->get_data()));
+			result = reinterpret_cast<Operand*>(std::stoull(result->get_data()));
 		}
 	}
 
@@ -286,6 +287,101 @@ void FunctionFrame::builtin_background(Operator* op, CVM* vm, FunctionFrame* cal
 	delete _b;
 }
 
+void FunctionFrame::builtin_random(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	std::random_device rd;
+
+	std::mt19937 gen(rd());
+
+	std::uniform_int_distribution<int> dis(0, 99);
+
+	this->stack->push(new Operand(std::to_string(dis(gen)), operand_number));
+}
+
+void FunctionFrame::builtin_sin(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	Operand* _v = this->stack->peek();
+	this->stack->pop();
+
+	Operand* v = extract_value_of_opernad(_v);
+
+	this->stack->push(new Operand(std::to_string(
+		std::sin(std::stof(v->get_data()))), operand_number));
+
+	delete _v;
+}
+
+void FunctionFrame::builtin_cos(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	Operand* _v = this->stack->peek();
+	this->stack->pop();
+
+	Operand* v = extract_value_of_opernad(_v);
+
+	this->stack->push(new Operand(std::to_string(
+		std::cos(std::stof(v->get_data()))), operand_number));
+
+	delete _v;
+}
+
+void FunctionFrame::builtin_tan(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	Operand* _v = this->stack->peek();
+	this->stack->pop();
+
+	Operand* v = extract_value_of_opernad(_v);
+
+	this->stack->push(new Operand(std::to_string(
+		std::tan(std::stof(v->get_data()))), operand_number));
+
+	delete _v;
+}
+
+void FunctionFrame::builtin_atan(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	Operand* _v1 = this->stack->peek();
+	this->stack->pop();
+	Operand* _v2 = this->stack->peek();
+	this->stack->pop();
+
+	Operand* v1 = extract_value_of_opernad(_v1);
+	Operand* v2 = extract_value_of_opernad(_v2);
+
+	this->stack->push(new Operand(std::to_string(
+		std::atan2(std::stof(v1->get_data()), std::stof(v2->get_data()))), operand_number));
+
+	delete _v1;
+	delete _v2;
+}
+
+void FunctionFrame::builtin_abs(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	Operand* _v = this->stack->peek();
+	this->stack->pop();
+
+	Operand* v = extract_value_of_opernad(_v);
+
+	this->stack->push(new Operand(std::to_string(
+		std::abs(std::stof(v->get_data()))), operand_number));
+
+	delete _v;
+}
+
+void FunctionFrame::builtin_random_range(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	Operand* _v1 = this->stack->peek();
+	this->stack->pop();
+	Operand* _v2 = this->stack->peek();
+	this->stack->pop();
+
+	Operand* v1 = extract_value_of_opernad(_v1);
+	Operand* v2 = extract_value_of_opernad(_v2);
+
+	std::random_device rd;
+
+	std::mt19937 gen(rd());
+
+	std::uniform_int_distribution<int> dis(std::stof(v1->get_data()), std::stof(v2->get_data()));
+
+	this->stack->push(new Operand(std::to_string(dis(gen)), operand_number));
+
+	delete _v1;
+	delete _v2;
+}
+
 void FunctionFrame::run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 	unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 	int parameter_count = std::stoi(op->get_operands()[1]->identifier);
@@ -303,8 +399,29 @@ void FunctionFrame::run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Me
 	case BUILTIN_IMAGE: // image
 		this->builtin_image(op, vm, caller, caller_class);
 		break;
-	case BUILTIN_BACKGROUND: // image
+	case BUILTIN_BACKGROUND: // background
 		this->builtin_background(op, vm, caller, caller_class);
+		break;
+	case BUILTIN_RANDOM: // random
+		this->builtin_random(op, vm, caller, caller_class);
+		break;
+	case BUILTIN_SIN: // sin
+		this->builtin_sin(op, vm, caller, caller_class);
+		break;
+	case BUILTIN_COS: // cos
+		this->builtin_cos(op, vm, caller, caller_class);
+		break;
+	case BUILTIN_TAN: // tan
+		this->builtin_tan(op, vm, caller, caller_class);
+		break;
+	case BUILTIN_ATAN: // atan
+		this->builtin_atan(op, vm, caller, caller_class);
+		break;
+	case BUILTIN_ABS: // abs
+		this->builtin_abs(op, vm, caller, caller_class);
+		break;
+	case BUILTIN_RANDOM_RANGE: // random_range
+		this->builtin_random_range(op, vm, caller, caller_class);
 		break;
 	}
 }
@@ -898,7 +1015,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			result = new Operand(elements, operand_array);
 
-			this->stack->push(result);
+			this->stack->push(create_op_address_operand(result));
 
 			break;
 		}
