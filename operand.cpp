@@ -13,11 +13,11 @@ Operand::Operand(std::string const& data, operand_type type) : data(data), type(
 Operand::~Operand() {
 }
 
-Operand::Operand(std::vector<Operand*>& array_data, operand_type type) : type(type) {
+Operand::Operand(std::vector<Operand*>* array_data, operand_type type) : type(type) {
 	this->array_data = array_data;
 }
 
-std::vector<Operand*>& Operand::get_array_data() {
+std::vector<Operand*>* Operand::get_array_data() {
 	return array_data;
 }
 

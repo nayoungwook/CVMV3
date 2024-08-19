@@ -34,7 +34,7 @@ Operand* copy_operand(Operand* op) {
 }
 
 inline Operand* extract_value_of_opernad(Operand* op) {
-
+	
 	Operand* result = op;
 
 	if (op->get_type() == operand_op_address) {
@@ -132,10 +132,10 @@ void FunctionFrame::builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, 
 	width = this->stack->peek(), this->stack->pop();
 	height = this->stack->peek(), this->stack->pop();
 
-	std::vector<Operand*> position_array = extract_value_of_opernad(position)->get_array_data();
+	std::vector<Operand*>* position_array = extract_value_of_opernad(position)->get_array_data();
 
-	float _x = std::stof(position_array[0]->get_data()),
-		_y = std::stof(position_array[1]->get_data());
+	float _x = std::stof(position_array->at(0)->get_data()),
+		_y = std::stof(position_array->at(1)->get_data());
 
 	float f_width = std::stof(extract_value_of_opernad(width)->get_data()),
 		f_height = std::stof(extract_value_of_opernad(height)->get_data());
@@ -171,9 +171,9 @@ void FunctionFrame::print_operand(Operand* data) {
 		break;
 	case operand_vector:
 		std::cout << "(";
-		for (int i = 0; i < data->get_array_data().size(); i++) {
-			print_operand(data->get_array_data()[i]);
-			if (i != data->get_array_data().size() - 1) {
+		for (int i = 0; i < data->get_array_data()->size(); i++) {
+			print_operand(data->get_array_data()->at(i));
+			if (i != data->get_array_data()->size() - 1) {
 				std::cout << ",";
 			}
 		}
@@ -181,9 +181,9 @@ void FunctionFrame::print_operand(Operand* data) {
 		break;
 	case operand_array:
 		std::cout << "[";
-		for (int i = 0; i < data->get_array_data().size(); i++) {
-			print_operand(data->get_array_data()[i]);
-			if (i != data->get_array_data().size() - 1) {
+		for (int i = 0; i < data->get_array_data()->size(); i++) {
+			print_operand(data->get_array_data()->at(i));
+			if (i != data->get_array_data()->size() - 1) {
 				std::cout << ",";
 			}
 		}
@@ -430,16 +430,16 @@ Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, double (*cal)(doub
 	Operand* lhs_vector = extract_value_of_opernad(lhs);
 	Operand* rhs_vector = extract_value_of_opernad(rhs);
 
-	std::vector<Operand*> calculated_result;
+	std::vector<Operand*>* calculated_result = new std::vector<Operand*>;
 
-	size_t min_vector_size = (size_t)min(lhs_vector->get_array_data().size(), rhs_vector->get_array_data().size());
+	size_t min_vector_size = (size_t)min(lhs_vector->get_array_data()->size(), rhs_vector->get_array_data()->size());
 	for (int i = 0; i < min_vector_size; i++) {
-		double lhs_v = std::stod(lhs_vector->get_array_data()[i]->get_data());
-		double rhs_v = std::stod(rhs_vector->get_array_data()[i]->get_data());
+		double lhs_v = std::stod(lhs_vector->get_array_data()->at(i)->get_data());
+		double rhs_v = std::stod(rhs_vector->get_array_data()->at(i)->get_data());
 
 		double calculated_v = cal(lhs_v, rhs_v);
 
-		calculated_result.push_back(new Operand(std::to_string(calculated_v), operand_number));
+		calculated_result->push_back(new Operand(std::to_string(calculated_v), operand_number));
 	}
 
 	return new Operand(calculated_result, operand_vector);
@@ -505,9 +505,9 @@ Memory* create_object(CVM* vm, CMClass* code_memory, FunctionFrame* frame, unsig
 		bool texture_declared = memory->member_variables.find(OBJECT_SPRITE) != memory->member_variables.end();
 
 		if (!position_declared) {
-			std::vector<Operand*> position_data;
-			position_data.push_back(new Operand("0", operand_number));
-			position_data.push_back(new Operand("0", operand_number));
+			std::vector<Operand*>* position_data = new std::vector<Operand*>;
+			position_data->push_back(new Operand("0", operand_number));
+			position_data->push_back(new Operand("0", operand_number));
 			memory->member_variables.insert(std::make_pair(OBJECT_POSITION, new Operand(position_data, operand_vector)));
 		}
 
@@ -558,8 +558,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 		Operand* position_op = caller_class->member_variables[OBJECT_POSITION];
 
-		float _x = std::stof(extract_value_of_opernad(position_op->get_array_data()[0])->get_data()),
-			_y = std::stof(extract_value_of_opernad(position_op->get_array_data()[1])->get_data());
+		float _x = std::stof(extract_value_of_opernad(position_op->get_array_data()->at(0))->get_data()),
+			_y = std::stof(extract_value_of_opernad(position_op->get_array_data()->at(1))->get_data());
 
 		Operand* width_op = caller_class->member_variables[OBJECT_WIDTH];
 		Operand* height_op = caller_class->member_variables[OBJECT_HEIGHT];
@@ -973,8 +973,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			}
 			else if (op_type == operand_vector) {
 				Operand* vector_op = attr_target;
-				delete vector_op->get_array_data()[store_id];
-				vector_op->get_array_data()[store_id] = store_value;
+				delete vector_op->get_array_data()->at(store_id);
+				vector_op->get_array_data()->assign(store_id, store_value);
 			}
 
 			delete attr_target_op;
@@ -991,7 +991,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* array_operand = this->stack->peek(); // do not delete it.
 			this->stack->pop();
 
-			Operand* result = extract_value_of_opernad(array_operand)->get_array_data()[index];
+			Operand* result = extract_value_of_opernad(array_operand)->get_array_data()->at(index);
 
 			this->stack->push(copy_operand(result));
 
@@ -1004,13 +1004,13 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			int array_size = std::stoi(op->get_operands()[0]->identifier);
 
 			Operand* result = nullptr;
-			std::vector<Operand*> elements;
+			std::vector<Operand*>* elements = new std::vector<Operand*>;
 
 			for (int i = 0; i < array_size; i++) {
 				Operand* peek = this->stack->peek();
 				this->stack->pop();
 
-				elements.push_back(peek);
+				elements->push_back(peek);
 			}
 
 			result = new Operand(elements, operand_array);
@@ -1024,14 +1024,14 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			int vector_size = std::stoi(op->get_operands()[0]->identifier);
 
 			Operand* result = nullptr;
-			std::vector<Operand*> elements;
+			std::vector<Operand*>* elements = new std::vector<Operand*>;
 
 			for (int i = 0; i < vector_size; i++) {
 				Operand* _peek = this->stack->peek();
 				Operand* extracted_data = extract_value_of_opernad(_peek);
 				this->stack->pop();
 
-				elements.push_back(extracted_data);
+				elements->push_back(extracted_data);
 			}
 
 			result = new Operand(elements, operand_vector);
@@ -1132,7 +1132,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			else if (type == operand_vector) {
 				int index = std::stoi(op->get_operands()[0]->identifier);
 
-				found_op = target->get_array_data()[index];
+				found_op = target->get_array_data()->at(index);
 			}
 
 			this->stack->push(create_op_address_operand(found_op));
@@ -1173,10 +1173,10 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 					Operand* target_element = extract_value_of_opernad(_target_element);
 
-					target->get_array_data().push_back(target_element);
+					target->get_array_data()->push_back(target_element);
 				}
 				else if (id == 1) { // array.size()
-					Operand* result = new Operand(std::to_string(target->get_array_data().size()), operand_number);
+					Operand* result = new Operand(std::to_string(target->get_array_data()->size()), operand_number);
 
 					this->stack->push(result);
 				}
@@ -1185,7 +1185,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					this->stack->pop();
 
 					Operand* target_element = extract_value_of_opernad(_target_element);
-					std::vector<Operand*>* _array = &target->get_array_data();
+					std::vector<Operand*>* _array = target->get_array_data();
 
 					int index = 0;
 
