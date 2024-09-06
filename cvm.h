@@ -36,6 +36,7 @@ public:
 
 	std::unordered_map<unsigned int, CMFunction*> global_functions;
 	std::unordered_map<unsigned int, CMClass*> global_class;
+	std::unordered_map<unsigned int, CMClass*> builtin_class;
 
 	std::unordered_map<unsigned int, Operand*> global_area;
 

@@ -23,7 +23,17 @@ Operand* copy_operand(Operand* op) {
 
 	op = extract_value_of_opernad(op);
 
-	if (op->get_type() == operand_vector || op->get_type() == operand_array) {
+	if (op->get_type() == operand_vector) {
+		std::vector<Operand*>* array_data = new std::vector<Operand*>;
+		std::vector<Operand*>* old_array_data = op->get_array_data();
+
+		for (Operand* op : *old_array_data) {
+			array_data->push_back(copy_operand(op));
+		}
+
+		copied_op = new Operand(array_data, op->get_type());
+	}
+	else if (op->get_type() == operand_array) {
 		copied_op = new Operand(op->get_array_data(), op->get_type());
 	}
 	else {
@@ -34,7 +44,7 @@ Operand* copy_operand(Operand* op) {
 }
 
 inline Operand* extract_value_of_opernad(Operand* op) {
-	
+
 	Operand* result = op;
 
 	if (op->get_type() == operand_op_address) {
@@ -233,8 +243,10 @@ void FunctionFrame::builtin_window(Operator* op, CVM* vm, FunctionFrame* caller,
 		delete _data;
 	}
 
-	CMWindow* cm_window = new CMWindow(vm, title, width, height);
-	Memory* win_memory = new Memory(cm_window);
+	unsigned int builtin_id = vm->builtin_class.size();
+	vm->builtin_class.insert(std::make_pair(builtin_id, new CMWindow(builtin_id, vm, title, width, height)));
+
+	Memory* win_memory = new Memory(vm->builtin_class.find(builtin_id));
 
 	this->stack->push(create_address_operand(win_memory));
 }
@@ -427,8 +439,8 @@ void FunctionFrame::run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Me
 }
 
 Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, double (*cal)(double l, double r)) {
-	Operand* lhs_vector = extract_value_of_opernad(lhs);
-	Operand* rhs_vector = extract_value_of_opernad(rhs);
+	Operand* lhs_vector = lhs;
+	Operand* rhs_vector = rhs;
 
 	std::vector<Operand*>* calculated_result = new std::vector<Operand*>;
 
@@ -475,9 +487,11 @@ double cal_pow(double lhs, double rhs) {
 	return pow(lhs, rhs);
 }
 
-Memory* create_object(CVM* vm, CMClass* code_memory, FunctionFrame* frame, unsigned int constructor_parameter_count) {
+Memory* create_object(CVM* vm, std::unordered_map<unsigned int, CMClass*>::iterator code_memory_iter, FunctionFrame* frame, unsigned int constructor_parameter_count) {
 
-	Memory* memory = new Memory(code_memory);
+	CMClass* code_memory = code_memory_iter->second;
+
+	Memory* memory = new Memory(code_memory_iter);
 
 	// run initializer
 	run_function(vm, memory, frame, code_memory->initializer, 0);
@@ -556,7 +570,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			exit(EXIT_FAILURE);
 		}
 
-		Operand* position_op = caller_class->member_variables[OBJECT_POSITION];
+		Operand* position_op = extract_value_of_opernad(caller_class->member_variables[OBJECT_POSITION]);
 
 		float _x = std::stof(extract_value_of_opernad(position_op->get_array_data()->at(0))->get_data()),
 			_y = std::stof(extract_value_of_opernad(position_op->get_array_data()->at(1))->get_data());
@@ -650,9 +664,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 			int parameter_count = std::stoi(op->get_operands()[1]->identifier);
 
-			CMClass* code_memory = vm->global_class[id];
-
-			Memory* memory = create_object(vm, code_memory, this, parameter_count);
+			Memory* memory = create_object(vm, vm->global_class.find(id), this, parameter_count);
 
 			// store in heap
 			vm->heap_area.push_back(memory);
@@ -691,7 +703,6 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			double v = std::stod(extract_value_of_opernad(target)->get_data()) + 1;
 			extract_value_of_opernad(target)->set_data(std::to_string(v));
 
-			delete target;
 			break;
 		}
 
@@ -907,7 +918,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				caller_class->member_variable_names.insert(std::make_pair(id, op->get_operands()[1]->identifier));
 			}
 			else {
-				delete caller_class->member_variables[id];
+				//delete caller_class->member_variables[id];
 				caller_class->member_variables[id] = peek;
 				caller_class->member_variable_names[id] = op->get_operands()[1]->identifier;
 			}
@@ -995,6 +1006,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			this->stack->push(copy_operand(result));
 
+			delete array_operand;
 			delete index_peek;
 
 			break;
@@ -1015,7 +1027,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			result = new Operand(elements, operand_array);
 
-			this->stack->push(create_op_address_operand(result));
+			this->stack->push(copy_operand(result));
 
 			break;
 		}
@@ -1045,7 +1057,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 			Operand* found_op = vm->global_area[id];
 
-			this->stack->push(create_op_address_operand(found_op));
+			this->stack->push(copy_operand(found_op));
 
 			break;
 		}
@@ -1054,7 +1066,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 			Operand* found_op = local_area[id];
 
-			this->stack->push(create_op_address_operand(found_op));
+			this->stack->push(copy_operand(found_op));
 			break;
 		}
 
@@ -1066,7 +1078,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				CHESTNUT_LOG(L"Unexpected critical error has been occured. at loadding member variable", log_level::log_error);
 			}
 
-			this->stack->push(create_op_address_operand(found_op));
+			this->stack->push(copy_operand(found_op));
 			break;
 		}
 
@@ -1135,7 +1147,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				found_op = target->get_array_data()->at(index);
 			}
 
-			this->stack->push(create_op_address_operand(found_op));
+			this->stack->push(copy_operand(found_op));
 
 			delete target_op;
 			break;

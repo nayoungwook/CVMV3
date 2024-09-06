@@ -1,6 +1,6 @@
 #include "cm_shader.h"
 
-CMShader::CMShader(std::string const& _frag_path, std::string const& _vert_path) {
+CMShader::CMShader(unsigned int id, std::string const& _frag_path, std::string const& _vert_path) : CMClass(id, 0, -1, -1, -1) {
 	unsigned int frag = 0, vert = 0;
 
 	std::string frag_path = get_absolute_path(_frag_path);

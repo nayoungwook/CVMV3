@@ -50,17 +50,74 @@ void register_source_code(CVM* vm, std::string const& loaded_file) {
 			CMClass* cm_c = ((CMClass*)code_memory);
 
 			// find if class already exist.
-			vm->global_class.insert(std::make_pair(cm_c->get_id(), cm_c));
 
-			// erorr with the update.
-			/*
-			힙 영역을 모두 탐색 후 업데이트 하면,
-			해당 메모리를 참조하고 있던 다른 메모리의 상태가 좆됨.
-			힙 탐색 말고 다른 방식으로 코드를 업데이트 해야할듯 함.
-			코드 메모리의 값 말고 주소를 계속 참조하는 방식으로 바꿔야 할듯 함.
-			*/
-			for (int i = 0; i < vm->heap_area.size(); i++) {
+			std::unordered_map<unsigned int, CMClass*>::iterator global_class_iterator;
+
+			bool class_already_exist = false;
+
+			for (global_class_iterator = vm->global_class.begin(); global_class_iterator != vm->global_class.end(); global_class_iterator++) {
+				if (global_class_iterator->second->name == cm_c->name) {
+					global_class_iterator->second = cm_c;
+					class_already_exist = true;
+					break;
+				}
 			}
+
+			if (!class_already_exist) {
+				vm->global_class.insert(std::make_pair(cm_c->get_id(), cm_c));
+			}
+
+			std::unordered_set<CMClass*> old_cm;
+
+			for (int i = 0; i < vm->heap_area.size(); i++) {
+				bool cm_changed = vm->heap_area[i]->get_backup_cm_class() != vm->heap_area[i]->get_cm_class();
+				Memory* target_memory = vm->heap_area[i];
+
+				if (cm_changed) {
+					CMClass* changed_cm = vm->heap_area[i]->get_cm_class();
+					std::unordered_map<unsigned int, std::string> backup_member_variable_names = vm->heap_area[i]->member_variable_names;
+
+					// backing up memories for check already declared memory ( with name. )
+					std::unordered_map<std::string, Operand*> backup_members;
+					std::unordered_map<unsigned int, Operand*>::iterator member_variable_iterator;
+
+					for (member_variable_iterator = target_memory->member_variables.begin();
+						member_variable_iterator != target_memory->member_variables.end(); member_variable_iterator++) {
+						//						Operand* backup_op = copy_operand(member_variable_iterator->second);
+						backup_members.insert(std::make_pair(member_variable_iterator->second->variable_name, member_variable_iterator->second));
+					}
+
+					run_function(vm, vm->heap_area[i], nullptr, changed_cm->initializer, 0);
+
+					// re-register already declared memories
+					std::unordered_map<unsigned int, Operand*>::iterator member_variable_name_iterator;
+					for (member_variable_name_iterator = target_memory->member_variables.begin();
+						member_variable_name_iterator != target_memory->member_variables.end();
+						member_variable_name_iterator++) {
+						if (backup_members.find(member_variable_name_iterator->second->variable_name) != backup_members.end()) {
+							Operand* changed_memory = member_variable_name_iterator->second;
+							member_variable_name_iterator->second = backup_members[member_variable_name_iterator->second->variable_name];
+							//backup_members[member_variable_name_iterator->second->variable_name] = nullptr; // mark used member variable
+						}
+					}
+
+					// remove unused backup members
+					/*
+					std::unordered_map<std::string, Operand*>::iterator backup_member_remover;
+					for (backup_member_remover = backup_members.begin();
+						backup_member_remover != backup_members.end(); backup_member_remover++) {
+						if (backup_member_remover->second != nullptr)
+							delete backup_member_remover->second;
+					}
+					*/
+				}
+				old_cm.insert(vm->heap_area[i]->get_backup_cm_class());
+				vm->heap_area[i]->update_backup_cm_class();
+			}
+
+
+			if (cm_c->get_type() == code_object)
+				register_render_function_code(cm_c);
 
 			std::wstring w_object_name;
 			w_object_name.assign(cm_c->name.begin(), cm_c->name.end());
@@ -227,22 +284,37 @@ SDL_Window* CMWindow::get_window() {
 }
 
 void load_default_shader(CVM* vm) {
-	CMShader* cm = new CMShader("fragment.glsl", "transform.glsl");
+	unsigned int builtin_id = vm->builtin_class.size();
+
+	CMShader* cm = new CMShader(builtin_id, "fragment.glsl", "transform.glsl");
 
 	cm->register_uniform_data("uWorldTransform");
 	cm->register_uniform_data("uViewProj");
 
-	Memory* shader_memory = new Memory((CMClass*)cm);
+	vm->builtin_class.insert(std::make_pair(builtin_id, cm));
+
+	Memory* shader_memory = new Memory(vm->builtin_class.find(builtin_id));
 
 	vm->global_area.insert(std::make_pair(0, create_address_operand(shader_memory)));
 }
 
-CMWindow::CMWindow(CVM* vm, std::string const& title, int width, int height)
-	: CMClass(0, 0, -1, -1, -1) {
+void load_builtin_variables(CVM* vm) {
+	std::vector<Operand*>* mouse_elements = new std::vector<Operand*>;
+	for (int i = 0; i < 2; i++) {
+		mouse_elements->push_back(new Operand("0", operand_number));
+	}
+	Operand* mouse_memory = new Operand(mouse_elements, operand_vector);
+	vm->global_area.insert(std::make_pair(1, create_op_address_operand(mouse_memory)));
+}
+
+CMWindow::CMWindow(unsigned int id, CVM* vm, std::string const& title, int width, int height)
+	: CMClass(id, 0, -1, -1, -1) {
 	this->_window = create_window(title, width, height);
 
 	load_images(vm->load_queue, vm->resources);
 	load_default_shader(vm);
+
+	load_builtin_variables(vm);
 
 	window_loop(vm, this->_window);
 

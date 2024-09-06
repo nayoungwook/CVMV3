@@ -1,19 +1,19 @@
 #include "operand.h"
 
 Operand::Operand(std::string const& data, operand_type type) : data(data), type(type) {
-	std::vector<Operand*> _v;
-
-	if (type == operand_number) {
-		if ((int)std::stod(data) == std::stod(data)) {
-			this->data = std::to_string((int)std::stod(data));
-		}
-	}
 }
 
 Operand::~Operand() {
+	if (this->type == operand_vector) {
+		for (int i = 0; i < array_data->size(); i++) {
+			delete array_data->at(i);
+		}
+		delete array_data;
+	}
 }
 
-Operand::Operand(std::vector<Operand*>* array_data, operand_type type) : type(type) {
+Operand::Operand(std::vector<Operand*>* array_data, operand_type type)
+	: type(type) {
 	this->array_data = array_data;
 }
 

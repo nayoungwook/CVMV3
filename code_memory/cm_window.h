@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include <gl/glew.h>
 #include <iostream>
+#include <unordered_set>
 #include "cm_function.h"
 #include "cm_class.h"
 #include "cm_scene.h"
@@ -20,7 +21,7 @@ private:
 	SDL_Window* _window;
 public:
 	SDL_Window* get_window();
-	CMWindow(CVM* vm, std::string const& title, int width, int height);
+	CMWindow(unsigned int id, CVM* vm, std::string const& title, int width, int height);
 };
 
 static SDL_GLContext context;
@@ -28,6 +29,7 @@ static SDL_GLContext context;
 SDL_Window* create_window(std::string const& title, int width, int height);
 void window_loop(CVM* vm, SDL_Window* window);
 void load_default_shader(CVM* vm);
+void load_builtin_variables(CVM* vm);
 
 static std::vector<std::string> changed_files;
 void register_source_code(CVM* machine, std::string const& loaded_file);

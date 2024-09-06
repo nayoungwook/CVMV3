@@ -44,7 +44,7 @@ Operand* copy_operand(Operand* op);
 inline Operand* extract_value_of_opernad(Operand* op);
 void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CMFunction* code_memory, int parameter_count);
 Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, double (*cal)(double l, double r));
-Memory* create_object(CVM* vm, CMClass* code_memory, FunctionFrame* frame, unsigned int constructor_parameter_count);
+Memory* create_object(CVM* vm, std::unordered_map<unsigned int, CMClass*>::iterator code_memory, FunctionFrame* frame, unsigned int constructor_parameter_count);
 
 const std::string get_type_string_of_operand(Operand* op);
 void check_type_for_store(CVM* vm, std::string const& type1, std::string const& type2);
