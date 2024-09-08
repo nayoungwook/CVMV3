@@ -98,8 +98,9 @@ void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CM
 	FunctionFrame* frame = new FunctionFrame(code_memory);
 
 	if (parameter_count != code_memory->get_param_types().size()) {
-		std::cout << "Error with function parameter : " << code_memory->name << std::endl;
-		exit(EXIT_FAILURE);
+		std::string name = caller_frame->get_code_memory()->name;
+		CHESTNUT_THROW_ERROR(L"Failed to call " + std::wstring(name.begin(), name.end()) + L". You pass the wrong parameters",
+			"RUNTIME_WRONG_PARAMETER", "0x02", 0);
 	}
 
 	for (int i = 0; i < parameter_count; i++) {
@@ -109,13 +110,9 @@ void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CM
 		std::string type_string_of_operand = get_type_string_of_operand(op);
 
 		if (code_memory->get_param_types()[i] != type_string_of_operand) {
-			//			std::wstring w_function_name;
-			//			w_function_name.assign(code_memory->name.begin(), code_memory->name.end());
-
-			//			CHESTNUT_THROW_ERROR(L"We don\'t have function \'" + w_function_name + L"\' with this parameter.", "NO_FUNCTION_WITH_PARAMETER", "008", ast->line_number);
-
-			std::cout << "Error with function parameter : " << code_memory->name << std::endl;
-			exit(EXIT_FAILURE);
+			std::string name = caller_frame->get_code_memory()->name;
+			CHESTNUT_THROW_ERROR(L"Failed to call " + std::wstring(name.begin(), name.end()) + L". You pass the wrong parameters",
+				"RUNTIME_WRONG_PARAMETER", "0x02", 0);
 		}
 
 		frame->local_area.insert(std::make_pair(i, copy_operand(op)));
@@ -394,6 +391,18 @@ void FunctionFrame::builtin_random_range(Operator* op, CVM* vm, FunctionFrame* c
 	delete _v2;
 }
 
+void FunctionFrame::builtin_sqrt(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	Operand* _v = this->stack->peek();
+	this->stack->pop();
+
+	Operand* v = extract_value_of_opernad(_v);
+
+	this->stack->push(new Operand(std::to_string(
+		std::sqrt(std::stof(v->get_data()))), operand_number));
+
+	delete _v;
+}
+
 void FunctionFrame::run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 	unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 	int parameter_count = std::stoi(op->get_operands()[1]->identifier);
@@ -434,6 +443,9 @@ void FunctionFrame::run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Me
 		break;
 	case BUILTIN_RANDOM_RANGE: // random_range
 		this->builtin_random_range(op, vm, caller, caller_class);
+		break;
+	case BUILTIN_SQRT:
+		this->builtin_sqrt(op, vm, caller, caller_class);
 		break;
 	}
 }
@@ -566,8 +578,9 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		Operand* texture_op = caller_class->member_variables[OBJECT_SPRITE];
 
 		if (texture_op->get_type() == operand_null) {
-			std::cout << "error at function_frame\.cpp Debug ID : 01x | texture is null." << std::endl;
-			exit(EXIT_FAILURE);
+			std::string name = caller_class->get_cm_class()->name;
+			CHESTNUT_THROW_ERROR(L"Failed to render " + std::wstring(name.begin(), name.end()) + L". You must assing texture for it.",
+				"RUNTIME_NO_TEXTURE_FOR_OBJECT", "0x03", 0);
 		}
 
 		Operand* position_op = extract_value_of_opernad(caller_class->member_variables[OBJECT_POSITION]);
@@ -782,8 +795,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			case op_div:
 				if (lhs->get_type() == operand_number) {
 					if (std::stod(rhs->get_data()) == 0) {
-						std::cout << "divided by zero error.";
-						exit(EXIT_FAILURE);
+						CHESTNUT_THROW_ERROR(L"Divided by zero. So sorry but We don\'t have Limit system here yet.",
+							"RUNTIME_DEVIDED_BY_ZERO", "0x04", op->get_line_number());
 					}
 
 					this->stack->push(new Operand(std::to_string(
@@ -806,8 +819,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			case op_mod: {
 				if (lhs->get_type() == operand_number) {
 					if (rhs == 0) {
-						std::cout << "divided by zero error.";
-						exit(EXIT_FAILURE);
+						CHESTNUT_THROW_ERROR(L"Divided by zero. So sorry but We don\'t have Limit system here yet.",
+							"RUNTIME_DEVIDED_BY_ZERO", "0x04", op->get_line_number());
 					}
 					this->stack->push(new Operand(std::to_string(
 						(int)std::stod(lhs->get_data())
@@ -983,9 +996,9 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				attr_memory->member_variables[store_id]->variable_name = name;
 			}
 			else if (op_type == operand_vector) {
-				Operand* vector_op = attr_target;
-				delete vector_op->get_array_data()->at(store_id);
-				vector_op->get_array_data()->assign(store_id, store_value);
+				std::string name = op->get_operands()[1]->identifier;
+				CHESTNUT_THROW_ERROR(L"Unable to store value into " + std::wstring(name.begin(), name.end()) + L" because it is vector varaible. it is read-only",
+					"RUNTIME_FAILED_TO_STORE_VALUE_INTO_VECTOR", "0x09", op->get_line_number());
 			}
 
 			delete attr_target_op;
@@ -1075,7 +1088,9 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* found_op = caller_class->member_variables[id];
 
 			if (found_op == nullptr) {
-				CHESTNUT_LOG(L"Unexpected critical error has been occured. at loadding member variable", log_level::log_error);
+				std::string var_name = op->get_operands()[1]->identifier;
+				CHESTNUT_THROW_ERROR(L"We can\'t find variable named " + std::wstring(var_name.begin(), var_name.end()),
+					"RUNTIME_FAILED_TO_LOAD_MEMBER_VARIABLE", "0x05", op->get_line_number());
 			}
 
 			this->stack->push(copy_operand(found_op));
@@ -1137,6 +1152,13 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			operand_type type = target->get_type();
 			Operand* found_op = nullptr;
 
+			if (target->get_type() == operand_null) {
+				std::string name = op->get_operands()[1]->identifier;
+
+				CHESTNUT_THROW_ERROR(L"Failed to load " + std::wstring(name.begin(), name.end()) + L" because target was null.",
+					"RUNTIME_LOAD_FROM_NULL", "0x07", op->get_line_number());
+			}
+
 			if (type == operand_address) {
 				Memory* memory = reinterpret_cast<Memory*>(std::stoull(target->get_data()));
 				found_op = memory->member_variables[std::stoi(op->get_operands()[0]->identifier)];
@@ -1150,6 +1172,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			this->stack->push(copy_operand(found_op));
 
 			delete target_op;
+
 			break;
 		}
 
@@ -1174,8 +1197,9 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			}
 
 			if (target->get_type() == operand_null) {
-				std::cout << "error at function_frame\.cpp op_call_attr | Error Code : WWERS" << std::endl;
-				exit(EXIT_FAILURE);
+				std::string name = op->get_operands()[2]->identifier;
+				CHESTNUT_THROW_ERROR(L"Failed to call " + std::wstring(name.begin(), name.end()) + L" because target was null.",
+					"RUNTIME_CALL_FROM_NULL", "0x01", op->get_line_number());
 			}
 
 			if (target->get_type() == operand_array) {

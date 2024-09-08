@@ -25,6 +25,12 @@
     <Filter Include="헤더 파일\engine">
       <UniqueIdentifier>{853e28b1-bbcc-4592-8f4d-a52e857c8f6a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\error">
+      <UniqueIdentifier>{f2ed6706-2eda-424f-8877-6ff5750fc385}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\error">
+      <UniqueIdentifier>{eb10f17a-a8c9-4c85-b3e1-d448acc1a32c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cvm.cpp">
@@ -92,6 +98,9 @@
     </ClCompile>
     <ClCompile Include="code_memory\cm_camera.cpp">
       <Filter>소스 파일\code_memory</Filter>
+    </ClCompile>
+    <ClCompile Include="error\sys_error.cpp">
+      <Filter>소스 파일\error</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -166,6 +175,9 @@
     </ClInclude>
     <ClInclude Include="code_memory\cm_camera.h">
       <Filter>헤더 파일\code_memory</Filter>
+    </ClInclude>
+    <ClInclude Include="error\sys_error.h">
+      <Filter>헤더 파일\error</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

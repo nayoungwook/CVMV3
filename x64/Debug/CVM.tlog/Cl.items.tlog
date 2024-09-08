@@ -10,6 +10,7 @@ C:\Users\user\source\repos\Chestnut\CVM\code_memory\code_memory.cpp;C:\Users\use
 C:\Users\user\source\repos\Chestnut\CVM\cvm.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\cvm.obj
 C:\Users\user\source\repos\Chestnut\CVM\engine\engine.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\engine.obj
 C:\Users\user\source\repos\Chestnut\CVM\engine\stb_image.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\stb_image.obj
+C:\Users\user\source\repos\Chestnut\CVM\error\sys_error.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\sys_error.obj
 C:\Users\user\source\repos\Chestnut\CVM\function_frame.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\function_frame.obj
 C:\Users\user\source\repos\Chestnut\CVM\Math.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\Math.obj
 C:\Users\user\source\repos\Chestnut\CVM\memory.cpp;C:\Users\user\source\repos\Chestnut\CVM\x64\Debug\memory.obj

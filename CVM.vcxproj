@@ -149,6 +149,7 @@
     <ClCompile Include="cvm.cpp" />
     <ClCompile Include="engine\engine.cpp" />
     <ClCompile Include="engine\stb_image.cpp" />
+    <ClCompile Include="error\sys_error.cpp" />
     <ClCompile Include="function_frame.cpp" />
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="memory.cpp" />
@@ -173,6 +174,7 @@
     <ClInclude Include="cvm.h" />
     <ClInclude Include="engine\engine.h" />
     <ClInclude Include="engine\stb_image.h" />
+    <ClInclude Include="error\sys_error.h" />
     <ClInclude Include="FileWatcher.hpp" />
     <ClInclude Include="function_frame.h" />
     <ClInclude Include="Math.h" />

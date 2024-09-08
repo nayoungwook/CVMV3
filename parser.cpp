@@ -44,25 +44,25 @@ Operator* get_operator(std::unordered_map<std::string, unsigned int>* label_id, 
 		type = op_store_attr;
 
 		operands.push_back(pull_token(tokens)); // id
-		pull_token(tokens);
+		operands.push_back(pull_token(tokens)); // name
 	}
 	else if (token->identifier == "@STORE_LOCAL") {
 		type = op_store_local;
 
 		operands.push_back(pull_token(tokens)); // id
-		pull_token(tokens);
+		operands.push_back(pull_token(tokens)); // name
 	}
 	else if (token->identifier == "@LOAD_GLOBAL") {
 		type = op_load_global;
 
 		operands.push_back(pull_token(tokens)); // id
-		pull_token(tokens);
+		operands.push_back(pull_token(tokens)); // name
 	}
 	else if (token->identifier == "@LOAD_LOCAL") {
 		type = op_load_local;
 
 		operands.push_back(pull_token(tokens)); // id
-		pull_token(tokens);
+		operands.push_back(pull_token(tokens)); // name
 	}
 	else if (token->identifier == "@SUPER_CALL") {
 		type = op_super_call;
@@ -154,7 +154,7 @@ Operator* get_operator(std::unordered_map<std::string, unsigned int>* label_id, 
 		type = op_load_attr;
 
 		operands.push_back(pull_token(tokens)); // id
-		pull_token(tokens);
+		operands.push_back(pull_token(tokens)); // name
 	}
 	else if (token->identifier == "@ARRAY") {
 		type = op_array;
@@ -206,9 +206,9 @@ Operator* get_operator(std::unordered_map<std::string, unsigned int>* label_id, 
 	return result;
 }
 
-CodeMemory* get_code_memory(std::queue<std::pair<std::string, std::string>>& load_queue, std::unordered_map<std::string, unsigned int>* label_id, std::vector<Token*>& tokens) {
-	Token* token = pull_token(tokens);
+CodeMemory* get_code_memory(CVM* vm, std::vector<Token*>& tokens) {
 
+	Token* token = pull_token(tokens);
 	if (token->identifier == "FUNC" || token->identifier == "$INITIALIZE" || token->identifier == "$CONSTRUCTOR") {
 		unsigned int id = std::stoi(pull_token(tokens)->identifier);
 		std::string name = pull_token(tokens)->identifier; // ( name )
@@ -229,7 +229,7 @@ CodeMemory* get_code_memory(std::queue<std::pair<std::string, std::string>>& loa
 
 		int i = 0;
 		while (tokens[0]->identifier != "}") {
-			operators.push_back(get_operator(label_id, i, tokens));
+			operators.push_back(get_operator(vm->label_id, i, tokens));
 			i++;
 		}
 
@@ -268,7 +268,7 @@ CodeMemory* get_code_memory(std::queue<std::pair<std::string, std::string>>& loa
 
 		while (tokens[0]->identifier != "}") {
 			std::queue<std::pair<std::string, std::string>> empty_queue; // there's nothing going to be queued.
-			CMFunction* member_function = (CMFunction*)get_code_memory(empty_queue, label_id, tokens);
+			CMFunction* member_function = (CMFunction*)get_code_memory(vm, tokens);
 
 			if (member_function->get_type() == code_constructor) {
 				constructor = (CMConstructor*)member_function;
@@ -324,9 +324,25 @@ CodeMemory* get_code_memory(std::queue<std::pair<std::string, std::string>>& loa
 		path.assign(current_directory.begin(), current_directory.end());
 		path += ("\\" + file_path.substr(1, file_path.size() - 2));
 
-		load_queue.push(std::make_pair(name, path));
+		vm->load_queue.push(std::make_pair(name, path));
 
 		int line_number = std::stoi(pull_token(tokens)->identifier); // line number
+	}
+	else if (token->identifier == "#IMPORT") {
+		std::string name = pull_token(tokens)->identifier;
+		std::string file_path = name + ".cir";
+		int line_number = std::stoi(pull_token(tokens)->identifier); // line number
+		
+		if (vm->imported_files.find(name) != vm->imported_files.end()) {
+			return nullptr;
+		}
+
+		std::vector<std::string> file = get_file(file_path);
+		std::vector<Token*> parsed_tokens = parse_tokens(file);
+
+		register_parsed_file(parsed_tokens, vm);
+
+		vm->imported_files.insert(name);
 	}
 
 	return nullptr;

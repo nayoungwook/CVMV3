@@ -13,9 +13,13 @@
 #include <assert.h>
 #include <queue>
 #include <unordered_map>
+#include <unordered_set>
+#include "cvm.h"
+
+class CVM;
 
 Operator* get_operator(std::unordered_map<std::string, unsigned int>* label_id, int line_number, std::vector<Token*>& tokens);
-CodeMemory* get_code_memory(std::queue<std::pair<std::string, std::string>>& load_queue, std::unordered_map<std::string, unsigned int>* label_id, std::vector<Token*>& tokens);
+CodeMemory* get_code_memory(CVM* vm, std::vector<Token*>& tokens);
 
 enum class special_literal {
 	line_break, none,

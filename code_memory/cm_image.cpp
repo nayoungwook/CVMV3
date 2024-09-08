@@ -41,8 +41,9 @@ std::pair<unsigned int, unsigned int> create_texture_id(std::string const& path,
 	bytes = stbi_load(path.c_str(), &width, &height, &channel, 4);
 	
 	if (!bytes) {
-		std::cout << "Error! stb_image failed to load image : " << path << std::endl;
-		exit(1);
+		std::string file_name = path;
+		CHESTNUT_THROW_ERROR(L"Failed to load image " + std::wstring(file_name.begin(), file_name.end()) + L" Please check file name again.",
+			"RUNTIME_FAILED_TO_LOAD_IMAGE", "0x08", -1);
 	}
 
 	try {

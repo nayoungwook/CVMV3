@@ -5,11 +5,29 @@
 
 Memory* CVM::current_scene_memory = nullptr;
 
-int main() {
+void register_parsed_file(std::vector<Token*>& parsed_tokens, CVM* vm) {
 
-	std::string path = "main.cir";
-	std::vector<std::string> file = get_file(path);
-	std::vector<Token*> parsed_tokens = parse_tokens(file);
+	while (!parsed_tokens.empty()) {
+		CodeMemory* code_memory = get_code_memory(vm, parsed_tokens);
+
+		if (code_memory == nullptr) continue;
+
+		if (code_memory->get_type() == code_function) {
+			CMFunction* cm_f = ((CMFunction*)code_memory);
+
+			vm->global_functions.insert(std::make_pair(cm_f->get_id(), cm_f));
+		}
+		else if (
+			code_memory->get_type() == code_class ||
+			code_memory->get_type() == code_scene || code_memory->get_type() == code_object) {
+			CMClass* cm_c = ((CMClass*)code_memory);
+
+			vm->global_class.insert(std::make_pair(cm_c->get_id(), cm_c));
+		}
+	}
+}
+
+int main() {
 
 	initialize_engine();
 
@@ -18,26 +36,18 @@ int main() {
 
 	vm->label_id = new std::unordered_map<std::string, unsigned int>;
 
-	while (!parsed_tokens.empty()) {
-		CodeMemory* code_memory = get_code_memory(vm->load_queue, vm->label_id, parsed_tokens);
+	std::string path = "main.cir";
+	std::vector<std::string> file = get_file(path);
+	std::vector<Token*> parsed_tokens = parse_tokens(file);
 
-		if (code_memory == nullptr) continue;
+	vm->imported_files.insert("main");
+	register_parsed_file(parsed_tokens, vm);
 
-		if (code_memory->get_type() == code_function) {
-			CMFunction* cm_f = ((CMFunction*)code_memory);
+	std::unordered_map<unsigned int, CMFunction*>::iterator global_function_iterator = vm->global_functions.begin();
 
-			if (cm_f->name == "main") {
-				main_function = cm_f;
-			}
-
-			vm->global_functions.insert(std::make_pair(cm_f->get_id(), cm_f));
-		}
-		else if (
-			code_memory->get_type() == code_class ||
-			code_memory->get_type() == code_scene || code_memory->get_type() == code_object) {
-			CMClass* cm_f = ((CMClass*)code_memory);
-
-			vm->global_class.insert(std::make_pair(cm_f->get_id(), cm_f));
+	for (; global_function_iterator != vm->global_functions.end(); global_function_iterator++) {
+		if (global_function_iterator->second->name == "main") {
+			main_function = global_function_iterator->second;
 		}
 	}
 

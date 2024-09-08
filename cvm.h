@@ -28,11 +28,14 @@ static const int BUILTIN_TAN= 8;
 static const int BUILTIN_ATAN= 9;
 static const int BUILTIN_ABS= 10;
 static const int BUILTIN_RANDOM_RANGE= 11;
+static const int BUILTIN_SQRT = 12;
 
 class CVM {
 public:
 	std::queue<std::pair<std::string, std::string>> load_queue; // <name , path>
 	std::unordered_map<std::string, CMImage*> resources;
+
+	std::unordered_set<std::string> imported_files;
 
 	std::unordered_map<unsigned int, CMFunction*> global_functions;
 	std::unordered_map<unsigned int, CMClass*> global_class;
@@ -50,3 +53,5 @@ public:
 
 	static Memory* current_scene_memory;
 };
+
+void register_parsed_file(std::vector<Token*>& parsed_tokens, CVM* vm);

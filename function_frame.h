@@ -4,6 +4,7 @@
 #include <random>
 #include "code_memory/cm_function.h"
 #include "code_memory/cm_window.h"
+#include "error/sys_error.h"
 #include "sys_util.h"
 #include "stack.h"
 #include "cvm.h"
@@ -36,6 +37,7 @@ public:
 	void builtin_atan(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 	void builtin_abs(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 	void builtin_random_range(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+	void builtin_sqrt(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 };
 
 Operand* create_address_operand(Memory* op);

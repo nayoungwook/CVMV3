@@ -21,7 +21,7 @@ void register_source_code(CVM* vm, std::string const& loaded_file) {
 	std::vector<Token*> parsed_tokens = parse_tokens(file);
 
 	while (!parsed_tokens.empty()) {
-		CodeMemory* code_memory = get_code_memory(vm->load_queue, vm->label_id, parsed_tokens);
+		CodeMemory* code_memory = get_code_memory(vm, parsed_tokens);
 
 		if (code_memory == nullptr) continue;
 
@@ -48,8 +48,6 @@ void register_source_code(CVM* vm, std::string const& loaded_file) {
 			code_memory->get_type() == code_scene || code_memory->get_type() == code_object) {
 
 			CMClass* cm_c = ((CMClass*)code_memory);
-
-			// find if class already exist.
 
 			std::unordered_map<unsigned int, CMClass*>::iterator global_class_iterator;
 
@@ -221,6 +219,13 @@ void window_loop(CVM* vm, SDL_Window* window) {
 				vm->key_data.erase(to_upper_all(key));
 				break;
 			}
+			case SDL_MOUSEMOTION: {
+				int win_w, win_h;
+				SDL_GetWindowSize(window, &win_w, &win_h);
+				int mouse_x = event.motion.x - win_w / 2, mouse_y = event.motion.y - win_h / 2;
+				vm->global_area[1]->get_array_data()->at(0)->set_data(std::to_string(mouse_x));
+				vm->global_area[1]->get_array_data()->at(1)->set_data(std::to_string(mouse_y));
+			}
 			}
 		}
 
@@ -245,11 +250,20 @@ void window_loop(CVM* vm, SDL_Window* window) {
 			CMFunction* tick_function =
 				current_scene_cm->member_functions->find(tick_funciton_id)->second;
 			run_function(vm, vm->current_scene_memory, nullptr, tick_function, 0);
+		}
+		
+		if (vm->current_scene_memory != nullptr) {
+			CMScene* current_scene_cm = (CMScene*)vm->current_scene_memory->get_cm_class();
+
+			unsigned int init_funciton_id = current_scene_cm->get_init_function_id();
+			unsigned int tick_funciton_id = current_scene_cm->get_tick_function_id();
+			unsigned int render_funciton_id = current_scene_cm->get_render_function_id();
+
+			CMScene* scene = current_scene_cm;
 
 			CMFunction* render_function =
 				current_scene_cm->member_functions->find(render_funciton_id)->second;
 			run_function(vm, vm->current_scene_memory, nullptr, render_function, 0);
-
 		}
 
 		SDL_GL_SwapWindow(window);
@@ -299,12 +313,13 @@ void load_default_shader(CVM* vm) {
 }
 
 void load_builtin_variables(CVM* vm) {
+	// for mouse
 	std::vector<Operand*>* mouse_elements = new std::vector<Operand*>;
 	for (int i = 0; i < 2; i++) {
 		mouse_elements->push_back(new Operand("0", operand_number));
 	}
 	Operand* mouse_memory = new Operand(mouse_elements, operand_vector);
-	vm->global_area.insert(std::make_pair(1, create_op_address_operand(mouse_memory)));
+	vm->global_area.insert(std::make_pair(1, mouse_memory));
 }
 
 CMWindow::CMWindow(unsigned int id, CVM* vm, std::string const& title, int width, int height)

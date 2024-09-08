@@ -4,6 +4,7 @@
 #include <gl/glew.h>
 #include <queue>
 #include <iostream>
+#include "../error/sys_error.h"
 #include "cm_class.h"
 #include "../engine/stb_image.h"
 

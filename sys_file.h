@@ -9,6 +9,7 @@
 #include <Windows.h>
 #include <chrono>
 #include "token.h"
+#include "error/sys_error.h"
 
 std::vector<std::string> get_file(std::string& file_path);
 void write_file(std::string& file_path, std::string content);

@@ -37,9 +37,13 @@ std::vector<std::string> get_file(std::string& file_path) {
 		openFile.close();
 	}
 	else {
-		std::cout << "Error! cannot read file : " << file_path << std::endl;
-		exit(EXIT_FAILURE);
+		std::string file_name = file_path;
+		CHESTNUT_THROW_ERROR(L"Failed to load file " + std::wstring(file_name.begin(), file_name.end()) + L" Please check file name again.",
+			"RUNTIME_FAILED_TO_LOAD_FILE", "0x09", -1);
 	}
+
+	CHESTNUT_LOG(L"new file : " + std::wstring(file_path.begin(), file_path.end()) + L" loaded.", log_level::log_okay);
+
 	return result;
 }
 
