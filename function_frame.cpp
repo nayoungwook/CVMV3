@@ -897,7 +897,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 		case op_store_global: {
 			Operand* peek_op = this->stack->peek();
-			Operand* peek = copy_operand(extract_value_of_opernad(peek_op));
+			Operand* peek = copy_operand(peek_op);
 			this->stack->pop();
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 
@@ -917,7 +917,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 		case op_store_class: {
 			Operand* peek_op = this->stack->peek();
-			Operand* peek = copy_operand(extract_value_of_opernad(peek_op));
+			Operand* peek = copy_operand(peek_op);
 			this->stack->pop();
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 
@@ -943,7 +943,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 		case op_store_local: {
 			Operand* peek_op = this->stack->peek();
-			Operand* peek = copy_operand(extract_value_of_opernad(peek_op));
+			Operand* peek = copy_operand(peek_op);
 			this->stack->pop();
 			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
 
@@ -962,7 +962,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			local_area[id]->variable_name = name;
 
-			check_type_for_store(vm, get_type_string_of_operand(peek), type);
+			//check_type_for_store(vm, get_type_string_of_operand(peek), type);
 
 			delete peek_op;
 
@@ -975,7 +975,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			this->stack->pop();
 
 			Operand* store_value_op = this->stack->peek();
-			Operand* store_value = copy_operand(extract_value_of_opernad(store_value_op));
+			Operand* store_value = copy_operand(store_value_op);
 			this->stack->pop();
 
 			unsigned int store_id = std::stoi(op->get_operands()[0]->identifier);
