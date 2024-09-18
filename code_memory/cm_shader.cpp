@@ -3,8 +3,13 @@
 CMShader::CMShader(unsigned int id, std::string const& _frag_path, std::string const& _vert_path) : CMClass(id, 0, -1, -1, -1) {
 	unsigned int frag = 0, vert = 0;
 
-	std::string frag_path = get_absolute_path(_frag_path);
-	std::string vert_path = get_absolute_path(_vert_path);
+	TCHAR buffer[MAX_PATH] = { 0 };
+	GetModuleFileName(NULL, buffer, MAX_PATH);
+	std::wstring::size_type pos = std::wstring(buffer).find_last_of(L"\\/");
+	std::wstring module_file_dir = std::wstring(buffer).substr(0, pos);
+
+	std::string frag_path = std::string(module_file_dir.begin(), module_file_dir.end()) + "\\" + _frag_path;
+	std::string vert_path = std::string(module_file_dir.begin(), module_file_dir.end()) + "\\" + _vert_path;
 
 	if (!compile_shader(frag, frag_path, GL_FRAGMENT_SHADER)) {
 		std::wstring msg = L"Compilation error in shader : ";

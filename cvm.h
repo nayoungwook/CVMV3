@@ -29,6 +29,7 @@ static const int BUILTIN_ATAN= 9;
 static const int BUILTIN_ABS= 10;
 static const int BUILTIN_RANDOM_RANGE= 11;
 static const int BUILTIN_SQRT = 12;
+static const int BUILTIN_TEXT = 13;
 
 class CVM {
 public:
@@ -52,6 +53,8 @@ public:
 	int proj_width, proj_height;
 
 	static Memory* current_scene_memory;
+
+	SDL_Renderer* renderer;
 };
 
 void register_parsed_file(std::vector<Token*>& parsed_tokens, CVM* vm);

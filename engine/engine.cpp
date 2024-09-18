@@ -36,3 +36,14 @@ void render_image(CMShader* shader, unsigned int texture_id, unsigned int vao, f
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 }
+
+int nextpoweroftwo(int x)
+{
+	double logbase2 = log(x) / log(2);
+	return round(pow(2, ceil(logbase2)));
+}
+
+void render_text(SDL_Renderer* renderer,
+	std::string const& str, float x, float y, float _r, float _g, float _b, float _a, float rotation) {
+	
+}

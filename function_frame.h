@@ -38,6 +38,7 @@ public:
 	void builtin_abs(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 	void builtin_random_range(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 	void builtin_sqrt(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+	void builtin_text(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 };
 
 Operand* create_address_operand(Memory* op);

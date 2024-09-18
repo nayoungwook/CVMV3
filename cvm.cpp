@@ -27,7 +27,7 @@ void register_parsed_file(std::vector<Token*>& parsed_tokens, CVM* vm) {
 	}
 }
 
-int main() {
+int main(int argc, char* args[]) {
 
 	initialize_engine();
 
@@ -36,12 +36,30 @@ int main() {
 
 	vm->label_id = new std::unordered_map<std::string, unsigned int>;
 
-	std::string path = "main.cir";
-	std::vector<std::string> file = get_file(path);
-	std::vector<Token*> parsed_tokens = parse_tokens(file);
+	if (argc == 1) {
+		CHESTNUT_LOG(L"With no arguments, the process is on the \'debug mode\'", log_level::log_warn);
+		CHESTNUT_LOG(L"If it was not your intention, please type \'chestnut -help.\' to get help.", log_level::log_warn);
 
-	vm->imported_files.insert("main");
-	register_parsed_file(parsed_tokens, vm);
+		std::string path = "main.cir";
+		std::vector<std::string> file = get_file(path);
+		std::vector<Token*> parsed_tokens = parse_tokens(file);
+
+		vm->imported_files.insert("main");
+		register_parsed_file(parsed_tokens, vm);
+
+	}
+	else if (argc == 2) {
+		std::string file_name = args[1];
+
+		std::string path = file_name + ".cir";
+		std::vector<std::string> file = get_file(path);
+		std::vector<Token*> parsed_tokens = parse_tokens(file);
+
+		vm->imported_files.insert("main");
+		register_parsed_file(parsed_tokens, vm);
+
+	}
+
 
 	std::unordered_map<unsigned int, CMFunction*>::iterator global_function_iterator = vm->global_functions.begin();
 

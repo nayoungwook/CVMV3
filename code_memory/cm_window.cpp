@@ -180,8 +180,7 @@ void window_loop(CVM* vm, SDL_Window* window) {
 				if (is_cn) {
 					CHESTNUT_LOG(L"cn File modified : " + path.substr(0, path.length() - 3), log_level::log_default);
 
-					std::wstring wcommand = get_current_directory() + L"\\"
-						+ L"chestnutcompiler -compile " + path.substr(0, path.length() - 3);
+					std::wstring wcommand = L"chestnutcompiler -compile " + path.substr(0, path.length() - 3);
 					std::string command;
 					command.assign(wcommand.begin(), wcommand.end());
 
@@ -196,6 +195,9 @@ void window_loop(CVM* vm, SDL_Window* window) {
 	while (_running) {
 		//		if (current_ticks - backup_ticks != 0)
 		//			std::cout << 1000 / (current_ticks - backup_ticks) << std::endl;
+
+		// check heap usage
+
 
 		backup_ticks = current_ticks;
 		tick_count = SDL_GetTicks();
@@ -251,7 +253,7 @@ void window_loop(CVM* vm, SDL_Window* window) {
 				current_scene_cm->member_functions->find(tick_funciton_id)->second;
 			run_function(vm, vm->current_scene_memory, nullptr, tick_function, 0);
 		}
-		
+
 		if (vm->current_scene_memory != nullptr) {
 			CMScene* current_scene_cm = (CMScene*)vm->current_scene_memory->get_cm_class();
 
@@ -282,13 +284,19 @@ SDL_Window* create_window(std::string const& title, int width, int height) {
 
 	int init_status = glewInit();
 	if (init_status != GLEW_OK) {
-		exit(1);
+		CHESTNUT_THROW_ERROR(L"Failed to initialize glew! please check your opengl libraries.", "FAILED_TO_INIT_GLEW", "0x10", -1);
 	}
 
 	glGetError();
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// Initialize Font
+	if (TTF_Init() < 0) {
+		CHESTNUT_THROW_ERROR(L"Failed to initialize SDL TTF! please check your SDL libraries.", "FAILED_TO_INIT_TTF", "0x11", -1);
+
+	}
 
 	return result;
 }
@@ -325,6 +333,11 @@ void load_builtin_variables(CVM* vm) {
 CMWindow::CMWindow(unsigned int id, CVM* vm, std::string const& title, int width, int height)
 	: CMClass(id, 0, -1, -1, -1) {
 	this->_window = create_window(title, width, height);
+
+	vm->renderer = SDL_CreateRenderer(this->_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
+	if (vm->renderer == NULL) {
+		CHESTNUT_THROW_ERROR(L"Failed to create renderer!", "FAILED_TO_CREATE_RENDERER", "0x12", -1);
+	}
 
 	load_images(vm->load_queue, vm->resources);
 	load_default_shader(vm);

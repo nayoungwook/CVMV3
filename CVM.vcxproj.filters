@@ -102,6 +102,9 @@
     <ClCompile Include="error\sys_error.cpp">
       <Filter>소스 파일\error</Filter>
     </ClCompile>
+    <ClCompile Include="builtin_functions.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cvm.h">
