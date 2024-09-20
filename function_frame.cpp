@@ -221,6 +221,10 @@ bool operand_compare(Operand* op1, Operand* op2) {
 
 	if (op1->get_type() != op2->get_type()) return false;
 
+	if (op1->get_type() == operand_vector) {
+		return op1->get_array_data() == op2->get_array_data();
+	}
+
 	if (op1->get_type() == operand_address) {
 		return
 			reinterpret_cast<Memory*>(std::stoull(op1->get_data())) ==
@@ -434,6 +438,60 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			Operand* lhs = extract_value_of_opernad(lhs_op);
 			Operand* rhs = extract_value_of_opernad(rhs_op);
+
+			if (lhs->get_type() != rhs->get_type()) {
+
+				if (
+					(lhs->get_type() == operand_vector && rhs->get_type() == operand_number) ||
+					(rhs->get_type() == operand_vector && lhs->get_type() == operand_number)
+					) {
+
+					std::vector<Operand*>* calculated_vector = new std::vector<Operand*>;
+
+					Operand* vector_operand = lhs->get_type() == operand_vector ? lhs : rhs;
+					Operand* number_operand = lhs->get_type() == operand_number ? lhs : rhs;
+
+					double rhs_v = std::stod(number_operand->get_data());
+					std::vector<Operand*>* array_data = vector_operand->get_array_data();
+					for (int i = 0; i < array_data->size(); i++) {
+						double lhs_v = std::stod(array_data->at(i)->get_data());
+
+						switch (type) {
+						case op_add:
+							calculated_vector->push_back(new Operand(std::to_string(lhs_v + rhs_v), operand_number));
+							break;
+						case op_sub:
+							calculated_vector->push_back(new Operand(std::to_string(lhs_v - rhs_v), operand_number));
+							break;
+						case op_mul:
+							calculated_vector->push_back(new Operand(std::to_string(lhs_v * rhs_v), operand_number));
+							break;
+						case op_div:
+							calculated_vector->push_back(new Operand(std::to_string(lhs_v / rhs_v), operand_number));
+							break;
+						case op_pow:
+							calculated_vector->push_back(new Operand(std::to_string(pow(lhs_v, rhs_v)), operand_number));
+							break;
+						case op_mod:
+							calculated_vector->push_back(new Operand(std::to_string((int)lhs_v % (int)rhs_v), operand_number));
+							break;
+						}
+					}
+
+					this->stack->push(new Operand(calculated_vector, operand_vector));
+				}
+				else {
+					std::string lhs_str = get_type_string_of_operand(lhs);
+					std::string rhs_str = get_type_string_of_operand(rhs);
+					CHESTNUT_THROW_ERROR(L"Failed to calculate " + std::wstring(lhs_str.begin(), lhs_str.begin())
+						+ L" " + std::wstring(rhs_str.begin(), rhs_str.begin()),
+						"TRIED_TO_CALCULATE_DIFFERENT_TYPES", "0x11", op->get_line_number());
+				}
+
+				delete lhs_op;
+				delete rhs_op;
+				break;
+			}
 
 			switch (type) {
 			case op_add:
@@ -688,7 +746,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			Operand* result = extract_value_of_opernad(array_operand)->get_array_data()->at(index);
 
-			this->stack->push(copy_operand(result));
+			this->stack->push(create_op_address_operand(result));
 
 			delete array_operand;
 			delete index_peek;
@@ -904,10 +962,26 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					}
 
 					if (index == _array->size()) { // Failed to find element in array.
-
+						CHESTNUT_THROW_ERROR(L"Failed to remove element from array.",
+							"FAILED_TO_REMOVE_ELEMENT_FROM_ARRAY", "0x12", op->get_line_number());
 					}
 
 					_array->erase(_array->begin() + index);
+				}
+				else if (id == 3) { // array.set( i , e )
+
+					Operand* _target_element = this->stack->peek();
+					this->stack->pop();
+
+					Operand* _index = this->stack->peek();
+					this->stack->pop();
+
+					Operand* target_element = extract_value_of_opernad(_target_element);
+					Operand* index = extract_value_of_opernad(_index);
+
+					std::vector<Operand*>* _array = target->get_array_data();
+
+					_array->at(std::stoi(index->get_data())) = target_element;
 				}
 			}
 			else {

@@ -28,6 +28,8 @@ void render_image(CMShader* shader, unsigned int texture_id, unsigned int vao, f
 
 	Matrix4 world_transform = Matrix4::CreateScale(width, height, 1.0f) * Matrix4::CreateRotationZ(-rotation / 180 * Math::Pi) * Matrix4::CreateTranslation(Vector3(x, y, 0));
 
+	glEnable(GL_TEXTURE_2D);
+
 	glBindTexture(GL_TEXTURE_2D, texture_id);
 
 	shader->set_matrix_uniform("uWorldTransform", world_transform);
@@ -35,6 +37,9 @@ void render_image(CMShader* shader, unsigned int texture_id, unsigned int vao, f
 
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+	glBindVertexArray(0);
+
+	glDisable(GL_TEXTURE_2D);
 }
 
 int nextpoweroftwo(int x)
@@ -43,7 +48,7 @@ int nextpoweroftwo(int x)
 	return round(pow(2, ceil(logbase2)));
 }
 
-void render_text(SDL_Renderer* renderer,
-	std::string const& str, float x, float y, float _r, float _g, float _b, float _a, float rotation) {
-	
+void render_text(SDL_Renderer* renderer, CMShader* shader,
+	std::string const& str, float x, float y, float _r, float _g, float _b, float _a, float rotation, int proj_width, int proj_height) {
+
 }

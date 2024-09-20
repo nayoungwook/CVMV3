@@ -295,7 +295,6 @@ SDL_Window* create_window(std::string const& title, int width, int height) {
 	// Initialize Font
 	if (TTF_Init() < 0) {
 		CHESTNUT_THROW_ERROR(L"Failed to initialize SDL TTF! please check your SDL libraries.", "FAILED_TO_INIT_TTF", "0x11", -1);
-
 	}
 
 	return result;

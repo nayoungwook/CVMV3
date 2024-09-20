@@ -70,7 +70,16 @@ void FunctionFrame::builtin_text(Operator* op, CVM* vm, FunctionFrame* caller, M
 		delete rotation;
 	}
 
-	render_text(vm->renderer, str->get_data(), _x, _y, 1, 1, 1, 1, f_rotation);
+	Memory* shader_memory = reinterpret_cast<Memory*>(std::stoull(vm->global_area[SHADER_MEMORY]->get_data()));
+	CMShader* shader_cm = (CMShader*)shader_memory->get_cm_class();
+
+	TTF_Font* font = TTF_OpenFont("C:\\Windows\\Fonts\\gulim.ttc", 16);
+
+	SDL_Color color = { 255, 0, 255, 0 };
+	SDL_Surface* surface = TTF_RenderText_Blended(font, str->get_data().c_str(), color);
+	SDL_Texture* texture = SDL_CreateTextureFromSurface(vm->renderer, surface);
+
+	//	render_text(vm->renderer, shader_cm, str->get_data(), _x, _y, 1, 1, 1, 1, f_rotation, vm->proj_width, vm->proj_height);
 
 	delete str;
 	delete position;

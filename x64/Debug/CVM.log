@@ -1,3 +1,5 @@
 ﻿  function_frame.cpp
-C:\Users\user\source\repos\Chestnut\CVM\FileWatcher.hpp(247,9): warning C4068: 알 수 없는 pragma 'mark'
-  CVM.vcxproj -> C:\Users\user\source\repos\Chestnut\x64\Debug\CVM.exe
+C:\workspace\CVM\FileWatcher.hpp(247,9): warning C4068: 알 수 없는 pragma 'mark'
+  (소스 파일 'function_frame.cpp'을(를) 컴파일하는 중)
+  
+  CVM.vcxproj -> C:\Users\nayou\source\repos\Chestnut\x64\Debug\CVM.exe

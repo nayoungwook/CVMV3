@@ -19,3 +19,4 @@ public:
 
 void load_images(std::queue<std::pair<std::string, std::string>>& load_queue, std::unordered_map<std::string, CMImage*>& resources);
 std::pair<unsigned int, unsigned int> create_texture_id(std::string const& path, int width, int height, int channel);
+unsigned int create_vao();
