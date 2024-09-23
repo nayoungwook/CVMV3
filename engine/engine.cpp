@@ -45,11 +45,10 @@ void render_image(CMShader* shader, unsigned int texture_id, unsigned int vao, f
 void render_text(SDL_Renderer* renderer, CMShader* shader,
 	std::string const& str, float x, float y, float _r, float _g, float _b, float _a, float rotation, int proj_width, int proj_height) {
 
-
 	SDL_Color color = { 255, 150, 255 };
 	TTF_Font* font = TTF_OpenFont("C:\\Windows\\Fonts\\gulim.ttc", 60);
 	SDL_Surface* surface = TTF_RenderUTF8_Solid(font, str.c_str(), color);
-
+	surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA8888, 0);
 	unsigned int vao, vbo, ebo;
 
 	float vertices[] = {
@@ -87,22 +86,22 @@ void render_text(SDL_Renderer* renderer, CMShader* shader,
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, tex_coord_count, GL_FLOAT, GL_FALSE, sizeof(float) * vertex_count, (void*)(sizeof(float) * position_vertex_count));
 
-	glEnable(GL_TEXTURE_2D);
-
 	unsigned int tex;
 	glGenTextures(1, &tex);
 
 	glBindTexture(GL_TEXTURE_2D, tex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, surface->pixels);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0,
+		GL_RGBA, GL_UNSIGNED_BYTE, surface->pixels);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	Matrix4 world_transform = Matrix4::CreateScale(surface->w, surface->h, 1.0f) * Matrix4::CreateRotationZ(-rotation / 180 * Math::Pi) * Matrix4::CreateTranslation(Vector3(x, y, 0));
+	glEnable(GL_TEXTURE_2D);
 
 	shader->set_matrix_uniform("uWorldTransform", world_transform);
 	shader->set_matrix_uniform("uViewProj", Matrix4::CreateSimpleViewProj(proj_width, proj_height));
-
 
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);

@@ -1,4 +1,8 @@
 ﻿  engine.cpp
-C:\Users\user\source\repos\Chestnut\CVM\engine\engine.cpp(36,84): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\user\source\repos\Chestnut\CVM\engine\engine.cpp(36,72): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  CVM.vcxproj -> C:\Users\user\source\repos\Chestnut\x64\Debug\CVM.exe
+C:\workspace\CVM\engine\engine.cpp(36,84): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\workspace\CVM\engine\engine.cpp(36,72): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\workspace\CVM\engine\engine.cpp(100,68): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\workspace\CVM\engine\engine.cpp(100,56): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\workspace\CVM\engine\engine.cpp(104,84): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\workspace\CVM\engine\engine.cpp(104,72): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  CVM.vcxproj -> C:\Users\nayou\source\repos\Chestnut\x64\Debug\CVM.exe

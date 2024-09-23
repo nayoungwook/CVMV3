@@ -54,11 +54,10 @@ enum operator_type {
 class Operator {
 private:
 	operator_type type;
-	std::vector<Token*> operands;
 	int line_number;
 public:
 	int get_line_number() const;
 	operator_type get_type() const;
-	std::vector<Token*> get_operands() const;
+	std::vector<Token*> operands;
 	Operator(operator_type type, std::vector<Token*>& operands, int line_number);
 };

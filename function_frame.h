@@ -22,6 +22,8 @@ public:
 	Stack* stack;
 	void run(CVM* vm, FunctionFrame* caller, Memory* caller_class);
 
+	void object_builtin_render(CVM* vm, FunctionFrame* caller, Memory* caller_class);
+
 	void run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 
 

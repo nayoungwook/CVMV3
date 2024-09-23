@@ -74,8 +74,18 @@ int main(int argc, char* args[]) {
 		exit(EXIT_FAILURE);
 	}
 
+	std::time_t start = time(NULL);
+	std::time_t fin = time(NULL);
+
+	time(&start);
+
 	FunctionFrame* main_frame = new FunctionFrame(main_function);
 	main_frame->run(vm, nullptr, nullptr);
+
+	time(&fin);
+
+	std::string diff = std::to_string((int) difftime(fin, start));
+	CHESTNUT_LOG(L"Process end with : " + std::wstring(diff.begin(), diff.end()) + L"sec.", log_level::log_default);
 
 	return 0;
 }

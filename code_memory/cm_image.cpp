@@ -37,7 +37,7 @@ unsigned int create_vao() {
 	unsigned int vao;
 
 	try {
-		
+
 		float vertices[] = {
 			-0.5f, 0.5f, 0.0f,   0.f, 0.f,
 			0.5f, 0.5f, 0.0f,    1.f, 0.f,

@@ -242,47 +242,52 @@ void check_type_for_store(CVM* vm, std::string const& type1, std::string const& 
 
 }
 
+void FunctionFrame::object_builtin_render(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	CMObject* caller_object = (CMObject*)caller_class->get_cm_class();
+
+	Memory* shader_memory = reinterpret_cast<Memory*>(std::stoull(vm->global_area[SHADER_MEMORY]->get_data()));
+	CMShader* shader_cm = (CMShader*)shader_memory->get_cm_class();
+
+	Operand* texture_op = caller_class->member_variables[OBJECT_SPRITE];
+
+	if (texture_op->get_type() == operand_null) {
+		std::string name = caller_class->get_cm_class()->name;
+		CHESTNUT_THROW_ERROR(L"Failed to render " + std::wstring(name.begin(), name.end()) + L". You must assing texture for it.",
+			"RUNTIME_NO_TEXTURE_FOR_OBJECT", "0x03", 0);
+	}
+
+	Operand* position_op = extract_value_of_opernad(caller_class->member_variables[OBJECT_POSITION]);
+
+	float _x = std::stof(extract_value_of_opernad(position_op->get_array_data()->at(0))->get_data()),
+		_y = std::stof(extract_value_of_opernad(position_op->get_array_data()->at(1))->get_data());
+
+	Operand* width_op = caller_class->member_variables[OBJECT_WIDTH];
+	Operand* height_op = caller_class->member_variables[OBJECT_HEIGHT];
+
+	float f_width = std::stof(extract_value_of_opernad(width_op)->get_data())
+		, f_height = std::stof(extract_value_of_opernad(height_op)->get_data());
+
+	Operand* rotation_op = caller_class->member_variables[OBJECT_ROTATION];
+	float f_rotation = std::stof(extract_value_of_opernad(rotation_op)->get_data());
+
+	std::unordered_map<std::string, CMImage*>::iterator image_data_iter = vm->resources.find(extract_value_of_opernad(texture_op)->get_data());
+
+	assert(image_data_iter != vm->resources.end());
+
+	CMImage* image_data = image_data_iter->second;
+
+	render_image(shader_cm, image_data->get_texture(), image_data->get_vao(),
+		_x, _y, f_width, f_height, f_rotation, vm->proj_width, vm->proj_height);
+
+	delete this;
+	return;
+}
+
 void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
+
 	if (this->get_code_memory()->get_type() == code_render) {
-		CMObject* caller_object = (CMObject*)caller_class->get_cm_class();
-
-		Memory* shader_memory = reinterpret_cast<Memory*>(std::stoull(vm->global_area[SHADER_MEMORY]->get_data()));
-		CMShader* shader_cm = (CMShader*)shader_memory->get_cm_class();
-
-		Operand* texture_op = caller_class->member_variables[OBJECT_SPRITE];
-
-		if (texture_op->get_type() == operand_null) {
-			std::string name = caller_class->get_cm_class()->name;
-			CHESTNUT_THROW_ERROR(L"Failed to render " + std::wstring(name.begin(), name.end()) + L". You must assing texture for it.",
-				"RUNTIME_NO_TEXTURE_FOR_OBJECT", "0x03", 0);
-		}
-
-		Operand* position_op = extract_value_of_opernad(caller_class->member_variables[OBJECT_POSITION]);
-
-		float _x = std::stof(extract_value_of_opernad(position_op->get_array_data()->at(0))->get_data()),
-			_y = std::stof(extract_value_of_opernad(position_op->get_array_data()->at(1))->get_data());
-
-		Operand* width_op = caller_class->member_variables[OBJECT_WIDTH];
-		Operand* height_op = caller_class->member_variables[OBJECT_HEIGHT];
-
-		float f_width = std::stof(extract_value_of_opernad(width_op)->get_data())
-			, f_height = std::stof(extract_value_of_opernad(height_op)->get_data());
-
-		Operand* rotation_op = caller_class->member_variables[OBJECT_ROTATION];
-		float f_rotation = std::stof(extract_value_of_opernad(rotation_op)->get_data());
-
-		std::unordered_map<std::string, CMImage*>::iterator image_data_iter = vm->resources.find(extract_value_of_opernad(texture_op)->get_data());
-
-		assert(image_data_iter != vm->resources.end());
-
-		CMImage* image_data = image_data_iter->second;
-
-		render_image(shader_cm, image_data->get_texture(), image_data->get_vao(),
-			_x, _y, f_width, f_height, f_rotation, vm->proj_width, vm->proj_height);
-
-		delete this;
-		return;
+		return object_builtin_render(vm, caller, caller_class);
 	}
 
 	std::vector<Operator*> operators = this->code_memory->get_operators();
@@ -293,7 +298,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 		switch (type) {
 		case op_push_string: {
-			std::string data = op->get_operands()[0]->identifier;
+			std::string data = op->operands[0]->identifier;
 			data = data.substr(1, data.size() - 2);
 
 			this->stack->push(new Operand(data, operand_string));
@@ -301,7 +306,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_push_number: {
-			this->stack->push(new Operand(op->get_operands()[0]->identifier, operand_number));
+			this->stack->push(new Operand(op->operands[0]->identifier, operand_number));
 			break;
 		}
 
@@ -316,7 +321,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_push_bool: {
-			this->stack->push(new Operand(op->get_operands()[0]->identifier, operand_bool));
+			this->stack->push(new Operand(op->operands[0]->identifier, operand_bool));
 			break;
 		}
 
@@ -339,7 +344,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			this->stack->pop();
 
 			if (extract_value_of_opernad(condition)->get_data() == "true") {
-				std::string id = op->get_operands()[0]->identifier;
+				std::string id = op->operands[0]->identifier;
 				line = vm->label_id->find(id)->second;
 			}
 
@@ -349,8 +354,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_new: {
-			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
-			int parameter_count = std::stoi(op->get_operands()[1]->identifier);
+			unsigned int id = std::stoi(op->operands[0]->identifier);
+			int parameter_count = std::stoi(op->operands[1]->identifier);
 
 			Memory* memory = create_object(vm, vm->global_class.find(id), this, parameter_count);
 
@@ -363,7 +368,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_keybaord: {
-			std::string key = to_upper_all(op->get_operands()[0]->identifier);
+			std::string key = to_upper_all(op->operands[0]->identifier);
 			std::string result = vm->key_data.find(key) != vm->key_data.end() ? "true" : "false";
 
 			this->stack->push(new Operand(result, operand_bool));
@@ -375,7 +380,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			this->stack->pop();
 
 			if (extract_value_of_opernad(condition)->get_data() == "false") {
-				std::string id = op->get_operands()[0]->identifier;
+				std::string id = op->operands[0]->identifier;
 				line = vm->label_id->find(id)->second;
 			}
 
@@ -406,7 +411,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_goto: {
-			std::string id = op->get_operands()[0]->identifier;
+			std::string id = op->operands[0]->identifier;
 			line = vm->label_id->find(id)->second;
 
 			break;
@@ -628,9 +633,9 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* peek_op = this->stack->peek();
 			Operand* peek = copy_operand(peek_op);
 			this->stack->pop();
-			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
+			unsigned int id = std::stoi(op->operands[0]->identifier);
 
-			std::string name = op->get_operands()[1]->identifier;
+			std::string name = op->operands[1]->identifier;
 
 			if (vm->global_area.find(id) != vm->global_area.end())
 				vm->global_area[id] = peek;
@@ -648,21 +653,21 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* peek_op = this->stack->peek();
 			Operand* peek = copy_operand(peek_op);
 			this->stack->pop();
-			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
+			unsigned int id = std::stoi(op->operands[0]->identifier);
 
-			std::string name = op->get_operands()[1]->identifier;
+			std::string name = op->operands[1]->identifier;
 
 			peek->variable_name = name;
 
 			if (caller_class->member_variables.find(id) == caller_class->member_variables.end()) {
-				//std::cout << "new variable declared." << op->get_operands()[0]->identifier << std::endl;
+				//std::cout << "new variable declared." << op->operands[0]->identifier << std::endl;
 				caller_class->member_variables.insert(std::make_pair(id, peek));
-				caller_class->member_variable_names.insert(std::make_pair(id, op->get_operands()[1]->identifier));
+				caller_class->member_variable_names.insert(std::make_pair(id, op->operands[1]->identifier));
 			}
 			else {
 				delete caller_class->member_variables[id];
 				caller_class->member_variables[id] = peek;
-				caller_class->member_variable_names[id] = op->get_operands()[1]->identifier;
+				caller_class->member_variable_names[id] = op->operands[1]->identifier;
 			}
 
 			delete peek_op;
@@ -674,7 +679,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* peek_op = this->stack->peek();
 			Operand* peek = copy_operand(peek_op);
 			this->stack->pop();
-			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
+			unsigned int id = std::stoi(op->operands[0]->identifier);
 
 			std::string name = "";
 			std::string type = "";
@@ -707,7 +712,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* store_value = copy_operand(store_value_op);
 			this->stack->pop();
 
-			unsigned int store_id = std::stoi(op->get_operands()[0]->identifier);
+			unsigned int store_id = std::stoi(op->operands[0]->identifier);
 
 			operand_type op_type = attr_target->get_type();
 
@@ -725,7 +730,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				attr_memory->member_variables[store_id]->variable_name = name;
 			}
 			else if (op_type == operand_vector) {
-				std::string name = op->get_operands()[1]->identifier;
+				std::string name = op->operands[1]->identifier;
 				CHESTNUT_THROW_ERROR(L"Unable to store value into " + std::wstring(name.begin(), name.end()) + L" because it is vector varaible. it is read-only",
 					"RUNTIME_FAILED_TO_STORE_VALUE_INTO_VECTOR", "0x09", op->get_line_number());
 			}
@@ -755,7 +760,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_array: {
-			int array_size = std::stoi(op->get_operands()[0]->identifier);
+			int array_size = std::stoi(op->operands[0]->identifier);
 
 			Operand* result = nullptr;
 			std::vector<Operand*>* elements = new std::vector<Operand*>;
@@ -775,7 +780,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_vector: {
-			int vector_size = std::stoi(op->get_operands()[0]->identifier);
+			int vector_size = std::stoi(op->operands[0]->identifier);
 
 			Operand* result = nullptr;
 			std::vector<Operand*>* elements = new std::vector<Operand*>;
@@ -796,7 +801,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_load_global: {
-			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
+			unsigned int id = std::stoi(op->operands[0]->identifier);
 			Operand* found_op = vm->global_area[id];
 
 			this->stack->push(copy_operand(found_op));
@@ -805,7 +810,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_load_local: {
-			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
+			unsigned int id = std::stoi(op->operands[0]->identifier);
 			Operand* found_op = local_area[id];
 
 			this->stack->push(copy_operand(found_op));
@@ -813,11 +818,11 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_load_class: {
-			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
+			unsigned int id = std::stoi(op->operands[0]->identifier);
 			Operand* found_op = caller_class->member_variables[id];
 
 			if (found_op == nullptr) {
-				std::string var_name = op->get_operands()[1]->identifier;
+				std::string var_name = op->operands[1]->identifier;
 				CHESTNUT_THROW_ERROR(L"We can\'t find variable named " + std::wstring(var_name.begin(), var_name.end()),
 					"RUNTIME_FAILED_TO_LOAD_MEMBER_VARIABLE", "0x05", op->get_line_number());
 			}
@@ -827,8 +832,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_call_class: {
-			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
-			int parameter_count = std::stoi(op->get_operands()[1]->identifier);
+			unsigned int id = std::stoi(op->operands[0]->identifier);
+			int parameter_count = std::stoi(op->operands[1]->identifier);
 
 			CMFunction* code_memory = caller_class->get_cm_class()->member_functions->find(id)->second;
 
@@ -838,8 +843,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_call_global: {
-			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
-			int parameter_count = std::stoi(op->get_operands()[1]->identifier);
+			unsigned int id = std::stoi(op->operands[0]->identifier);
+			int parameter_count = std::stoi(op->operands[1]->identifier);
 			CMFunction* code_memory = vm->global_functions[id];
 
 			run_function(vm, nullptr, this, code_memory, parameter_count);
@@ -848,7 +853,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_super_call: {
-			int parameter_count = std::stoi(op->get_operands()[0]->identifier);
+			int parameter_count = std::stoi(op->operands[0]->identifier);
 			unsigned int parent_id = caller_class->get_cm_class()->get_parent_id();
 
 			CMClass* parent_code_memory = vm->global_class[parent_id];
@@ -882,7 +887,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* found_op = nullptr;
 
 			if (target->get_type() == operand_null) {
-				std::string name = op->get_operands()[1]->identifier;
+				std::string name = op->operands[1]->identifier;
 
 				CHESTNUT_THROW_ERROR(L"Failed to load " + std::wstring(name.begin(), name.end()) + L" because target was null.",
 					"RUNTIME_LOAD_FROM_NULL", "0x07", op->get_line_number());
@@ -890,10 +895,10 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			if (type == operand_address) {
 				Memory* memory = reinterpret_cast<Memory*>(std::stoull(target->get_data()));
-				found_op = memory->member_variables[std::stoi(op->get_operands()[0]->identifier)];
+				found_op = memory->member_variables[std::stoi(op->operands[0]->identifier)];
 			}
 			else if (type == operand_vector) {
-				int index = std::stoi(op->get_operands()[0]->identifier);
+				int index = std::stoi(op->operands[0]->identifier);
 
 				found_op = target->get_array_data()->at(index);
 			}
@@ -906,8 +911,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_call_attr: {
-			unsigned int id = std::stoi(op->get_operands()[0]->identifier);
-			int parameter_count = std::stoi(op->get_operands()[1]->identifier);
+			unsigned int id = std::stoi(op->operands[0]->identifier);
+			int parameter_count = std::stoi(op->operands[1]->identifier);
 
 			std::vector<Operand*> operands;
 
@@ -926,7 +931,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			}
 
 			if (target->get_type() == operand_null) {
-				std::string name = op->get_operands()[2]->identifier;
+				std::string name = op->operands[2]->identifier;
 				CHESTNUT_THROW_ERROR(L"Failed to call " + std::wstring(name.begin(), name.end()) + L" because target was null.",
 					"RUNTIME_CALL_FROM_NULL", "0x01", op->get_line_number());
 			}

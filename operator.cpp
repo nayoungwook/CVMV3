@@ -4,10 +4,6 @@ operator_type Operator::get_type() const {
 	return type;
 }
 
-std::vector<Token*> Operator::get_operands() const {
-	return operands;
-}
-
 int Operator::get_line_number() const {
 	return line_number;
 }
