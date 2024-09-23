@@ -28,6 +28,23 @@ void load_images(std::queue<std::pair<std::string, std::string>>& load_queue, st
 	}
 }
 
+void load_fonts(std::queue<std::pair<std::string, std::string>>& font_queue, std::unordered_map<std::string, TTF_Font*>& font_resources) {
+	while (!font_queue.empty()) {
+		std::pair<std::string, std::string> q = font_queue.front();
+		font_queue.pop();
+
+		TTF_Font* font = TTF_OpenFont(q.second.c_str(), 64);
+
+		if (font_resources.find(q.first) == font_resources.end()) {
+			font_resources.insert(std::make_pair(q.first, font));
+		}
+		else {
+			font_resources[q.first] = font;
+		}
+	}
+
+}
+
 unsigned int create_vao() {
 	unsigned char* bytes;
 	unsigned int vertex_count = 0;

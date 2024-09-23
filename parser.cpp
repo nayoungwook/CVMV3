@@ -328,6 +328,18 @@ CodeMemory* get_code_memory(CVM* vm, std::vector<Token*>& tokens) {
 
 		int line_number = std::stoi(pull_token(tokens)->identifier); // line number
 	}
+	else if (token->identifier == "#FONT") {
+		std::string name = pull_token(tokens)->identifier;
+
+		std::string path = "", file_path = pull_token(tokens)->identifier;
+		std::wstring current_directory = get_current_directory();
+		path.assign(current_directory.begin(), current_directory.end());
+		path += ("\\" + file_path.substr(1, file_path.size() - 2));
+
+		vm->font_queue.push(std::make_pair(name, path));
+
+		int line_number = std::stoi(pull_token(tokens)->identifier); // line number
+	}
 	else if (token->identifier == "#IMPORT") {
 		std::string name = pull_token(tokens)->identifier;
 		std::string file_path = name + ".cir";

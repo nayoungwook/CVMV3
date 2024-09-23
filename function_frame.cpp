@@ -285,7 +285,6 @@ void FunctionFrame::object_builtin_render(CVM* vm, FunctionFrame* caller, Memory
 
 void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
-
 	if (this->get_code_memory()->get_type() == code_render) {
 		return object_builtin_render(vm, caller, caller_class);
 	}

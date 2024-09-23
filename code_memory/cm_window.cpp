@@ -339,6 +339,7 @@ CMWindow::CMWindow(unsigned int id, CVM* vm, std::string const& title, int width
 	}
 
 	load_images(vm->load_queue, vm->resources);
+	load_fonts(vm->font_queue, vm->font_resources);
 	load_default_shader(vm);
 
 	load_builtin_variables(vm);

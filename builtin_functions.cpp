@@ -49,10 +49,17 @@ void FunctionFrame::builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, 
 
 void FunctionFrame::builtin_text(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 	int parameter_count = std::stoi(op->operands[1]->identifier);
+
+	Operand* font = this->stack->peek(); // string data.
+	this->stack->pop();
+
 	Operand* str = this->stack->peek(); // string data.
 	this->stack->pop();
 
 	Operand* position = this->stack->peek();
+	this->stack->pop();
+
+	Operand* size = this->stack->peek();
 	this->stack->pop();
 
 	std::vector<Operand*>* position_array = extract_value_of_opernad(position)->get_array_data();
@@ -73,10 +80,15 @@ void FunctionFrame::builtin_text(Operator* op, CVM* vm, FunctionFrame* caller, M
 	Memory* shader_memory = reinterpret_cast<Memory*>(std::stoull(vm->global_area[SHADER_MEMORY]->get_data()));
 	CMShader* shader_cm = (CMShader*)shader_memory->get_cm_class();
 
-	render_text(vm->renderer, shader_cm, str->get_data(), _x, _y, 1, 1, 1, 1, f_rotation, vm->proj_width, vm->proj_height);
+	std::string font_name = extract_value_of_opernad(font)->get_data();
+	int i_size = (int)std::stof(extract_value_of_opernad(size)->get_data());
 
+	render_text(vm->font_resources[font_name], shader_cm, str->get_data(), _x, _y, 1, 1, 1, 1, f_rotation, vm->proj_width, vm->proj_height, i_size);
+
+	delete font;
 	delete str;
 	delete position;
+	delete size;
 }
 
 void FunctionFrame::print_operand(Operand* data) {

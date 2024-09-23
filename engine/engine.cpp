@@ -42,13 +42,11 @@ void render_image(CMShader* shader, unsigned int texture_id, unsigned int vao, f
 	glDisable(GL_TEXTURE_2D);
 }
 
-void render_text(SDL_Renderer* renderer, CMShader* shader,
-	std::string const& str, float x, float y, float _r, float _g, float _b, float _a, float rotation, int proj_width, int proj_height) {
+void render_text(TTF_Font* font, CMShader* shader, std::string const& str, float x, float y, float _r, float _g, float _b, float _a, float rotation, int proj_width, int proj_height, int size) {
 
-	SDL_Color color = { 255, 150, 255 };
-	TTF_Font* font = TTF_OpenFont("C:\\Windows\\Fonts\\gulim.ttc", 60);
-	SDL_Surface* surface = TTF_RenderUTF8_Solid(font, str.c_str(), color);
-	surface = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA8888, 0);
+	SDL_Color color = { 255, 150, 100 };
+	SDL_Surface* _temp_surface = TTF_RenderUTF8_Solid(font, str.c_str(), color);
+	SDL_Surface* surface = SDL_ConvertSurfaceFormat(_temp_surface, SDL_PIXELFORMAT_RGBA8888, 0);
 	unsigned int vao, vbo, ebo;
 
 	float vertices[] = {
@@ -65,7 +63,7 @@ void render_text(SDL_Renderer* renderer, CMShader* shader,
 		0, 1, 2,
 		2, 3, 0,
 	};
-
+	
 	int indices_count = sizeof(indices) / sizeof(unsigned int);
 
 	glGenVertexArrays(1, &vao);
@@ -97,7 +95,7 @@ void render_text(SDL_Renderer* renderer, CMShader* shader,
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	Matrix4 world_transform = Matrix4::CreateScale(surface->w, surface->h, 1.0f) * Matrix4::CreateRotationZ(-rotation / 180 * Math::Pi) * Matrix4::CreateTranslation(Vector3(x, y, 0));
+	Matrix4 world_transform = Matrix4::CreateScale(surface->w / 64 * size, surface->h / 64 * size, 1.0f) * Matrix4::CreateRotationZ(-rotation / 180 * Math::Pi) * Matrix4::CreateTranslation(Vector3(x, y, 0));
 	glEnable(GL_TEXTURE_2D);
 
 	shader->set_matrix_uniform("uWorldTransform", world_transform);
@@ -107,13 +105,13 @@ void render_text(SDL_Renderer* renderer, CMShader* shader,
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
 
+	glDisable(GL_TEXTURE_2D);
+
 	glDeleteBuffers(1, &vbo);
 	glDeleteBuffers(1, &ebo);
 	glDeleteVertexArrays(1, &vao);
-
 	glDeleteTextures(1, &tex);
 
+	SDL_FreeSurface(_temp_surface);
 	SDL_FreeSurface(surface);
-	TTF_CloseFont(font);
-	glDisable(GL_TEXTURE_2D);
 }
