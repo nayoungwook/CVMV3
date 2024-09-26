@@ -57,37 +57,37 @@ inline Operand* extract_value_of_opernad(Operand* op) {
 }
 
 Operand* create_address_operand(Memory* op) {
-	return new Operand(std::to_string((unsigned long long)(void**) op), operand_address);
+	return new Operand(std::to_wstring((unsigned long long)(void**) op), operand_address);
 }
 
 Operand* create_op_address_operand(Operand* op) {
-	return new Operand(std::to_string((unsigned long long)(void**) op), operand_op_address);
+	return new Operand(std::to_wstring((unsigned long long)(void**) op), operand_op_address);
 }
 
-const std::string get_type_string_of_operand(Operand* op) {
-	std::string type_string_operand = "";
+const std::wstring get_type_string_of_operand(Operand* op) {
+	std::wstring type_string_operand = L"";
 
 	Operand* extracted_op = extract_value_of_opernad(op);
 
 	switch (extracted_op->get_type()) {
 	case operand_number:
-		type_string_operand = "number";
+		type_string_operand = L"number";
 		break;
 	case operand_array:
-		type_string_operand = "array";
+		type_string_operand = L"array";
 		break;
 	case operand_address:
 		type_string_operand
 			= reinterpret_cast<Memory*>(std::stoull(extracted_op->get_data()))->get_cm_class()->name;
 		break;
 	case operand_bool:
-		type_string_operand = "bool";
+		type_string_operand = L"bool";
 		break;
 	case operand_string:
-		type_string_operand = "string";
+		type_string_operand = L"wstring";
 		break;
 	case operand_vector:
-		type_string_operand = "vector";
+		type_string_operand = L"vector";
 		break;
 	}
 
@@ -98,7 +98,7 @@ void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CM
 	FunctionFrame* frame = new FunctionFrame(code_memory);
 
 	if (parameter_count != code_memory->get_param_types().size()) {
-		std::string name = caller_frame->get_code_memory()->name;
+		std::wstring name = caller_frame->get_code_memory()->name;
 		CHESTNUT_THROW_ERROR(L"Failed to call " + std::wstring(name.begin(), name.end()) + L". You pass the wrong parameters",
 			"RUNTIME_WRONG_PARAMETER", "0x02", 0);
 	}
@@ -107,10 +107,10 @@ void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CM
 		Operand* op = caller_frame->stack->peek();
 		caller_frame->stack->pop();
 
-		std::string type_string_of_operand = get_type_string_of_operand(op);
+		std::wstring type_string_of_operand = get_type_string_of_operand(op);
 
 		if (code_memory->get_param_types()[i] != type_string_of_operand) {
-			std::string name = caller_frame->get_code_memory()->name;
+			std::wstring name = caller_frame->get_code_memory()->name;
 			CHESTNUT_THROW_ERROR(L"Failed to call " + std::wstring(name.begin(), name.end()) + L". You pass the wrong parameters",
 				"RUNTIME_WRONG_PARAMETER", "0x02", 0);
 		}
@@ -134,7 +134,7 @@ Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, double (*cal)(doub
 
 		double calculated_v = cal(lhs_v, rhs_v);
 
-		calculated_result->push_back(new Operand(std::to_string(calculated_v), operand_number));
+		calculated_result->push_back(new Operand(std::to_wstring(calculated_v), operand_number));
 	}
 
 	return new Operand(calculated_result, operand_vector);
@@ -187,7 +187,7 @@ Memory* create_object(CVM* vm, std::unordered_map<unsigned int, CMClass*>::itera
 		// add render function
 		unsigned int render_function_id = ((CMObject*)code_memory)->get_render_function_id();
 		std::vector<Operator*> temp1;
-		std::vector<std::string> temp2;
+		std::vector<std::wstring> temp2;
 		CMFunction* render_function = new CMRender(temp1, render_function_id, temp2);
 		if (code_memory->member_functions->find(render_function_id) != code_memory->member_functions->end())
 			code_memory->member_functions->erase(code_memory->member_functions->find(render_function_id));
@@ -203,15 +203,15 @@ Memory* create_object(CVM* vm, std::unordered_map<unsigned int, CMClass*>::itera
 
 		if (!position_declared) {
 			std::vector<Operand*>* position_data = new std::vector<Operand*>;
-			position_data->push_back(new Operand("0", operand_number));
-			position_data->push_back(new Operand("0", operand_number));
+			position_data->push_back(new Operand(L"0", operand_number));
+			position_data->push_back(new Operand(L"0", operand_number));
 			memory->member_variables.insert(std::make_pair(OBJECT_POSITION, new Operand(position_data, operand_vector)));
 		}
 
-		if (!width_declared) memory->member_variables.insert(std::make_pair(OBJECT_WIDTH, new Operand("100", operand_number)));
-		if (!height_declared) memory->member_variables.insert(std::make_pair(OBJECT_HEIGHT, new Operand("100", operand_number)));
-		if (!rotation_declared) memory->member_variables.insert(std::make_pair(OBJECT_ROTATION, new Operand("0", operand_number)));
-		if (!texture_declared) memory->member_variables.insert(std::make_pair(OBJECT_SPRITE, new Operand("", operand_null)));
+		if (!width_declared) memory->member_variables.insert(std::make_pair(OBJECT_WIDTH, new Operand(L"100", operand_number)));
+		if (!height_declared) memory->member_variables.insert(std::make_pair(OBJECT_HEIGHT, new Operand(L"100", operand_number)));
+		if (!rotation_declared) memory->member_variables.insert(std::make_pair(OBJECT_ROTATION, new Operand(L"0", operand_number)));
+		if (!texture_declared) memory->member_variables.insert(std::make_pair(OBJECT_SPRITE, new Operand(L"", operand_null)));
 
 	}
 	return memory;
@@ -234,7 +234,7 @@ bool operand_compare(Operand* op1, Operand* op2) {
 	return op1 == op2;
 }
 
-void check_type_for_store(CVM* vm, std::string const& type1, std::string const& type2) {
+void check_type_for_store(CVM* vm, std::wstring const& type1, std::wstring const& type2) {
 	if (type1 == type2) return;
 
 	bool both_object = true;
@@ -251,7 +251,7 @@ void FunctionFrame::object_builtin_render(CVM* vm, FunctionFrame* caller, Memory
 	Operand* texture_op = caller_class->member_variables[OBJECT_SPRITE];
 
 	if (texture_op->get_type() == operand_null) {
-		std::string name = caller_class->get_cm_class()->name;
+		std::wstring name = caller_class->get_cm_class()->name;
 		CHESTNUT_THROW_ERROR(L"Failed to render " + std::wstring(name.begin(), name.end()) + L". You must assing texture for it.",
 			"RUNTIME_NO_TEXTURE_FOR_OBJECT", "0x03", 0);
 	}
@@ -270,7 +270,7 @@ void FunctionFrame::object_builtin_render(CVM* vm, FunctionFrame* caller, Memory
 	Operand* rotation_op = caller_class->member_variables[OBJECT_ROTATION];
 	float f_rotation = std::stof(extract_value_of_opernad(rotation_op)->get_data());
 
-	std::unordered_map<std::string, CMImage*>::iterator image_data_iter = vm->resources.find(extract_value_of_opernad(texture_op)->get_data());
+	std::unordered_map<std::wstring, CMImage*>::iterator image_data_iter = vm->resources.find(extract_value_of_opernad(texture_op)->get_data());
 
 	assert(image_data_iter != vm->resources.end());
 
@@ -297,7 +297,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 		switch (type) {
 		case op_push_string: {
-			std::string data = op->operands[0]->identifier;
+			std::wstring data = op->operands[0]->identifier;
 			data = data.substr(1, data.size() - 2);
 
 			this->stack->push(new Operand(data, operand_string));
@@ -310,7 +310,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_push_null: {
-			this->stack->push(new Operand("", operand_null));
+			this->stack->push(new Operand(L"", operand_null));
 			break;
 		}
 
@@ -342,8 +342,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* condition = this->stack->peek();
 			this->stack->pop();
 
-			if (extract_value_of_opernad(condition)->get_data() == "true") {
-				std::string id = op->operands[0]->identifier;
+			if (extract_value_of_opernad(condition)->get_data() == L"true") {
+				std::wstring id = op->operands[0]->identifier;
 				line = vm->label_id->find(id)->second;
 			}
 
@@ -367,8 +367,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_keybaord: {
-			std::string key = to_upper_all(op->operands[0]->identifier);
-			std::string result = vm->key_data.find(key) != vm->key_data.end() ? "true" : "false";
+			std::wstring key = to_upper_all(op->operands[0]->identifier);
+			std::wstring result = vm->key_data.find(key) != vm->key_data.end() ? L"true" : L"false";
 
 			this->stack->push(new Operand(result, operand_bool));
 			break;
@@ -378,8 +378,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* condition = this->stack->peek();
 			this->stack->pop();
 
-			if (extract_value_of_opernad(condition)->get_data() == "false") {
-				std::string id = op->operands[0]->identifier;
+			if (extract_value_of_opernad(condition)->get_data() == L"false") {
+				std::wstring id = op->operands[0]->identifier;
 				line = vm->label_id->find(id)->second;
 			}
 
@@ -393,7 +393,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			this->stack->pop();
 
 			double v = std::stod(extract_value_of_opernad(target)->get_data()) + 1;
-			extract_value_of_opernad(target)->set_data(std::to_string(v));
+			extract_value_of_opernad(target)->set_data(std::to_wstring(v));
 
 			break;
 		}
@@ -403,14 +403,14 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			this->stack->pop();
 
 			double v = std::stod(extract_value_of_opernad(target)->get_data()) - 1;
-			extract_value_of_opernad(target)->set_data(std::to_string(v));
+			extract_value_of_opernad(target)->set_data(std::to_wstring(v));
 
 			delete target;
 			break;
 		}
 
 		case op_goto: {
-			std::string id = op->operands[0]->identifier;
+			std::wstring id = op->operands[0]->identifier;
 			line = vm->label_id->find(id)->second;
 
 			break;
@@ -462,22 +462,22 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 						switch (type) {
 						case op_add:
-							calculated_vector->push_back(new Operand(std::to_string(lhs_v + rhs_v), operand_number));
+							calculated_vector->push_back(new Operand(std::to_wstring(lhs_v + rhs_v), operand_number));
 							break;
 						case op_sub:
-							calculated_vector->push_back(new Operand(std::to_string(lhs_v - rhs_v), operand_number));
+							calculated_vector->push_back(new Operand(std::to_wstring(lhs_v - rhs_v), operand_number));
 							break;
 						case op_mul:
-							calculated_vector->push_back(new Operand(std::to_string(lhs_v * rhs_v), operand_number));
+							calculated_vector->push_back(new Operand(std::to_wstring(lhs_v * rhs_v), operand_number));
 							break;
 						case op_div:
-							calculated_vector->push_back(new Operand(std::to_string(lhs_v / rhs_v), operand_number));
+							calculated_vector->push_back(new Operand(std::to_wstring(lhs_v / rhs_v), operand_number));
 							break;
 						case op_pow:
-							calculated_vector->push_back(new Operand(std::to_string(pow(lhs_v, rhs_v)), operand_number));
+							calculated_vector->push_back(new Operand(std::to_wstring(pow(lhs_v, rhs_v)), operand_number));
 							break;
 						case op_mod:
-							calculated_vector->push_back(new Operand(std::to_string((int)lhs_v % (int)rhs_v), operand_number));
+							calculated_vector->push_back(new Operand(std::to_wstring((int)lhs_v % (int)rhs_v), operand_number));
 							break;
 						}
 					}
@@ -485,8 +485,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					this->stack->push(new Operand(calculated_vector, operand_vector));
 				}
 				else {
-					std::string lhs_str = get_type_string_of_operand(lhs);
-					std::string rhs_str = get_type_string_of_operand(rhs);
+					std::wstring lhs_str = get_type_string_of_operand(lhs);
+					std::wstring rhs_str = get_type_string_of_operand(rhs);
 					CHESTNUT_THROW_ERROR(L"Failed to calculate " + std::wstring(lhs_str.begin(), lhs_str.begin())
 						+ L" " + std::wstring(rhs_str.begin(), rhs_str.begin()),
 						"TRIED_TO_CALCULATE_DIFFERENT_TYPES", "0x11", op->get_line_number());
@@ -500,7 +500,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			switch (type) {
 			case op_add:
 				if (lhs->get_type() == operand_number)
-					this->stack->push(new Operand(std::to_string(
+					this->stack->push(new Operand(std::to_wstring(
 						std::stod(lhs->get_data())
 						+ std::stod(rhs->get_data())), operand_number));
 				else if (lhs->get_type() == operand_vector)
@@ -509,7 +509,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				break;
 			case op_sub:
 				if (lhs->get_type() == operand_number)
-					this->stack->push(new Operand(std::to_string(
+					this->stack->push(new Operand(std::to_wstring(
 						std::stod(lhs->get_data())
 						- std::stod(rhs->get_data())), operand_number));
 				else if (lhs->get_type() == operand_vector)
@@ -518,7 +518,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				break;
 			case op_mul:
 				if (lhs->get_type() == operand_number)
-					this->stack->push(new Operand(std::to_string(
+					this->stack->push(new Operand(std::to_wstring(
 						std::stod(lhs->get_data())
 						* std::stod(rhs->get_data())), operand_number));
 				else if (lhs->get_type() == operand_vector)
@@ -532,7 +532,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 							"RUNTIME_DEVIDED_BY_ZERO", "0x04", op->get_line_number());
 					}
 
-					this->stack->push(new Operand(std::to_string(
+					this->stack->push(new Operand(std::to_wstring(
 						std::stod(lhs->get_data())
 						/ std::stod(rhs->get_data())), operand_number));
 
@@ -543,7 +543,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				break;
 			case op_pow:
 				if (lhs->get_type() == operand_number) {
-					this->stack->push(new Operand(std::to_string(
+					this->stack->push(new Operand(std::to_wstring(
 						pow(std::stod(lhs->get_data()), std::stod(rhs->get_data()))), operand_number));
 				}
 				else if (lhs->get_type() == operand_vector)
@@ -555,7 +555,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 						CHESTNUT_THROW_ERROR(L"Divided by zero. So sorry but We don\'t have Limit system here yet.",
 							"RUNTIME_DEVIDED_BY_ZERO", "0x04", op->get_line_number());
 					}
-					this->stack->push(new Operand(std::to_string(
+					this->stack->push(new Operand(std::to_wstring(
 						(int)std::stod(lhs->get_data())
 						% (int)std::stod(rhs->get_data())), operand_number));
 				}
@@ -566,25 +566,25 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			case op_greater: {
 				bool result = std::stod(lhs->get_data()) < std::stod(rhs->get_data());
-				this->stack->push(new Operand(result ? "true" : "false", operand_bool));
+				this->stack->push(new Operand(result ? L"true" : L"false", operand_bool));
 				break;
 			}
 
 			case op_lesser: {
 				bool result = std::stod(lhs->get_data()) > std::stod(rhs->get_data());
-				this->stack->push(new Operand(result ? "true" : "false", operand_bool));
+				this->stack->push(new Operand(result ? L"true" : L"false", operand_bool));
 				break;
 			}
 
 			case op_eq_lesser: {
 				bool result = std::stod(lhs->get_data()) >= std::stod(rhs->get_data());
-				this->stack->push(new Operand(result ? "true" : "false", operand_bool));
+				this->stack->push(new Operand(result ? L"true" : L"false", operand_bool));
 				break;
 			}
 
 			case op_eq_greater: {
 				bool result = std::stod(lhs->get_data()) <= std::stod(rhs->get_data());
-				this->stack->push(new Operand(result ? "true" : "false", operand_bool));
+				this->stack->push(new Operand(result ? L"true" : L"false", operand_bool));
 				break;
 			}
 
@@ -594,32 +594,32 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				if (lhs->get_type() == operand_number)
 					result = std::stod(lhs->get_data()) == std::stod(rhs->get_data());
 
-				this->stack->push(new Operand(result ? "true" : "false", operand_bool));
+				this->stack->push(new Operand(result ? L"true" : L"false", operand_bool));
 				break;
 			}
 
 			case op_not_equal: {
 				bool result = lhs->get_data() != rhs->get_data();
-				this->stack->push(new Operand(result ? "true" : "false", operand_bool));
+				this->stack->push(new Operand(result ? L"true" : L"false", operand_bool));
 				break;
 			}
 
 			case op_or: {
-				bool _lhs = lhs->get_data() == "true";
-				bool _rhs = rhs->get_data() == "true";
+				bool _lhs = lhs->get_data() == L"true";
+				bool _rhs = rhs->get_data() == L"true";
 				bool result = _lhs || _rhs;
 
-				this->stack->push(new Operand(result ? "true" : "false", operand_bool));
+				this->stack->push(new Operand(result ? L"true" : L"false", operand_bool));
 
 				break;
 			}
 
 			case op_and: {
-				bool _lhs = lhs->get_data() == "true";
-				bool _rhs = rhs->get_data() == "true";
+				bool _lhs = lhs->get_data() == L"true";
+				bool _rhs = rhs->get_data() == L"true";
 				bool result = _lhs && _rhs;
 
-				this->stack->push(new Operand(result ? "true" : "false", operand_bool));
+				this->stack->push(new Operand(result ? L"true" : L"false", operand_bool));
 				break;
 			}
 			}
@@ -634,7 +634,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			this->stack->pop();
 			unsigned int id = std::stoi(op->operands[0]->identifier);
 
-			std::string name = op->operands[1]->identifier;
+			std::wstring name = op->operands[1]->identifier;
 
 			if (vm->global_area.find(id) != vm->global_area.end())
 				vm->global_area[id] = peek;
@@ -654,7 +654,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			this->stack->pop();
 			unsigned int id = std::stoi(op->operands[0]->identifier);
 
-			std::string name = op->operands[1]->identifier;
+			std::wstring name = op->operands[1]->identifier;
 
 			peek->variable_name = name;
 
@@ -680,8 +680,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			this->stack->pop();
 			unsigned int id = std::stoi(op->operands[0]->identifier);
 
-			std::string name = "";
-			std::string type = "";
+			std::wstring name = L"";
+			std::wstring type = L"";
 
 			if (local_area.find(id) != local_area.end()) {
 				delete local_area[id];
@@ -717,7 +717,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			if (op_type == operand_address) {
 				Memory* attr_memory = reinterpret_cast<Memory*>(std::stoull(attr_target->get_data()));
-				std::string name = "";
+				std::wstring name = L"";
 
 				if (attr_memory->member_variables.find(store_id) != attr_memory->member_variables.end()) {
 					name = attr_memory->member_variables[store_id]->variable_name;
@@ -729,7 +729,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				attr_memory->member_variables[store_id]->variable_name = name;
 			}
 			else if (op_type == operand_vector) {
-				std::string name = op->operands[1]->identifier;
+				std::wstring name = op->operands[1]->identifier;
 				CHESTNUT_THROW_ERROR(L"Unable to store value into " + std::wstring(name.begin(), name.end()) + L" because it is vector varaible. it is read-only",
 					"RUNTIME_FAILED_TO_STORE_VALUE_INTO_VECTOR", "0x09", op->get_line_number());
 			}
@@ -821,7 +821,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* found_op = caller_class->member_variables[id];
 
 			if (found_op == nullptr) {
-				std::string var_name = op->operands[1]->identifier;
+				std::wstring var_name = op->operands[1]->identifier;
 				CHESTNUT_THROW_ERROR(L"We can\'t find variable named " + std::wstring(var_name.begin(), var_name.end()),
 					"RUNTIME_FAILED_TO_LOAD_MEMBER_VARIABLE", "0x05", op->get_line_number());
 			}
@@ -866,7 +866,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			std::unordered_map<unsigned int, CMFunction*>::iterator member_function_iter = parent_code_memory->member_functions->begin();
 
 			for (; member_function_iter != parent_code_memory->member_functions->end(); member_function_iter++) {
-				if (member_function_iter->second->get_access_modifier() != "private")
+				if (member_function_iter->second->get_access_modifier() != L"private")
 					caller_class->get_cm_class()->member_functions->insert(std::make_pair(member_function_iter->second->get_id(), member_function_iter->second));
 			}
 
@@ -886,7 +886,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* found_op = nullptr;
 
 			if (target->get_type() == operand_null) {
-				std::string name = op->operands[1]->identifier;
+				std::wstring name = op->operands[1]->identifier;
 
 				CHESTNUT_THROW_ERROR(L"Failed to load " + std::wstring(name.begin(), name.end()) + L" because target was null.",
 					"RUNTIME_LOAD_FROM_NULL", "0x07", op->get_line_number());
@@ -930,7 +930,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			}
 
 			if (target->get_type() == operand_null) {
-				std::string name = op->operands[2]->identifier;
+				std::wstring name = op->operands[2]->identifier;
 				CHESTNUT_THROW_ERROR(L"Failed to call " + std::wstring(name.begin(), name.end()) + L" because target was null.",
 					"RUNTIME_CALL_FROM_NULL", "0x01", op->get_line_number());
 			}
@@ -945,7 +945,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					target->get_array_data()->push_back(target_element);
 				}
 				else if (id == 1) { // array.size()
-					Operand* result = new Operand(std::to_string(target->get_array_data()->size()), operand_number);
+					Operand* result = new Operand(std::to_wstring(target->get_array_data()->size()), operand_number);
 
 					this->stack->push(result);
 				}

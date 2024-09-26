@@ -2,4 +2,4 @@
 
 #include <iostream>
 
-std::string to_upper_all(const std::string& str);
+std::wstring to_upper_all(const std::wstring& str);

@@ -10,7 +10,7 @@ private:
 	CMClass* backup_class = nullptr;
 public:
 	std::unordered_map<unsigned int, Operand*> member_variables;
-	std::unordered_map<unsigned int, std::string> member_variable_names;
+	std::unordered_map<unsigned int, std::wstring> member_variable_names;
 	void store_parent_memory(Memory* memory);
 	Memory* get_parent_memory();
 	void update_backup_cm_class();

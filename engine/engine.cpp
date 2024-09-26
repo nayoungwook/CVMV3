@@ -21,7 +21,6 @@ void initialize_engine() {
 }
 
 void render_image(CMShader* shader, unsigned int texture_id, unsigned int vao, float x, float y, float width, float height, float rotation, int proj_width, int proj_height) {
-
 	SDL_Point rotation_center = {
 		(int)width / 2, (int)height / 2
 	};
@@ -29,7 +28,6 @@ void render_image(CMShader* shader, unsigned int texture_id, unsigned int vao, f
 	Matrix4 world_transform = Matrix4::CreateScale(width, height, 1.0f) * Matrix4::CreateRotationZ(-rotation / 180 * Math::Pi) * Matrix4::CreateTranslation(Vector3(x, y, 0));
 
 	glEnable(GL_TEXTURE_2D);
-
 	glBindTexture(GL_TEXTURE_2D, texture_id);
 
 	shader->set_matrix_uniform("uWorldTransform", world_transform);
@@ -42,11 +40,19 @@ void render_image(CMShader* shader, unsigned int texture_id, unsigned int vao, f
 	glDisable(GL_TEXTURE_2D);
 }
 
-void render_text(TTF_Font* font, CMShader* shader, std::string const& str, float x, float y, float _r, float _g, float _b, float _a, float rotation, int proj_width, int proj_height, int size) {
+void render_text(TTF_Font* font, CMShader* shader, std::wstring const& str, float x, float y, float _r, float _g, float _b, float _a, float rotation, int proj_width, int proj_height, int size) {
 
-	SDL_Color color = { 255, 150, 100 };
-	SDL_Surface* _temp_surface = TTF_RenderUTF8_Solid(font, str.c_str(), color);
-	SDL_Surface* surface = SDL_ConvertSurfaceFormat(_temp_surface, SDL_PIXELFORMAT_RGBA8888, 0);
+	if (font == nullptr) {
+		CHESTNUT_THROW_ERROR(L"Failed to render Text. You must assign font for it.",
+			"RUNTIME_NO_FONT_FOR_OBJECT", "0x13", 0);
+	}
+
+	SDL_Color color = { 0, 0, 0, 0 };
+
+	SDL_Surface* _temp_surface = TTF_RenderUNICODE_Solid(font, (Uint16*) str.c_str(), color);
+	
+	SDL_Surface* surface = SDL_ConvertSurfaceFormat(_temp_surface, SDL_PIXELFORMAT_RGBA32, 0);
+
 	unsigned int vao, vbo, ebo;
 
 	float vertices[] = {
@@ -63,7 +69,7 @@ void render_text(TTF_Font* font, CMShader* shader, std::string const& str, float
 		0, 1, 2,
 		2, 3, 0,
 	};
-	
+
 	int indices_count = sizeof(indices) / sizeof(unsigned int);
 
 	glGenVertexArrays(1, &vao);
@@ -92,8 +98,8 @@ void render_text(TTF_Font* font, CMShader* shader, std::string const& str, float
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0,
 		GL_RGBA, GL_UNSIGNED_BYTE, surface->pixels);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	Matrix4 world_transform = Matrix4::CreateScale(surface->w / 64 * size, surface->h / 64 * size, 1.0f) * Matrix4::CreateRotationZ(-rotation / 180 * Math::Pi) * Matrix4::CreateTranslation(Vector3(x, y, 0));
 	glEnable(GL_TEXTURE_2D);

@@ -21,16 +21,16 @@ private:
 	SDL_Window* _window;
 public:
 	SDL_Window* get_window();
-	CMWindow(unsigned int id, CVM* vm, std::string const& title, int width, int height);
+	CMWindow(unsigned int id, CVM* vm, std::wstring const& title, int width, int height);
 };
 
 static SDL_GLContext context;
 
-SDL_Window* create_window(std::string const& title, int width, int height);
+SDL_Window* create_window(std::wstring const& title, int width, int height);
 void window_loop(CVM* vm, SDL_Window* window);
 void load_default_shader(CVM* vm);
 void load_builtin_variables(CVM* vm);
 
-static std::vector<std::string> changed_files;
-void register_source_code(CVM* machine, std::string const& loaded_file);
+static std::vector<std::wstring> changed_files;
+void register_source_code(CVM* machine, std::wstring const& loaded_file);
 void register_render_function_code(CMClass* cm_c);

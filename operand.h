@@ -17,18 +17,18 @@ enum operand_type {
 
 class Operand {
 private:
-	std::string data;
+	std::wstring data;
 	operand_type type;
 	std::vector<Operand*>* array_data;
 public:
-	void set_data(std::string data);
-	std::string get_data() const;
+	void set_data(std::wstring data);
+	std::wstring get_data() const;
 	std::vector<Operand*>* get_array_data();
 
 	operand_type get_type() const;
-	Operand(std::string const& data, operand_type type);
+	Operand(std::wstring const& data, operand_type type);
 	Operand(std::vector<Operand*>* array_data, operand_type type);
 	~Operand();
 
-	std::string variable_name = "";
+	std::wstring variable_name = L"";
 };

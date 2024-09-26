@@ -11,8 +11,8 @@
 #include "token.h"
 #include "error/sys_error.h"
 
-std::vector<std::string> get_file(std::string& file_path);
-void write_file(std::string& file_path, std::string content);
+std::vector<std::wstring> get_file(std::wstring& file_path);
+void write_file(std::wstring& file_path, std::wstring content);
 std::wstring get_current_directory();
-std::string get_absolute_path(std::string const& path);
-std::vector<Token*> parse_tokens(std::vector<std::string> file);
+std::wstring get_absolute_path(std::wstring const& path);
+std::vector<Token*> parse_tokens(std::vector<std::wstring> file);

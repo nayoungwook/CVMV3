@@ -1,6 +1,6 @@
 #include "cm_shader.h"
 
-CMShader::CMShader(unsigned int id, std::string const& _frag_path, std::string const& _vert_path) : CMClass(id, 0, -1, -1, -1) {
+CMShader::CMShader(unsigned int id, std::wstring const& _frag_path, std::wstring const& _vert_path) : CMClass(id, 0, -1, -1, -1) {
 	unsigned int frag = 0, vert = 0;
 
 	TCHAR buffer[MAX_PATH] = { 0 };
@@ -8,8 +8,8 @@ CMShader::CMShader(unsigned int id, std::string const& _frag_path, std::string c
 	std::wstring::size_type pos = std::wstring(buffer).find_last_of(L"\\/");
 	std::wstring module_file_dir = std::wstring(buffer).substr(0, pos);
 
-	std::string frag_path = std::string(module_file_dir.begin(), module_file_dir.end()) + "\\" + _frag_path;
-	std::string vert_path = std::string(module_file_dir.begin(), module_file_dir.end()) + "\\" + _vert_path;
+	std::wstring frag_path = std::wstring(module_file_dir.begin(), module_file_dir.end()) + L"\\" + _frag_path;
+	std::wstring vert_path = std::wstring(module_file_dir.begin(), module_file_dir.end()) + L"\\" + _vert_path;
 
 	if (!compile_shader(frag, frag_path, GL_FRAGMENT_SHADER)) {
 		std::wstring msg = L"Compilation error in shader : ";
@@ -82,7 +82,7 @@ bool CMShader::compile_succeeded(unsigned int shader) {
 	return true;
 }
 
-bool CMShader::compile_shader(unsigned int& _shader, const std::string& path, GLenum type) {
+bool CMShader::compile_shader(unsigned int& _shader, const std::wstring& path, GLenum type) {
 	std::ifstream shader_file(path);
 
 	if (shader_file.is_open()) {

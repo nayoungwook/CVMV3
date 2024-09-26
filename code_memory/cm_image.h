@@ -18,7 +18,7 @@ public:
 	CMImage(unsigned int texture, unsigned int vao);
 };
 
-void load_images(std::queue<std::pair<std::string, std::string>>& load_queue, std::unordered_map<std::string, CMImage*>& resources);
-void load_fonts(std::queue<std::pair<std::string, std::string>>& font_queue, std::unordered_map<std::string, TTF_Font*>& font_resources);
-std::pair<unsigned int, unsigned int> create_texture_id(std::string const& path, int width, int height, int channel);
+void load_images(std::queue<std::pair<std::wstring, std::wstring>>& load_queue, std::unordered_map<std::wstring, CMImage*>& resources);
+void load_fonts(std::queue<std::pair<std::wstring, std::wstring>>& font_queue, std::unordered_map<std::wstring, TTF_Font*>& font_resources);
+std::pair<unsigned int, unsigned int> create_texture_id(std::wstring const& path, int width, int height, int channel);
 unsigned int create_vao();

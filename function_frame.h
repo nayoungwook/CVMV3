@@ -51,8 +51,8 @@ void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CM
 Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, double (*cal)(double l, double r));
 Memory* create_object(CVM* vm, std::unordered_map<unsigned int, CMClass*>::iterator code_memory, FunctionFrame* frame, unsigned int constructor_parameter_count);
 
-const std::string get_type_string_of_operand(Operand* op);
-void check_type_for_store(CVM* vm, std::string const& type1, std::string const& type2);
+const std::wstring get_type_string_of_operand(Operand* op);
+void check_type_for_store(CVM* vm, std::wstring const& type1, std::wstring const& type2);
 
 double cal_add(double lhs, double rhs);
 double cal_sub(double lhs, double rhs);

@@ -16,12 +16,12 @@ private:
 	unsigned int program;
 	std::unordered_map<std::string, unsigned int> uniform_data;
 public:
-	CMShader(unsigned int id, std::string const& _frag_path, std::string const& _vert_path);
+	CMShader(unsigned int id, std::wstring const& _frag_path, std::wstring const& _vert_path);
 
 	std::unordered_map<std::string, unsigned int> get_uniform_data();
 	unsigned int get_program() const;
 	bool compile_succeeded(unsigned int shader);
-	bool compile_shader(unsigned int& _shader, const std::string& path, GLenum type);
+	bool compile_shader(unsigned int& _shader, const std::wstring& path, GLenum type);
 	void register_uniform_data(const char* name);
 	void set_matrix_uniform(const char* name, Matrix4 matrix);
 };

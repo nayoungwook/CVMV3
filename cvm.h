@@ -34,13 +34,13 @@ static const int BUILTIN_TEXT = 13;
 
 class CVM {
 public:
-	std::queue<std::pair<std::string, std::string>> load_queue; // <name , path>
-	std::unordered_map<std::string, CMImage*> resources;
+	std::queue<std::pair<std::wstring, std::wstring>> load_queue; // <name , path>
+	std::unordered_map<std::wstring, CMImage*> resources;
 
-	std::queue<std::pair<std::string, std::string>> font_queue; // <name , path>
-	std::unordered_map<std::string, TTF_Font*> font_resources;
+	std::queue<std::pair<std::wstring, std::wstring>> font_queue; // <name , path>
+	std::unordered_map<std::wstring, TTF_Font*> font_resources;
 
-	std::unordered_set<std::string> imported_files;
+	std::unordered_set<std::wstring> imported_files;
 
 	std::unordered_map<unsigned int, CMFunction*> global_functions;
 	std::unordered_map<unsigned int, CMClass*> global_class;
@@ -50,9 +50,9 @@ public:
 
 	std::vector<Memory*> heap_area;
 
-	std::unordered_map<std::string, unsigned int>* label_id;
+	std::unordered_map<std::wstring, unsigned int>* label_id;
 
-	std::unordered_set<std::string> key_data;
+	std::unordered_set<std::wstring> key_data;
 
 	int proj_width, proj_height;
 

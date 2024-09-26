@@ -17,7 +17,7 @@ private:
 	unsigned int tick_function_id = 0;
 	unsigned int render_function_id = 0;
 public:
-	std::string name = "";
+	std::wstring name = L"";
 
 	std::unordered_map<unsigned int, CMFunction*>* member_functions;
 

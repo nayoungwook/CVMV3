@@ -1,6 +1,6 @@
 #include "operand.h"
 
-Operand::Operand(std::string const& data, operand_type type) : data(data), type(type) {
+Operand::Operand(std::wstring const& data, operand_type type) : data(data), type(type) {
 }
 
 Operand::~Operand() {
@@ -21,11 +21,11 @@ std::vector<Operand*>* Operand::get_array_data() {
 	return array_data;
 }
 
-void Operand::set_data(std::string data) {
+void Operand::set_data(std::wstring data) {
 	this->data = data;
 }
 
-std::string Operand::get_data() const {
+std::wstring Operand::get_data() const {
 	return data;
 }
 

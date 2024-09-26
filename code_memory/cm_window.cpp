@@ -3,7 +3,7 @@
 void register_render_function_code(CMClass* cm_c) {
 	unsigned int render_function_id = ((CMObject*)cm_c)->get_render_function_id();
 	std::vector<Operator*> temp1;
-	std::vector<std::string> temp2;
+	std::vector<std::wstring> temp2;
 	CMFunction* render_function = new CMRender(temp1, render_function_id, temp2);
 	if (cm_c->member_functions->find(render_function_id) != cm_c->member_functions->end())
 		cm_c->member_functions->erase(cm_c->member_functions->find(render_function_id));
@@ -11,12 +11,12 @@ void register_render_function_code(CMClass* cm_c) {
 	cm_c->member_functions->insert(std::make_pair(render_function_id, render_function));
 }
 
-void register_source_code(CVM* vm, std::string const& loaded_file) {
-	std::string name = loaded_file;
+void register_source_code(CVM* vm, std::wstring const& loaded_file) {
+	std::wstring name = loaded_file;
 	std::wstring wname;
 	wname.assign(name.begin(), name.end());
 
-	std::vector<std::string> file = get_file(name);
+	std::vector<std::wstring> file = get_file(name);
 
 	std::vector<Token*> parsed_tokens = parse_tokens(file);
 
@@ -73,10 +73,10 @@ void register_source_code(CVM* vm, std::string const& loaded_file) {
 
 				if (cm_changed) {
 					CMClass* changed_cm = vm->heap_area[i]->get_cm_class();
-					std::unordered_map<unsigned int, std::string> backup_member_variable_names = vm->heap_area[i]->member_variable_names;
+					std::unordered_map<unsigned int, std::wstring> backup_member_variable_names = vm->heap_area[i]->member_variable_names;
 
 					// backing up memories for check already declared memory ( with name. )
-					std::unordered_map<std::string, Operand*> backup_members;
+					std::unordered_map<std::wstring, Operand*> backup_members;
 					std::unordered_map<unsigned int, Operand*>::iterator member_variable_iterator;
 
 					for (member_variable_iterator = target_memory->member_variables.begin();
@@ -101,7 +101,7 @@ void register_source_code(CVM* vm, std::string const& loaded_file) {
 
 					// remove unused backup members
 					/*
-					std::unordered_map<std::string, Operand*>::iterator backup_member_remover;
+					std::unordered_map<std::wstring, Operand*>::iterator backup_member_remover;
 					for (backup_member_remover = backup_members.begin();
 						backup_member_remover != backup_members.end(); backup_member_remover++) {
 						if (backup_member_remover->second != nullptr)
@@ -147,9 +147,9 @@ void window_loop(CVM* vm, SDL_Window* window) {
 			case filewatch::Event::modified:
 				bool is_cir = true;
 				bool is_cn = true;
-				std::string cir = ".cir";
-				std::string cn = ".cn";
-				std::string str_path;
+				std::wstring cir = L".cir";
+				std::wstring cn = L".cn";
+				std::wstring str_path;
 				str_path.assign(path.begin(), path.end());
 
 				if (!(std::isalpha(str_path[0]) || str_path[0] == '_')) break;
@@ -174,17 +174,17 @@ void window_loop(CVM* vm, SDL_Window* window) {
 				if (is_cir) {
 					CHESTNUT_LOG(L"cir File modified : " + path, log_level::log_default);
 
-					changed_files.push_back(std::string(path.begin(), path.end()));
+					changed_files.push_back(std::wstring(path.begin(), path.end()));
 				}
 
 				if (is_cn) {
 					CHESTNUT_LOG(L"cn File modified : " + path.substr(0, path.length() - 3), log_level::log_default);
 
 					std::wstring wcommand = L"chestnutcompiler -compile " + path.substr(0, path.length() - 3);
-					std::string command;
+					std::wstring command;
 					command.assign(wcommand.begin(), wcommand.end());
 
-					system(command.c_str());
+					system(std::string(command.begin(), command.end()).c_str());
 				}
 
 				break;
@@ -213,20 +213,20 @@ void window_loop(CVM* vm, SDL_Window* window) {
 			case SDL_KEYDOWN:
 			{
 				std::string key = SDL_GetKeyName(event.key.keysym.sym);
-				vm->key_data.insert(to_upper_all(key));
+				vm->key_data.insert(to_upper_all(std::wstring(key.begin(), key.end())));
 				break;
 			}
 			case SDL_KEYUP: {
 				std::string key = SDL_GetKeyName(event.key.keysym.sym);
-				vm->key_data.erase(to_upper_all(key));
+				vm->key_data.erase(to_upper_all(std::wstring(key.begin(), key.end())));
 				break;
 			}
 			case SDL_MOUSEMOTION: {
 				int win_w, win_h;
 				SDL_GetWindowSize(window, &win_w, &win_h);
 				int mouse_x = event.motion.x - win_w / 2, mouse_y = event.motion.y - win_h / 2;
-				vm->global_area[1]->get_array_data()->at(0)->set_data(std::to_string(mouse_x));
-				vm->global_area[1]->get_array_data()->at(1)->set_data(std::to_string(mouse_y));
+				vm->global_area[1]->get_array_data()->at(0)->set_data(std::to_wstring(mouse_x));
+				vm->global_area[1]->get_array_data()->at(1)->set_data(std::to_wstring(mouse_y));
 			}
 			}
 		}
@@ -276,8 +276,8 @@ void window_loop(CVM* vm, SDL_Window* window) {
 	}
 }
 
-SDL_Window* create_window(std::string const& title, int width, int height) {
-	SDL_Window* result = SDL_CreateWindow(title.c_str(), 100, 100, width, height, SDL_WINDOW_OPENGL);
+SDL_Window* create_window(std::wstring const& title, int width, int height) {
+	SDL_Window* result = SDL_CreateWindow(std::string(title.begin(), title.end()).c_str(), 100, 100, width, height, SDL_WINDOW_OPENGL);
 
 	if (context == nullptr)
 		context = SDL_GL_CreateContext(result);
@@ -307,7 +307,7 @@ SDL_Window* CMWindow::get_window() {
 void load_default_shader(CVM* vm) {
 	unsigned int builtin_id = vm->builtin_class.size();
 
-	CMShader* cm = new CMShader(builtin_id, "fragment.glsl", "transform.glsl");
+	CMShader* cm = new CMShader(builtin_id, L"fragment.glsl", L"transform.glsl");
 
 	cm->register_uniform_data("uWorldTransform");
 	cm->register_uniform_data("uViewProj");
@@ -323,13 +323,13 @@ void load_builtin_variables(CVM* vm) {
 	// for mouse
 	std::vector<Operand*>* mouse_elements = new std::vector<Operand*>;
 	for (int i = 0; i < 2; i++) {
-		mouse_elements->push_back(new Operand("0", operand_number));
+		mouse_elements->push_back(new Operand(L"0", operand_number));
 	}
 	Operand* mouse_memory = new Operand(mouse_elements, operand_vector);
 	vm->global_area.insert(std::make_pair(1, mouse_memory));
 }
 
-CMWindow::CMWindow(unsigned int id, CVM* vm, std::string const& title, int width, int height)
+CMWindow::CMWindow(unsigned int id, CVM* vm, std::wstring const& title, int width, int height)
 	: CMClass(id, 0, -1, -1, -1) {
 	this->_window = create_window(title, width, height);
 

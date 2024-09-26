@@ -34,28 +34,28 @@ int main(int argc, char* args[]) {
 	CVM* vm = new CVM();
 	CMFunction* main_function = nullptr;
 
-	vm->label_id = new std::unordered_map<std::string, unsigned int>;
+	vm->label_id = new std::unordered_map<std::wstring, unsigned int>;
 
 	if (argc == 1) {
 		CHESTNUT_LOG(L"With no arguments, the process is on the \'debug mode\'", log_level::log_warn);
 		CHESTNUT_LOG(L"If it was not your intention, please type \'chestnut -help.\' to get help.", log_level::log_warn);
 
-		std::string path = "main.cir";
-		std::vector<std::string> file = get_file(path);
+		std::wstring path = L"main.cir";
+		std::vector<std::wstring> file = get_file(path);
 		std::vector<Token*> parsed_tokens = parse_tokens(file);
 
-		vm->imported_files.insert("main");
+		vm->imported_files.insert(L"main");
 		register_parsed_file(parsed_tokens, vm);
 
 	}
 	else if (argc == 2) {
 		std::string file_name = args[1];
 
-		std::string path = file_name + ".cir";
-		std::vector<std::string> file = get_file(path);
+		std::wstring path = std::wstring(file_name.begin(), file_name.end()) + L".cir";
+		std::vector<std::wstring> file = get_file(path);
 		std::vector<Token*> parsed_tokens = parse_tokens(file);
 
-		vm->imported_files.insert("main");
+		vm->imported_files.insert(L"main");
 		register_parsed_file(parsed_tokens, vm);
 
 	}
@@ -64,7 +64,7 @@ int main(int argc, char* args[]) {
 	std::unordered_map<unsigned int, CMFunction*>::iterator global_function_iterator = vm->global_functions.begin();
 
 	for (; global_function_iterator != vm->global_functions.end(); global_function_iterator++) {
-		if (global_function_iterator->second->name == "main") {
+		if (global_function_iterator->second->name == L"main") {
 			main_function = global_function_iterator->second;
 		}
 	}
@@ -84,7 +84,7 @@ int main(int argc, char* args[]) {
 
 	time(&fin);
 
-	std::string diff = std::to_string((int) difftime(fin, start));
+	std::wstring diff = std::to_wstring((int) difftime(fin, start));
 	CHESTNUT_LOG(L"Process end with : " + std::wstring(diff.begin(), diff.end()) + L"sec.", log_level::log_default);
 
 	return 0;

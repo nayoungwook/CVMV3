@@ -8,9 +8,9 @@
 class Token {
 private:
 public:
-	Token(std::string identifier) : identifier(identifier) {}
-	std::string identifier;
+	Token(std::wstring identifier) : identifier(identifier) {}
+	std::wstring identifier;
 };
 
 Token* pull_token(std::vector<Token*>& tokens);
-std::vector<Token*> extract_tokens(std::string const& str);
+std::vector<Token*> extract_tokens(std::wstring const& str);

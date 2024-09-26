@@ -1,7 +1,6 @@
 #include "sys_error.h"
 
-void CHESTNUT_THROW_ERROR(std::wstring const& message,
-	std::string const& error_type, std::string const& error_code, int line_number) {
+void CHESTNUT_THROW_ERROR(std::wstring const& message, std::string const& error_type, std::string const& error_code, int line_number) {
 	std::cout << "=====================================\n";
 	std::wstring w_error_type, w_error_code;
 
@@ -9,7 +8,7 @@ void CHESTNUT_THROW_ERROR(std::wstring const& message,
 	w_error_code.assign(error_code.begin(), error_code.end());
 
 	std::wstring w_line_number;
-	std::string line_number_str = std::to_string(line_number);
+	std::wstring line_number_str = std::to_wstring(line_number);
 
 	w_line_number.assign(line_number_str.begin(), line_number_str.end());
 

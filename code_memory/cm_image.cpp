@@ -12,9 +12,9 @@ unsigned int CMImage::get_vao() const {
 	return this->vao;
 }
 
-void load_images(std::queue<std::pair<std::string, std::string>>& load_queue, std::unordered_map<std::string, CMImage*>& resources) {
+void load_images(std::queue<std::pair<std::wstring, std::wstring>>& load_queue, std::unordered_map<std::wstring, CMImage*>& resources) {
 	while (!load_queue.empty()) {
-		std::pair<std::string, std::string> q = load_queue.front();
+		std::pair<std::wstring, std::wstring> q = load_queue.front();
 		load_queue.pop();
 
 		std::pair<unsigned int, unsigned int> result = create_texture_id(q.second, 128, 128, 0);
@@ -28,12 +28,26 @@ void load_images(std::queue<std::pair<std::string, std::string>>& load_queue, st
 	}
 }
 
-void load_fonts(std::queue<std::pair<std::string, std::string>>& font_queue, std::unordered_map<std::string, TTF_Font*>& font_resources) {
+void load_fonts(std::queue<std::pair<std::wstring, std::wstring>>& font_queue, std::unordered_map<std::wstring, TTF_Font*>& font_resources) {
 	while (!font_queue.empty()) {
-		std::pair<std::string, std::string> q = font_queue.front();
+		std::pair<std::wstring, std::wstring> q = font_queue.front();
 		font_queue.pop();
 
-		TTF_Font* font = TTF_OpenFont(q.second.c_str(), 64);
+		TTF_Font* font = TTF_OpenFont(std::string(q.second.begin(), q.second.end()).c_str(), 64);
+
+		if (font == NULL) {
+			printf("Failed to load font '%s'! SDL_ttf Error: %s\n", q.second.c_str(), TTF_GetError());
+			// Check if file exists
+			SDL_RWops* file = SDL_RWFromFile(std::string(q.second.begin(), q.second.end()).c_str(), "rb");
+			if (file == NULL) {
+				printf("Font file does not exist or is not readable!\n");
+			}
+			else {
+				SDL_RWclose(file);
+				printf("Font file exists but could not be loaded. Possible corruption or unsupported format.\n");
+			}
+			// Handle error...
+		}
 
 		if (font_resources.find(q.first) == font_resources.end()) {
 			font_resources.insert(std::make_pair(q.first, font));
@@ -98,7 +112,7 @@ unsigned int create_vao() {
 	return vao;
 }
 
-std::pair<unsigned int, unsigned int> create_texture_id(std::string const& path, int width, int height, int channel) {
+std::pair<unsigned int, unsigned int> create_texture_id(std::wstring const& path, int width, int height, int channel) {
 
 	unsigned char* bytes;
 	unsigned int vertex_count = 0;
@@ -108,10 +122,10 @@ std::pair<unsigned int, unsigned int> create_texture_id(std::string const& path,
 	unsigned int vao;
 	unsigned int texture;
 
-	bytes = stbi_load(path.c_str(), &width, &height, &channel, 4);
+	bytes = stbi_load(std::string(path.begin(), path.end()).c_str(), &width, &height, &channel, 4);
 
 	if (!bytes) {
-		std::string file_name = path;
+		std::wstring file_name = path;
 		CHESTNUT_THROW_ERROR(L"Failed to load image " + std::wstring(file_name.begin(), file_name.end()) + L" Please check file name again.",
 			"RUNTIME_FAILED_TO_LOAD_IMAGE", "0x08", -1);
 	}

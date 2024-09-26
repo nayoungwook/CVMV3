@@ -2,13 +2,13 @@
 
 void FunctionFrame::builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 	int parameter_count = std::stoi(op->operands[1]->identifier);
-	Operand* image = this->stack->peek(); // string data.
+	Operand* image = this->stack->peek(); // wstring data.
 	this->stack->pop();
 
 	Operand* position = this->stack->peek();
 	this->stack->pop();
 
-	std::unordered_map<std::string, CMImage*>::iterator image_data_iter = vm->resources.find(extract_value_of_opernad(image)->get_data());
+	std::unordered_map<std::wstring, CMImage*>::iterator image_data_iter = vm->resources.find(extract_value_of_opernad(image)->get_data());
 
 	assert(image_data_iter != vm->resources.end());
 
@@ -50,10 +50,10 @@ void FunctionFrame::builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, 
 void FunctionFrame::builtin_text(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 	int parameter_count = std::stoi(op->operands[1]->identifier);
 
-	Operand* font = this->stack->peek(); // string data.
+	Operand* font = this->stack->peek(); // wstring data.
 	this->stack->pop();
 
-	Operand* str = this->stack->peek(); // string data.
+	Operand* str = this->stack->peek(); // wstring data.
 	this->stack->pop();
 
 	Operand* position = this->stack->peek();
@@ -80,7 +80,7 @@ void FunctionFrame::builtin_text(Operator* op, CVM* vm, FunctionFrame* caller, M
 	Memory* shader_memory = reinterpret_cast<Memory*>(std::stoull(vm->global_area[SHADER_MEMORY]->get_data()));
 	CMShader* shader_cm = (CMShader*)shader_memory->get_cm_class();
 
-	std::string font_name = extract_value_of_opernad(font)->get_data();
+	std::wstring font_name = extract_value_of_opernad(font)->get_data();
 	int i_size = (int)std::stof(extract_value_of_opernad(size)->get_data());
 
 	render_text(vm->font_resources[font_name], shader_cm, str->get_data(), _x, _y, 1, 1, 1, 1, f_rotation, vm->proj_width, vm->proj_height, i_size);
@@ -93,7 +93,7 @@ void FunctionFrame::builtin_text(Operator* op, CVM* vm, FunctionFrame* caller, M
 
 void FunctionFrame::print_operand(Operand* data) {
 	operand_type type = data->get_type();
-	std::string content = data->get_data();
+	std::wstring content = data->get_data();
 
 	switch (type) {
 	case operand_number:
@@ -120,7 +120,7 @@ void FunctionFrame::print_operand(Operand* data) {
 		std::cout << "]";
 		break;
 	default:
-		std::cout << content;
+		std::wcout << content;
 		break;
 	}
 }
@@ -143,7 +143,7 @@ void FunctionFrame::builtin_print(Operator* op, CVM* vm, FunctionFrame* caller, 
 void FunctionFrame::builtin_window(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 	int parameter_count = std::stoi(op->operands[1]->identifier);
 
-	std::string title;
+	std::wstring title;
 	int width = 0, height = 0;
 
 	for (int i = 0; i < parameter_count; i++) {
@@ -226,7 +226,7 @@ void FunctionFrame::builtin_random(Operator* op, CVM* vm, FunctionFrame* caller,
 
 	std::uniform_int_distribution<int> dis(0, 999999999);
 
-	this->stack->push(new Operand(std::to_string(dis(gen)), operand_number));
+	this->stack->push(new Operand(std::to_wstring(dis(gen)), operand_number));
 }
 
 void FunctionFrame::builtin_sin(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
@@ -235,7 +235,7 @@ void FunctionFrame::builtin_sin(Operator* op, CVM* vm, FunctionFrame* caller, Me
 
 	Operand* v = extract_value_of_opernad(_v);
 
-	this->stack->push(new Operand(std::to_string(
+	this->stack->push(new Operand(std::to_wstring(
 		std::sin(std::stof(v->get_data()))), operand_number));
 
 	delete _v;
@@ -247,7 +247,7 @@ void FunctionFrame::builtin_cos(Operator* op, CVM* vm, FunctionFrame* caller, Me
 
 	Operand* v = extract_value_of_opernad(_v);
 
-	this->stack->push(new Operand(std::to_string(
+	this->stack->push(new Operand(std::to_wstring(
 		std::cos(std::stof(v->get_data()))), operand_number));
 
 	delete _v;
@@ -259,7 +259,7 @@ void FunctionFrame::builtin_tan(Operator* op, CVM* vm, FunctionFrame* caller, Me
 
 	Operand* v = extract_value_of_opernad(_v);
 
-	this->stack->push(new Operand(std::to_string(
+	this->stack->push(new Operand(std::to_wstring(
 		std::tan(std::stof(v->get_data()))), operand_number));
 
 	delete _v;
@@ -274,7 +274,7 @@ void FunctionFrame::builtin_atan(Operator* op, CVM* vm, FunctionFrame* caller, M
 	Operand* v1 = extract_value_of_opernad(_v1);
 	Operand* v2 = extract_value_of_opernad(_v2);
 
-	this->stack->push(new Operand(std::to_string(
+	this->stack->push(new Operand(std::to_wstring(
 		std::atan2(std::stof(v1->get_data()), std::stof(v2->get_data()))), operand_number));
 
 	delete _v1;
@@ -287,7 +287,7 @@ void FunctionFrame::builtin_abs(Operator* op, CVM* vm, FunctionFrame* caller, Me
 
 	Operand* v = extract_value_of_opernad(_v);
 
-	this->stack->push(new Operand(std::to_string(
+	this->stack->push(new Operand(std::to_wstring(
 		std::abs(std::stof(v->get_data()))), operand_number));
 
 	delete _v;
@@ -308,7 +308,7 @@ void FunctionFrame::builtin_random_range(Operator* op, CVM* vm, FunctionFrame* c
 
 	std::uniform_int_distribution<int> dis(std::stof(v1->get_data()), std::stof(v2->get_data()));
 
-	this->stack->push(new Operand(std::to_string(dis(gen)), operand_number));
+	this->stack->push(new Operand(std::to_wstring(dis(gen)), operand_number));
 
 	delete _v1;
 	delete _v2;
@@ -320,7 +320,7 @@ void FunctionFrame::builtin_sqrt(Operator* op, CVM* vm, FunctionFrame* caller, M
 
 	Operand* v = extract_value_of_opernad(_v);
 
-	this->stack->push(new Operand(std::to_string(
+	this->stack->push(new Operand(std::to_wstring(
 		std::sqrt(std::stof(v->get_data()))), operand_number));
 
 	delete _v;
