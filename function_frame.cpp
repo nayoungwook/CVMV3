@@ -17,53 +17,6 @@ FunctionFrame::~FunctionFrame() {
 	delete stack;
 }
 
-Operand* copy_operand(Operand* op) {
-
-	Operand* copied_op = nullptr;
-
-	op = extract_value_of_opernad(op);
-
-	if (op->get_type() == operand_vector) {
-		std::vector<Operand*>* array_data = new std::vector<Operand*>;
-		std::vector<Operand*>* old_array_data = op->get_array_data();
-
-		for (Operand* op : *old_array_data) {
-			array_data->push_back(copy_operand(op));
-		}
-
-		copied_op = new Operand(array_data, op->get_type());
-	}
-	else if (op->get_type() == operand_array) {
-		copied_op = new Operand(op->get_array_data(), op->get_type());
-	}
-	else {
-		copied_op = new Operand(op->get_data(), op->get_type());
-	}
-
-	return copied_op;
-}
-
-inline Operand* extract_value_of_opernad(Operand* op) {
-
-	Operand* result = op;
-
-	if (op->get_type() == operand_op_address) {
-		while (result->get_type() == operand_op_address) {
-			result = reinterpret_cast<Operand*>(std::stoull(result->get_data()));
-		}
-	}
-
-	return result;
-}
-
-Operand* create_address_operand(Memory* op) {
-	return new Operand(std::to_wstring((unsigned long long)(void**) op), operand_address);
-}
-
-Operand* create_op_address_operand(Operand* op) {
-	return new Operand(std::to_wstring((unsigned long long)(void**) op), operand_op_address);
-}
-
 const std::wstring get_type_string_of_operand(Operand* op) {
 	std::wstring type_string_operand = L"";
 
@@ -84,7 +37,7 @@ const std::wstring get_type_string_of_operand(Operand* op) {
 		type_string_operand = L"bool";
 		break;
 	case operand_string:
-		type_string_operand = L"wstring";
+		type_string_operand = L"string";
 		break;
 	case operand_vector:
 		type_string_operand = L"vector";
@@ -184,16 +137,6 @@ Memory* create_object(CVM* vm, std::unordered_map<unsigned int, CMClass*>::itera
 
 	if (code_memory->get_type() == code_object) {
 
-		// add render function
-		unsigned int render_function_id = ((CMObject*)code_memory)->get_render_function_id();
-		std::vector<Operator*> temp1;
-		std::vector<std::wstring> temp2;
-		CMFunction* render_function = new CMRender(temp1, render_function_id, temp2);
-		if (code_memory->member_functions->find(render_function_id) != code_memory->member_functions->end())
-			code_memory->member_functions->erase(code_memory->member_functions->find(render_function_id));
-
-		code_memory->member_functions->insert(std::make_pair(render_function_id, render_function));
-
 		// add primitive variables
 		bool position_declared = memory->member_variables.find(OBJECT_POSITION) != memory->member_variables.end();
 		bool width_declared = memory->member_variables.find(OBJECT_WIDTH) != memory->member_variables.end();
@@ -239,7 +182,70 @@ void check_type_for_store(CVM* vm, std::wstring const& type1, std::wstring const
 
 	bool both_object = true;
 
+}
 
+Operand* cast_operand(Operator* op, std::wstring cast_type, Operand* target) {
+	Operand* result = nullptr;
+	operand_type target_type = target->get_type();
+	bool primitive_casted = false;
+	Memory* target_memory = nullptr;
+
+	if (cast_type == get_type_string_of_operand(target)) {
+		return target;
+	}
+
+	if (target->get_type() == operand_address) {
+		target_memory = reinterpret_cast<Memory*>(std::stoull(target->get_data()));
+		if (target_memory->get_cm_class()->name == cast_type)
+			return target;
+	}
+
+	if (cast_type == L"string") {
+		result = new Operand(target->get_data(), operand_string);
+	}
+	else if (cast_type == L"number") {
+		std::wstring target_number_string = target->get_data();
+		bool is_number = true;
+
+		for (int i = 0; i < target_number_string.size(); i++) {
+			if (!(iswdigit(target_number_string[i]) || target_number_string[i] == '.' || target_number_string[i] == 'f')) {
+				is_number = false;
+			}
+		}
+
+		if (is_number) {
+			result = new Operand(target->get_data(), operand_number);
+		}
+		else {
+			CHESTNUT_THROW_ERROR(L"Failed to cast " + get_type_string_of_operand(target) + L" into " + cast_type + L" " + target->get_data() + L" is not a number.",
+				"FAILED_TO_CAST", "0x12", op->get_line_number());
+		}
+	}
+	else if (cast_type == L"bool") {
+		switch (target_type) {
+		case operand_number:
+			result = new Operand(target->get_data() == L"1" ? L"true" : L"false", operand_bool);
+			break;
+		case operand_string:
+			result = new Operand(target->get_data() == L"true" ? L"true" : L"false", operand_bool);
+			break;
+		}
+	}
+
+	primitive_casted = result != nullptr;
+
+	if (primitive_casted && target_type == operand_address) {
+		// tried to cast into primitive, but the target was address (Memory)
+		CHESTNUT_THROW_ERROR(L"Failed to cast " + target_memory->get_cm_class()->name + L" into " + cast_type,
+			"FAILED_TO_CAST", "0x12", op->get_line_number());
+	}
+
+	if (result == nullptr) {
+		CHESTNUT_THROW_ERROR(L"Failed to cast " + get_type_string_of_operand(target) + L" into " + cast_type,
+			"FAILED_TO_CAST", "0x12", op->get_line_number());
+	}
+
+	return result;
 }
 
 void FunctionFrame::object_builtin_render(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
@@ -283,17 +289,32 @@ void FunctionFrame::object_builtin_render(CVM* vm, FunctionFrame* caller, Memory
 	return;
 }
 
+extern std::unordered_map<Memory*, Node*> gc_nodes;
+
+//#define OPERATOR_TIME_STAMP
+
 void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 	if (this->get_code_memory()->get_type() == code_render) {
 		return object_builtin_render(vm, caller, caller_class);
 	}
 
+	vm->stack_area.push_back(this);
+
 	std::vector<Operator*> operators = this->code_memory->get_operators();
 
 	for (int line = 0; line < operators.size(); line++) {
 		Operator* op = operators[line];
 		operator_type type = op->get_type();
+
+#ifdef OPERATOR_TIME_STAMP
+
+		clock_t start, finish;
+		double duration;
+
+		start = clock();
+
+#endif
 
 		switch (type) {
 		case op_push_string: {
@@ -334,10 +355,6 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			return;
 		};
 
-		case op_label: {
-			break;
-		}
-
 		case op_for: {
 			Operand* condition = this->stack->peek();
 			this->stack->pop();
@@ -362,6 +379,9 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			vm->heap_area.push_back(memory);
 
 			this->stack->push(create_address_operand(memory));
+
+			gc_nodes.insert(std::make_pair(memory, new Node(memory)));
+			vm->gc->increase_gc_counter();
 
 			break;
 		}
@@ -389,23 +409,22 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_inc: {
-			Operand* target = this->stack->peek();
+			Operand* target = extract_value_of_opernad(this->stack->peek());
 			this->stack->pop();
 
-			double v = std::stod(extract_value_of_opernad(target)->get_data()) + 1;
-			extract_value_of_opernad(target)->set_data(std::to_wstring(v));
+			double v = std::stod(target->get_data()) + 1;
+			target->set_data(std::to_wstring(v));
 
 			break;
 		}
 
 		case op_dec: {
-			Operand* target = this->stack->peek();
+			Operand* target = extract_value_of_opernad(this->stack->peek());
 			this->stack->pop();
 
-			double v = std::stod(extract_value_of_opernad(target)->get_data()) - 1;
-			extract_value_of_opernad(target)->set_data(std::to_wstring(v));
+			double v = std::stod(target->get_data()) - 1;
+			target->set_data(std::to_wstring(v));
 
-			delete target;
 			break;
 		}
 
@@ -643,6 +662,11 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			vm->global_area[id]->variable_name = name;
 
+			if (peek->get_type() == operand_address) {
+				// modifying nodes for attr
+				gc_nodes[caller_class]->childs.push_back(gc_nodes[reinterpret_cast<Memory*>(std::stoull(peek->get_data()))]);
+			}
+
 			delete peek_op;
 
 			break;
@@ -667,6 +691,11 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				delete caller_class->member_variables[id];
 				caller_class->member_variables[id] = peek;
 				caller_class->member_variable_names[id] = op->operands[1]->identifier;
+			}
+
+			if (peek->get_type() == operand_address) {
+				// modifying nodes for attr
+				gc_nodes[caller_class]->childs.push_back(gc_nodes[reinterpret_cast<Memory*>(std::stoull(peek->get_data()))]);
 			}
 
 			delete peek_op;
@@ -727,6 +756,11 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 				attr_memory->member_variables.insert(std::make_pair(store_id, store_value));
 				attr_memory->member_variables[store_id]->variable_name = name;
+
+				// modifying nodes for attr
+				if (store_value->get_type() == operand_address) {
+					gc_nodes[attr_memory]->childs.push_back(gc_nodes[reinterpret_cast<Memory*>(std::stoull(store_value->get_data()))]);
+				}
 			}
 			else if (op_type == operand_vector) {
 				std::wstring name = op->operands[1]->identifier;
@@ -837,6 +871,16 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			CMFunction* code_memory = caller_class->get_cm_class()->member_functions->find(id)->second;
 
 			run_function(vm, caller_class, this, code_memory, parameter_count);
+
+			break;
+		}
+
+		case op_cast: {
+			Operand* target = this->stack->peek();
+			this->stack->pop();
+			std::wstring cast_type = op->operands[0]->identifier;
+
+			this->stack->push(cast_operand(op, cast_type, target));
 
 			break;
 		}
@@ -1002,6 +1046,19 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		}
-	}
+
+#ifdef OPERATOR_TIME_STAMP
+		finish = clock();
+
+		duration = (double)(finish - start);
+
+		std::wcout << std::endl;
+		std::wstring diff = std::to_wstring(duration);
+		CHESTNUT_LOG(L"Operator " + std::to_wstring(op->get_type()) + L" end with : " + std::wstring(diff.begin(), diff.end()) + L"ms.", log_level::log_default);
+#endif
+
+		}
+
+	vm->stack_area.pop_back();
 	delete this;
-}
+		}

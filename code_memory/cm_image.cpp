@@ -1,7 +1,6 @@
 #include "cm_image.h"
 
 CMImage::CMImage(unsigned int texture, unsigned int vao) : texture(texture), vao(vao) {
-
 }
 
 unsigned int CMImage::get_texture() const {

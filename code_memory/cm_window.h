@@ -12,6 +12,7 @@
 #include "../function_frame.h"
 #include "../sys_util.h"
 #include "../sys_file.h"
+#include "../operand.h"
 #include "cm_image.h"
 
 #include "../FileWatcher.hpp"
@@ -34,3 +35,5 @@ void load_builtin_variables(CVM* vm);
 static std::vector<std::wstring> changed_files;
 void register_source_code(CVM* machine, std::wstring const& loaded_file);
 void register_render_function_code(CMClass* cm_c);
+
+void log_data(CVM* vm);

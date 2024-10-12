@@ -171,6 +171,8 @@ void FunctionFrame::builtin_window(Operator* op, CVM* vm, FunctionFrame* caller,
 	this->stack->push(create_address_operand(win_memory));
 }
 
+extern std::unordered_map<Memory*, Node*> gc_nodes;
+
 void FunctionFrame::builtin_load_scene(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 	int parameter_count = std::stoi(op->operands[1]->identifier);
 
@@ -184,8 +186,9 @@ void FunctionFrame::builtin_load_scene(Operator* op, CVM* vm, FunctionFrame* cal
 		Memory* scene = reinterpret_cast<Memory*>(std::stoull(target->get_data()));
 
 		vm->current_scene_memory = scene;
+		vm->gc->current_scene = scene;
 
-		CMFunction* init_function =
+		CMFunction * init_function =
 			scene->get_cm_class()->member_functions->find(scene->get_cm_class()->get_init_function_id())->second;
 		run_function(vm, vm->current_scene_memory, nullptr, init_function, 0);
 

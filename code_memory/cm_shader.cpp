@@ -2,6 +2,7 @@
 
 CMShader::CMShader(unsigned int id, std::wstring const& _frag_path, std::wstring const& _vert_path) : CMClass(id, 0, -1, -1, -1) {
 	unsigned int frag = 0, vert = 0;
+	this->name = L"shader";
 
 	TCHAR buffer[MAX_PATH] = { 0 };
 	GetModuleFileName(NULL, buffer, MAX_PATH);

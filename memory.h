@@ -18,4 +18,5 @@ public:
 	CMClass* get_backup_cm_class();
 	void set_cm_class(CMClass* cm_class);
 	Memory(std::unordered_map<unsigned int, CMClass*>::iterator cm_class);
+	~Memory();
 };

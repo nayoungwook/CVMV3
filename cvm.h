@@ -5,6 +5,7 @@
 #include <unordered_set>
 #include <queue>
 #include <SDL_ttf.h>
+#include <stack>
 
 #include "sys_file.h"
 #include "parser.h"
@@ -14,6 +15,7 @@
 #include "engine/engine.h"
 #include "sys_logger.h"
 #include "code_memory/cm_shader.h"
+#include "gc/gc.h"
 
 static const int SHADER_MEMORY = 0;
 
@@ -32,6 +34,8 @@ static const int BUILTIN_RANDOM_RANGE = 11;
 static const int BUILTIN_SQRT = 12;
 static const int BUILTIN_TEXT = 13;
 
+class FunctionFrame;
+
 class CVM {
 public:
 	std::queue<std::pair<std::wstring, std::wstring>> load_queue; // <name , path>
@@ -39,6 +43,8 @@ public:
 
 	std::queue<std::pair<std::wstring, std::wstring>> font_queue; // <name , path>
 	std::unordered_map<std::wstring, TTF_Font*> font_resources;
+
+	std::vector<FunctionFrame*> stack_area;
 
 	std::unordered_set<std::wstring> imported_files;
 
@@ -56,9 +62,12 @@ public:
 
 	int proj_width, proj_height;
 
+	CGC* gc;
 	static Memory* current_scene_memory;
 
 	SDL_Renderer* renderer;
+
+	CVM();
 };
 
 void register_parsed_file(std::vector<Token*>& parsed_tokens, CVM* vm);

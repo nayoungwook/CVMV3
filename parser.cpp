@@ -164,6 +164,10 @@ Operator* get_operator(std::unordered_map<std::wstring, unsigned int>* label_id,
 	else if (token->identifier == L"@ARRAY_GET") {
 		type = op_array_get;
 	}
+	else if (token->identifier == L"@CAST") {
+		type = op_cast;
+		operands.push_back(pull_token(tokens)); // type
+	}
 	else if (token->identifier == L"@NEW") {
 		type = op_new;
 
@@ -206,6 +210,8 @@ Operator* get_operator(std::unordered_map<std::wstring, unsigned int>* label_id,
 	return result;
 }
 
+std::unordered_set<std::wstring> enabled_options;
+
 CodeMemory* get_code_memory(CVM* vm, std::vector<Token*>& tokens) {
 
 	Token* token = pull_token(tokens);
@@ -229,7 +235,9 @@ CodeMemory* get_code_memory(CVM* vm, std::vector<Token*>& tokens) {
 
 		int i = 0;
 		while (tokens[0]->identifier != L"}") {
-			operators.push_back(get_operator(vm->label_id, i, tokens));
+			Operator* _operator = get_operator(vm->label_id, i, tokens);
+			if (_operator != nullptr)
+				operators.push_back(_operator);
 			i++;
 		}
 
@@ -311,8 +319,20 @@ CodeMemory* get_code_memory(CVM* vm, std::vector<Token*>& tokens) {
 
 		((CMClass*)result)->constructor = constructor;
 		((CMClass*)result)->initializer = initializer;
-
 		((CMClass*)result)->name = name.substr(1, name.size() - 2);
+
+		// add render function
+		if (object_type == L"OBJECT") {
+			CMObject* result_object = ((CMObject*)result);
+			unsigned int render_function_id = result_object->get_render_function_id();
+			std::vector<Operator*> temp1;
+			std::vector<std::wstring> temp2;
+			CMFunction* render_function = new CMRender(temp1, render_function_id, temp2);
+			if (result_object->member_functions->find(render_function_id) != result_object->member_functions->end())
+				result_object->member_functions->erase(result_object->member_functions->find(render_function_id));
+
+			result_object->member_functions->insert(std::make_pair(render_function_id, render_function));
+		}
 
 		return result;
 	}
@@ -355,6 +375,13 @@ CodeMemory* get_code_memory(CVM* vm, std::vector<Token*>& tokens) {
 		register_parsed_file(parsed_tokens, vm);
 
 		vm->imported_files.insert(name);
+	}
+	else if (token->identifier == L"#OPTION") {
+		std::wstring option = pull_token(tokens)->identifier;
+
+		enabled_options.insert(option);
+
+		CHESTNUT_LOG(L"debug_view_gc_log enabled.", log_level::log_warn);
 	}
 
 	return nullptr;

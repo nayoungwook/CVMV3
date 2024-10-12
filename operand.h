@@ -15,6 +15,7 @@ enum operand_type {
 	operand_null = 7,
 };
 
+class Memory;
 class Operand {
 private:
 	std::wstring data;
@@ -32,3 +33,8 @@ public:
 
 	std::wstring variable_name = L"";
 };
+
+Operand* create_address_operand(Memory* op);
+Operand* create_op_address_operand(Operand* op);
+Operand* copy_operand(Operand* op);
+Operand* extract_value_of_opernad(Operand* op);

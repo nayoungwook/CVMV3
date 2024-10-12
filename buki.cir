@@ -1,0 +1,180 @@
+#LOAD shibuki "buki.jpg" 1
+
+
+OBJECT 0 (Shibuki) -1 {
+$INITIALIZE 0 (constructor) default void {
+    @PUSH_NUMBER 0 0
+
+    @PUSH_NUMBER 0 0
+
+@VECTOR 2 0
+
+@STORE_CLASS 0 (position) 0
+@PUSH_NUMBER 100 0
+
+@STORE_CLASS 1 (width) 0
+@PUSH_NUMBER 100 0
+
+@STORE_CLASS 2 (height) 0
+@PUSH_NUMBER 0 0
+
+@STORE_CLASS 3 (rotation) 0
+@PUSH_NULL 0
+
+
+
+@STORE_CLASS 4 (sprite) 0
+
+@PUSH_NUMBER 4.5f 4
+
+@STORE_CLASS 5 (speed) 4
+
+}
+FUNC 0 (init) public void  {
+@PUSH_STRING "shibuki" 11
+@PUSH_THIS 0
+
+@STORE_ATTR 4 (sprite) 0
+
+
+}
+
+FUNC 1 (tick) public void  {
+    @PUSH_NUMBER 4 15
+
+    @PUSH_THIS 0
+
+@LOAD_ATTR 3 (rotation) 0
+
+
+
+    @ADD 15
+    @PUSH_THIS 0
+
+@STORE_ATTR 3 (rotation) 0
+
+
+    @KEYBOARD w 16
+
+    @IF 0x2 16
+        @LOAD_CLASS 5 (speed) 17
+
+
+
+        @PUSH_NUMBER 0 17
+
+    @VECTOR 2 17
+
+    @PUSH_THIS 0
+
+@LOAD_ATTR 0 (position) 0
+
+
+
+    @ADD 17
+    @PUSH_THIS 0
+
+@STORE_ATTR 0 (position) 0
+
+
+    @GOTO 0x1 16
+    @LABEL 0x2 16
+    @LABEL 0x1 16
+
+    @KEYBOARD s 18
+
+    @IF 0x4 18
+        @LOAD_CLASS 5 (speed) 19
+
+
+
+        @PUSH_NUMBER 0 19
+
+    @VECTOR 2 19
+
+    @PUSH_THIS 0
+
+@LOAD_ATTR 0 (position) 0
+
+
+
+    @SUB 19
+    @PUSH_THIS 0
+
+@STORE_ATTR 0 (position) 0
+
+
+    @GOTO 0x3 18
+    @LABEL 0x4 18
+    @LABEL 0x3 18
+
+    @KEYBOARD a 20
+
+    @IF 0x6 20
+        @PUSH_NUMBER 0 21
+
+        @LOAD_CLASS 5 (speed) 21
+
+
+
+    @VECTOR 2 21
+
+    @PUSH_THIS 0
+
+@LOAD_ATTR 0 (position) 0
+
+
+
+    @SUB 21
+    @PUSH_THIS 0
+
+@STORE_ATTR 0 (position) 0
+
+
+    @GOTO 0x5 20
+    @LABEL 0x6 20
+    @LABEL 0x5 20
+
+    @KEYBOARD d 22
+
+    @IF 0x8 22
+        @PUSH_NUMBER 0 23
+
+        @LOAD_CLASS 5 (speed) 23
+
+
+
+    @VECTOR 2 23
+
+    @PUSH_THIS 0
+
+@LOAD_ATTR 0 (position) 0
+
+
+
+    @ADD 23
+    @PUSH_THIS 0
+
+@STORE_ATTR 0 (position) 0
+
+
+    @GOTO 0x7 22
+    @LABEL 0x8 22
+    @LABEL 0x7 22
+
+}
+
+FUNC 2 (render) public void  {
+}
+
+$CONSTRUCTOR 0 (constructor) default void {
+@PUSH_THIS 7
+
+@CALL_ATTR 0 (init) 0 7
+
+
+
+}
+
+}
+

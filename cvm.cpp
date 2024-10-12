@@ -27,11 +27,16 @@ void register_parsed_file(std::vector<Token*>& parsed_tokens, CVM* vm) {
 	}
 }
 
+CVM::CVM() {
+	this->gc = new CGC(this->stack_area, this->heap_area, this->global_area);
+}
+
 int main(int argc, char* args[]) {
 
 	initialize_engine();
 
 	CVM* vm = new CVM();
+
 	CMFunction* main_function = nullptr;
 
 	vm->label_id = new std::unordered_map<std::wstring, unsigned int>;
@@ -60,7 +65,6 @@ int main(int argc, char* args[]) {
 
 	}
 
-
 	std::unordered_map<unsigned int, CMFunction*>::iterator global_function_iterator = vm->global_functions.begin();
 
 	for (; global_function_iterator != vm->global_functions.end(); global_function_iterator++) {
@@ -84,7 +88,8 @@ int main(int argc, char* args[]) {
 
 	time(&fin);
 
-	std::wstring diff = std::to_wstring((int) difftime(fin, start));
+	std::wcout << std::endl;
+	std::wstring diff = std::to_wstring((int)difftime(fin, start));
 	CHESTNUT_LOG(L"Process end with : " + std::wstring(diff.begin(), diff.end()) + L"sec.", log_level::log_default);
 
 	return 0;

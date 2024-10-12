@@ -12,4 +12,5 @@ public:
 	Operand* peek();
 	void pop();
 	void push(Operand* op);
+	~Stack();
 };

@@ -156,6 +156,7 @@
     <ClCompile Include="engine\stb_image.cpp" />
     <ClCompile Include="error\sys_error.cpp" />
     <ClCompile Include="function_frame.cpp" />
+    <ClCompile Include="gc\gc.cpp" />
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="memory.cpp" />
     <ClCompile Include="operand.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="error\sys_error.h" />
     <ClInclude Include="FileWatcher.hpp" />
     <ClInclude Include="function_frame.h" />
+    <ClInclude Include="gc\gc.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="memory.h" />
     <ClInclude Include="operand.h" />

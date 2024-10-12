@@ -132,6 +132,14 @@ void register_source_code(CVM* vm, std::wstring const& loaded_file) {
 	CHESTNUT_LOG(L"code refreshed : " + wname, log_level::log_okay);
 }
 
+void log_data(CVM* vm) {
+	// check heap usage
+	//CHESTNUT_LOG(L"Current Heap Usage : " + std::to_wstring(vm->heap_area.size()), log_level::log_default);
+
+	//		if (current_ticks - backup_ticks != 0)
+	//			std::cout << 1000 / (current_ticks - backup_ticks) << std::endl;
+}
+
 void window_loop(CVM* vm, SDL_Window* window) {
 	SDL_Event event;
 
@@ -192,18 +200,21 @@ void window_loop(CVM* vm, SDL_Window* window) {
 		}
 	);
 
+	float log_timer = 0;
+
 	while (_running) {
-		//		if (current_ticks - backup_ticks != 0)
-		//			std::cout << 1000 / (current_ticks - backup_ticks) << std::endl;
-
-		// check heap usage
-
-
 		backup_ticks = current_ticks;
 		tick_count = SDL_GetTicks();
 		current_ticks = tick_count;
 
 		Uint32 start_time = SDL_GetTicks();
+
+		log_timer += 0.025f;
+
+		if (log_timer >= 1) {
+			log_timer = 0;
+			log_data(vm);
+		}
 
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
@@ -332,6 +343,7 @@ void load_builtin_variables(CVM* vm) {
 CMWindow::CMWindow(unsigned int id, CVM* vm, std::wstring const& title, int width, int height)
 	: CMClass(id, 0, -1, -1, -1) {
 	this->_window = create_window(title, width, height);
+	this->name = L"window";
 
 	vm->renderer = SDL_CreateRenderer(this->_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 	if (vm->renderer == NULL) {

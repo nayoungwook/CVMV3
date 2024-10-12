@@ -9,6 +9,13 @@ void Stack::pop() {
 	this->operands.pop_front();
 }
 
+Stack::~Stack() {
+	while (!this->operands.empty()) {
+		delete this->operands.front();
+		this->operands.pop_front();
+	}
+}
+
 void Stack::push(Operand* op) {
 	this->operands.push_front(op);
 }

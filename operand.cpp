@@ -32,3 +32,55 @@ std::wstring Operand::get_data() const {
 operand_type Operand::get_type() const {
 	return type;
 }
+
+Operand* extract_value_of_opernad(Operand* op) {
+
+	Operand* result = op;
+
+	if (op->get_type() == operand_op_address) {
+		while (result->get_type() == operand_op_address) {
+			result = reinterpret_cast<Operand*>(std::stoull(result->get_data()));
+		}
+	}
+
+	return result;
+}
+
+Operand* copy_operand(Operand* op) {
+
+	Operand* copied_op = nullptr;
+
+	op = extract_value_of_opernad(op);
+
+	switch (op->get_type()) {
+	case operand_vector: {
+		std::vector<Operand*>* array_data = new std::vector<Operand*>;
+		std::vector<Operand*>* old_array_data = op->get_array_data();
+
+		for (Operand* op : *old_array_data) {
+			array_data->push_back(copy_operand(op));
+		}
+
+		copied_op = new Operand(array_data, op->get_type());
+		break;
+	}
+	case operand_array: {
+		copied_op = new Operand(op->get_array_data(), op->get_type());
+		break;
+	}
+	default: {
+		copied_op = new Operand(op->get_data(), op->get_type());
+		break;
+	}
+	}
+
+	return copied_op;
+}
+
+Operand* create_address_operand(Memory* op) {
+	return new Operand(std::to_wstring((unsigned long long)(void**) op), operand_address);
+}
+
+Operand* create_op_address_operand(Operand* op) {
+	return new Operand(std::to_wstring((unsigned long long)(void**) op), operand_op_address);
+}

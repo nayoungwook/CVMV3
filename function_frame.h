@@ -9,6 +9,7 @@
 #include "stack.h"
 #include "cvm.h"
 #include "memory.h"
+#include "gc/gc.h"
 
 class FunctionFrame {
 private:
@@ -43,13 +44,11 @@ public:
 	void builtin_text(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 };
 
-Operand* create_address_operand(Memory* op);
-Operand* create_op_address_operand(Operand* op);
-Operand* copy_operand(Operand* op);
-inline Operand* extract_value_of_opernad(Operand* op);
 void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CMFunction* code_memory, int parameter_count);
 Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, double (*cal)(double l, double r));
 Memory* create_object(CVM* vm, std::unordered_map<unsigned int, CMClass*>::iterator code_memory, FunctionFrame* frame, unsigned int constructor_parameter_count);
+
+Operand* cast_operand(Operator* op, std::wstring cast_type, Operand* target);
 
 const std::wstring get_type_string_of_operand(Operand* op);
 void check_type_for_store(CVM* vm, std::wstring const& type1, std::wstring const& type2);
