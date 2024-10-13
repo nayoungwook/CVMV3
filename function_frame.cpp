@@ -49,20 +49,29 @@ const std::wstring get_type_string_of_operand(Operand* op) {
 void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CMFunction* code_memory, int parameter_count) {
 	FunctionFrame* frame = new FunctionFrame(code_memory);
 
-	if (code_memory->get_type() == code_function && parameter_count != code_memory->get_param_types().size()) {
+	bool is_defined_function
+		= code_memory->get_type() == code_function || code_memory->get_type() == code_constructor || code_memory->get_type() == code_initialize;
+
+	if (is_defined_function && parameter_count != code_memory->get_param_types().size()) {
 		std::wstring name = caller_frame->get_code_memory()->name;
 		CHESTNUT_THROW_ERROR(L"Failed to call " + std::wstring(name.begin(), name.end()) + L". You pass the wrong parameters",
 			"RUNTIME_WRONG_PARAMETER", "0x02", 0);
 	}
 
-	if (code_memory->get_type() == code_function || code_memory->get_type() == code_constructor || code_memory->get_type() == code_initialize) {
+	if (is_defined_function) {
 		for (int i = 0; i < parameter_count; i++) {
 			Operand* op = caller_frame->stack->peek();
 			caller_frame->stack->pop();
 
 			std::wstring type_string_of_operand = get_type_string_of_operand(op);
 
+			bool wrong_type = false;
+
 			if (code_memory->get_param_types()[i] != type_string_of_operand) {
+				wrong_type = true;
+			}
+
+			if (wrong_type) {
 				std::wstring name = caller_frame->get_code_memory()->name;
 				CHESTNUT_THROW_ERROR(L"Failed to call " + std::wstring(name.begin(), name.end()) + L". You pass the wrong parameters",
 					"RUNTIME_WRONG_PARAMETER", "0x02", 0);
@@ -184,12 +193,9 @@ bool operand_compare(Operand* op1, Operand* op2) {
 	}
 
 	if (op1->get_type() == operand_address) {
-		return op1->get_data() == op2->get_data();
-		/*
 		return
 			reinterpret_cast<Memory*>(std::stoull(op1->get_data())) ==
 			reinterpret_cast<Memory*>(std::stoull(op2->get_data()));
-		*/
 	}
 
 	return op1 == op2;
@@ -358,9 +364,10 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		if (index == _array->size()) { // Failed to find element in array.
-			CHESTNUT_THROW_ERROR(L"Failed to remove element from array.",
-				"FAILED_TO_REMOVE_ELEMENT_FROM_ARRAY", "0x12", -1);
+			delete this;
+			return;
 		}
+
 		if (_array->at(index)->get_type() == operand_address) {
 			std::unordered_map<Memory*, Node*>::iterator gc_node_iterator = gc_nodes.find(caller_class);
 			Memory* remove_target_element = reinterpret_cast<Memory*>(std::stoull(target_element->get_data()));
@@ -424,7 +431,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			this->stack->push(new Operand(data, operand_string));
 			break;
-		}
+	}
 
 		case op_push_number: {
 			this->stack->push(new Operand(op->operands[0]->identifier, operand_number));
@@ -1109,7 +1116,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			break;
 		}
 
-		}
+}
 
 #ifdef OPERATOR_TIME_STAMP
 		finish = clock();
@@ -1121,8 +1128,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		CHESTNUT_LOG(L"Operator " + std::to_wstring(op->get_type()) + L" end with : " + std::wstring(diff.begin(), diff.end()) + L"ms.", log_level::log_default);
 #endif
 
-		}
+	}
 
 	vm->stack_area.pop_back();
 	delete this;
-		}
+}
