@@ -16,8 +16,21 @@ void Memory::set_cm_class(CMClass* cm_class) {
 	this->cm_class->second = cm_class;
 }
 
+ArrayMemory::ArrayMemory(std::unordered_map<unsigned int, CMClass*>::iterator cm_class, std::vector<Operand*>* array_elements)
+	: Memory(cm_class), array_elements(array_elements) {
+
+}
+
 Memory::Memory(std::unordered_map<unsigned int, CMClass*>::iterator cm_class) : cm_class(cm_class) {
 
+}
+
+ArrayMemory::~ArrayMemory() {
+	for (Operand* op : *array_elements) {
+		delete op;
+	}
+
+	delete array_elements;
 }
 
 Memory::~Memory() {

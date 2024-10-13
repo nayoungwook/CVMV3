@@ -1,5 +1,7 @@
 #include "function_frame.h"
 
+extern std::unordered_map<Memory*, Node*> gc_nodes;
+
 CMFunction* FunctionFrame::get_code_memory() const {
 	return code_memory;
 }
@@ -26,9 +28,6 @@ const std::wstring get_type_string_of_operand(Operand* op) {
 	case operand_number:
 		type_string_operand = L"number";
 		break;
-	case operand_array:
-		type_string_operand = L"array";
-		break;
 	case operand_address:
 		type_string_operand
 			= reinterpret_cast<Memory*>(std::stoull(extracted_op->get_data()))->get_cm_class()->name;
@@ -50,25 +49,39 @@ const std::wstring get_type_string_of_operand(Operand* op) {
 void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CMFunction* code_memory, int parameter_count) {
 	FunctionFrame* frame = new FunctionFrame(code_memory);
 
-	if (parameter_count != code_memory->get_param_types().size()) {
+	if (code_memory->get_type() == code_function && parameter_count != code_memory->get_param_types().size()) {
 		std::wstring name = caller_frame->get_code_memory()->name;
 		CHESTNUT_THROW_ERROR(L"Failed to call " + std::wstring(name.begin(), name.end()) + L". You pass the wrong parameters",
 			"RUNTIME_WRONG_PARAMETER", "0x02", 0);
 	}
 
-	for (int i = 0; i < parameter_count; i++) {
-		Operand* op = caller_frame->stack->peek();
-		caller_frame->stack->pop();
+	if (code_memory->get_type() == code_function || code_memory->get_type() == code_constructor || code_memory->get_type() == code_initialize) {
+		for (int i = 0; i < parameter_count; i++) {
+			Operand* op = caller_frame->stack->peek();
+			caller_frame->stack->pop();
 
-		std::wstring type_string_of_operand = get_type_string_of_operand(op);
+			std::wstring type_string_of_operand = get_type_string_of_operand(op);
 
-		if (code_memory->get_param_types()[i] != type_string_of_operand) {
-			std::wstring name = caller_frame->get_code_memory()->name;
-			CHESTNUT_THROW_ERROR(L"Failed to call " + std::wstring(name.begin(), name.end()) + L". You pass the wrong parameters",
-				"RUNTIME_WRONG_PARAMETER", "0x02", 0);
+			if (code_memory->get_param_types()[i] != type_string_of_operand) {
+				std::wstring name = caller_frame->get_code_memory()->name;
+				CHESTNUT_THROW_ERROR(L"Failed to call " + std::wstring(name.begin(), name.end()) + L". You pass the wrong parameters",
+					"RUNTIME_WRONG_PARAMETER", "0x02", 0);
+			}
+
+			frame->local_area.insert(std::make_pair(i, copy_operand(op)));
+		}
+	}
+	else {
+		std::vector<Operand*> array_params;
+		for (int i = 0; i < parameter_count; i++) {
+			Operand* op = caller_frame->stack->peek();
+			caller_frame->stack->pop();
+			array_params.push_back(op);
 		}
 
-		frame->local_area.insert(std::make_pair(i, copy_operand(op)));
+		for (int i = 0; i < array_params.size(); i++) {
+			frame->stack->push(copy_operand(array_params[array_params.size() - i - 1]));
+		}
 	}
 
 	frame->run(vm, caller_frame, caller_class);
@@ -80,10 +93,10 @@ Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, double (*cal)(doub
 
 	std::vector<Operand*>* calculated_result = new std::vector<Operand*>;
 
-	size_t min_vector_size = (size_t)min(lhs_vector->get_array_data()->size(), rhs_vector->get_array_data()->size());
+	size_t min_vector_size = (size_t)min(lhs_vector->get_vector_elements()->size(), rhs_vector->get_vector_elements()->size());
 	for (int i = 0; i < min_vector_size; i++) {
-		double lhs_v = std::stod(lhs_vector->get_array_data()->at(i)->get_data());
-		double rhs_v = std::stod(rhs_vector->get_array_data()->at(i)->get_data());
+		double lhs_v = std::stod(lhs_vector->get_vector_elements()->at(i)->get_data());
+		double rhs_v = std::stod(rhs_vector->get_vector_elements()->at(i)->get_data());
 
 		double calculated_v = cal(lhs_v, rhs_v);
 
@@ -129,6 +142,9 @@ Memory* create_object(CVM* vm, std::unordered_map<unsigned int, CMClass*>::itera
 
 	Memory* memory = new Memory(code_memory_iter);
 
+	gc_nodes.insert(std::make_pair(memory, new Node(memory)));
+	vm->gc->increase_gc_counter();
+
 	// run initializer
 	run_function(vm, memory, frame, code_memory->initializer, 0);
 
@@ -136,7 +152,6 @@ Memory* create_object(CVM* vm, std::unordered_map<unsigned int, CMClass*>::itera
 	run_function(vm, memory, frame, code_memory->constructor, constructor_parameter_count);
 
 	if (code_memory->get_type() == code_object) {
-
 		// add primitive variables
 		bool position_declared = memory->member_variables.find(OBJECT_POSITION) != memory->member_variables.end();
 		bool width_declared = memory->member_variables.find(OBJECT_WIDTH) != memory->member_variables.end();
@@ -165,13 +180,16 @@ bool operand_compare(Operand* op1, Operand* op2) {
 	if (op1->get_type() != op2->get_type()) return false;
 
 	if (op1->get_type() == operand_vector) {
-		return op1->get_array_data() == op2->get_array_data();
+		return op1->get_vector_elements() == op2->get_vector_elements();
 	}
 
 	if (op1->get_type() == operand_address) {
+		return op1->get_data() == op2->get_data();
+		/*
 		return
 			reinterpret_cast<Memory*>(std::stoull(op1->get_data())) ==
 			reinterpret_cast<Memory*>(std::stoull(op2->get_data()));
+		*/
 	}
 
 	return op1 == op2;
@@ -264,8 +282,8 @@ void FunctionFrame::object_builtin_render(CVM* vm, FunctionFrame* caller, Memory
 
 	Operand* position_op = extract_value_of_opernad(caller_class->member_variables[OBJECT_POSITION]);
 
-	float _x = std::stof(extract_value_of_opernad(position_op->get_array_data()->at(0))->get_data()),
-		_y = std::stof(extract_value_of_opernad(position_op->get_array_data()->at(1))->get_data());
+	float _x = std::stof(extract_value_of_opernad(position_op->get_vector_elements()->at(0))->get_data()),
+		_y = std::stof(extract_value_of_opernad(position_op->get_vector_elements()->at(1))->get_data());
 
 	Operand* width_op = caller_class->member_variables[OBJECT_WIDTH];
 	Operand* height_op = caller_class->member_variables[OBJECT_HEIGHT];
@@ -289,18 +307,102 @@ void FunctionFrame::object_builtin_render(CVM* vm, FunctionFrame* caller, Memory
 	return;
 }
 
-extern std::unordered_map<Memory*, Node*> gc_nodes;
-
 //#define OPERATOR_TIME_STAMP
 
 void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
-
-	if (this->get_code_memory()->get_type() == code_render) {
+	code_type cm_type = this->get_code_memory()->get_type();
+	if (cm_type == code_render) {
 		return object_builtin_render(vm, caller, caller_class);
 	}
 
-	vm->stack_area.push_back(this);
+	if (cm_type == code_array_push) {
+		Operand* _target_element = this->stack->peek();
+		this->stack->pop();
 
+		Operand* target_element = extract_value_of_opernad(_target_element);
+
+		((ArrayMemory*)caller_class)->array_elements->push_back(target_element);
+
+		if (target_element->get_type() == operand_address) {
+			// modifying nodes for attr
+			gc_nodes[caller_class]->childs.push_back(gc_nodes[reinterpret_cast<Memory*>(std::stoull(target_element->get_data()))]);
+		}
+
+		delete this;
+		return;
+	}
+
+	if (cm_type == code_array_size) {
+		Operand* result = new Operand(std::to_wstring(((ArrayMemory*)caller_class)->array_elements->size()), operand_number);
+		caller->stack->push(result);
+
+		delete this;
+		return;
+	}
+
+	if (cm_type == code_array_remove) {
+
+		Operand* _target_element = this->stack->peek();
+		this->stack->pop();
+
+		Operand* target_element = extract_value_of_opernad(_target_element);
+		std::vector<Operand*>* _array = ((ArrayMemory*)caller_class)->array_elements;
+
+		int index = 0;
+
+		for (Operand* _element : (*_array)) {
+			if (operand_compare(extract_value_of_opernad(_element), target_element)) {
+				break;
+			}
+			index++;
+		}
+
+		if (index == _array->size()) { // Failed to find element in array.
+			CHESTNUT_THROW_ERROR(L"Failed to remove element from array.",
+				"FAILED_TO_REMOVE_ELEMENT_FROM_ARRAY", "0x12", -1);
+		}
+		if (_array->at(index)->get_type() == operand_address) {
+			std::unordered_map<Memory*, Node*>::iterator gc_node_iterator = gc_nodes.find(caller_class);
+			Memory* remove_target_element = reinterpret_cast<Memory*>(std::stoull(target_element->get_data()));
+
+			for (int i = 0; i < gc_node_iterator->second->childs.size(); i++) {
+				if (gc_node_iterator->second->childs[i]->memory == remove_target_element) {
+					gc_node_iterator->second->childs.erase(gc_node_iterator->second->childs.begin() + i);
+					break;
+				}
+			}
+		}
+
+		_array->erase(_array->begin() + index);
+
+		delete this;
+		return;
+	}
+
+	if (cm_type == code_array_set) {
+		Operand* _target_element = this->stack->peek();
+		this->stack->pop();
+
+		Operand* _index = this->stack->peek();
+		this->stack->pop();
+
+		Operand* target_element = extract_value_of_opernad(_target_element);
+		Operand* index = extract_value_of_opernad(_index);
+
+		std::vector<Operand*>* _array = ((ArrayMemory*)caller_class)->array_elements;
+
+		_array->at(std::stoi(index->get_data())) = target_element;
+
+		if (target_element->get_type() == operand_address) {
+			// modifying nodes for attr
+			gc_nodes[caller_class]->childs.push_back(gc_nodes[reinterpret_cast<Memory*>(std::stoull(target_element->get_data()))]);
+		}
+
+		delete this;
+		return;
+	}
+
+	vm->stack_area.push_back(this);
 	std::vector<Operator*> operators = this->code_memory->get_operators();
 
 	for (int line = 0; line < operators.size(); line++) {
@@ -315,7 +417,6 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		start = clock();
 
 #endif
-
 		switch (type) {
 		case op_push_string: {
 			std::wstring data = op->operands[0]->identifier;
@@ -379,9 +480,6 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			vm->heap_area.push_back(memory);
 
 			this->stack->push(create_address_operand(memory));
-
-			gc_nodes.insert(std::make_pair(memory, new Node(memory)));
-			vm->gc->increase_gc_counter();
 
 			break;
 		}
@@ -475,7 +573,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					Operand* number_operand = lhs->get_type() == operand_number ? lhs : rhs;
 
 					double rhs_v = std::stod(number_operand->get_data());
-					std::vector<Operand*>* array_data = vector_operand->get_array_data();
+					std::vector<Operand*>* array_data = vector_operand->get_vector_elements();
 					for (int i = 0; i < array_data->size(); i++) {
 						double lhs_v = std::stod(array_data->at(i)->get_data());
 
@@ -682,6 +780,25 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			peek->variable_name = name;
 
+			if (peek->get_type() == operand_address) {
+				// modifying nodes for attr
+				Memory* chlid_memory = reinterpret_cast<Memory*>(std::stoull(peek->get_data()));
+				gc_nodes[caller_class]->childs.push_back(gc_nodes[chlid_memory]);
+
+				// disconnect node between already assigned varaible
+				if (caller_class->member_variables.find(id) != caller_class->member_variables.end()) {
+					Memory* already_assigned_memory = reinterpret_cast<Memory*>(std::stoull(caller_class->member_variables[id]->get_data()));
+					std::unordered_map<Memory*, Node*>::iterator gc_node_iterator = gc_nodes.find(caller_class);
+
+					for (int i = 0; i < gc_node_iterator->second->childs.size(); i++) {
+						if (gc_node_iterator->second->childs[i]->memory == already_assigned_memory) {
+							gc_node_iterator->second->childs.erase(gc_node_iterator->second->childs.begin() + i);
+							break;
+						}
+					}
+				}
+			}
+
 			if (caller_class->member_variables.find(id) == caller_class->member_variables.end()) {
 				//std::cout << "new variable declared." << op->operands[0]->identifier << std::endl;
 				caller_class->member_variables.insert(std::make_pair(id, peek));
@@ -691,11 +808,6 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				delete caller_class->member_variables[id];
 				caller_class->member_variables[id] = peek;
 				caller_class->member_variable_names[id] = op->operands[1]->identifier;
-			}
-
-			if (peek->get_type() == operand_address) {
-				// modifying nodes for attr
-				gc_nodes[caller_class]->childs.push_back(gc_nodes[reinterpret_cast<Memory*>(std::stoull(peek->get_data()))]);
 			}
 
 			delete peek_op;
@@ -782,7 +894,9 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* array_operand = this->stack->peek(); // do not delete it.
 			this->stack->pop();
 
-			Operand* result = extract_value_of_opernad(array_operand)->get_array_data()->at(index);
+			ArrayMemory* array_memory = reinterpret_cast<ArrayMemory*>(std::stoull(extract_value_of_opernad(array_operand)->get_data()));
+
+			Operand* result = array_memory->array_elements->at(index);
 
 			this->stack->push(create_op_address_operand(result));
 
@@ -805,9 +919,14 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				elements->push_back(peek);
 			}
 
-			result = new Operand(elements, operand_array);
+			ArrayMemory* memory = new ArrayMemory(vm->builtin_class.find(vm->array_code_memory_id), elements);
 
-			this->stack->push(copy_operand(result));
+			// store in heap
+			vm->heap_area.push_back(memory);
+			gc_nodes.insert(std::make_pair(memory, new Node(memory)));
+
+			vm->gc->increase_gc_counter();
+			this->stack->push(create_address_operand(memory));
 
 			break;
 		}
@@ -943,7 +1062,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			else if (type == operand_vector) {
 				int index = std::stoi(op->operands[0]->identifier);
 
-				found_op = target->get_array_data()->at(index);
+				found_op = target->get_vector_elements()->at(index);
 			}
 
 			this->stack->push(copy_operand(found_op));
@@ -979,66 +1098,11 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					"RUNTIME_CALL_FROM_NULL", "0x01", op->get_line_number());
 			}
 
-			if (target->get_type() == operand_array) {
-				if (id == 0) { // array.push( e )
-					Operand* _target_element = this->stack->peek();
-					this->stack->pop();
+			Memory* memory = reinterpret_cast<Memory*>(std::stoull(target->get_data()));
+			CMClass* cm = memory->get_cm_class();
+			CMFunction* callee_function = (CMFunction*)cm->member_functions->find(id)->second;
 
-					Operand* target_element = extract_value_of_opernad(_target_element);
-
-					target->get_array_data()->push_back(target_element);
-				}
-				else if (id == 1) { // array.size()
-					Operand* result = new Operand(std::to_wstring(target->get_array_data()->size()), operand_number);
-
-					this->stack->push(result);
-				}
-				else if (id == 2) { // array.remove( e )
-					Operand* _target_element = this->stack->peek();
-					this->stack->pop();
-
-					Operand* target_element = extract_value_of_opernad(_target_element);
-					std::vector<Operand*>* _array = target->get_array_data();
-
-					int index = 0;
-
-					for (Operand* _element : (*_array)) {
-						if (operand_compare(extract_value_of_opernad(_element), target_element)) {
-							break;
-						}
-						index++;
-					}
-
-					if (index == _array->size()) { // Failed to find element in array.
-						CHESTNUT_THROW_ERROR(L"Failed to remove element from array.",
-							"FAILED_TO_REMOVE_ELEMENT_FROM_ARRAY", "0x12", op->get_line_number());
-					}
-
-					_array->erase(_array->begin() + index);
-				}
-				else if (id == 3) { // array.set( i , e )
-
-					Operand* _target_element = this->stack->peek();
-					this->stack->pop();
-
-					Operand* _index = this->stack->peek();
-					this->stack->pop();
-
-					Operand* target_element = extract_value_of_opernad(_target_element);
-					Operand* index = extract_value_of_opernad(_index);
-
-					std::vector<Operand*>* _array = target->get_array_data();
-
-					_array->at(std::stoi(index->get_data())) = target_element;
-				}
-			}
-			else {
-				Memory* memory = reinterpret_cast<Memory*>(std::stoull(target->get_data()));
-				CMClass* cm = memory->get_cm_class();
-				CMFunction* callee_function = (CMFunction*)cm->member_functions->find(id)->second;
-
-				run_function(vm, memory, this, callee_function, parameter_count);
-			}
+			run_function(vm, memory, this, callee_function, parameter_count);
 
 			delete target_op;
 

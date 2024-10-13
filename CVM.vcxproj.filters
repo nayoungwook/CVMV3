@@ -114,6 +114,9 @@
     <ClCompile Include="gc\gc.cpp">
       <Filter>소스 파일\gc</Filter>
     </ClCompile>
+    <ClCompile Include="code_memory\cm_array.cpp">
+      <Filter>소스 파일\code_memory</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cvm.h">
@@ -193,6 +196,9 @@
     </ClInclude>
     <ClInclude Include="gc\gc.h">
       <Filter>헤더 파일\gc</Filter>
+    </ClInclude>
+    <ClInclude Include="code_memory\cm_array.h">
+      <Filter>헤더 파일\code_memory</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

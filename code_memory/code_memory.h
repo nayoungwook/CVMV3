@@ -8,6 +8,11 @@ enum code_type {
 	code_scene = 4,
 	code_object = 5,
 	code_render = 6,
+	code_array = 7,
+	code_array_push = 8,
+	code_array_remove = 9,
+	code_array_size = 10,
+	code_array_set = 11,
 };
 
 class CodeMemory {

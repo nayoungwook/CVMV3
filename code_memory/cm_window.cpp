@@ -236,8 +236,8 @@ void window_loop(CVM* vm, SDL_Window* window) {
 				int win_w, win_h;
 				SDL_GetWindowSize(window, &win_w, &win_h);
 				int mouse_x = event.motion.x - win_w / 2, mouse_y = event.motion.y - win_h / 2;
-				vm->global_area[1]->get_array_data()->at(0)->set_data(std::to_wstring(mouse_x));
-				vm->global_area[1]->get_array_data()->at(1)->set_data(std::to_wstring(mouse_y));
+				vm->global_area[1]->get_vector_elements()->at(0)->set_data(std::to_wstring(mouse_x));
+				vm->global_area[1]->get_vector_elements()->at(1)->set_data(std::to_wstring(mouse_y));
 			}
 			}
 		}
@@ -277,6 +277,11 @@ void window_loop(CVM* vm, SDL_Window* window) {
 			CMFunction* render_function =
 				current_scene_cm->member_functions->find(render_funciton_id)->second;
 			run_function(vm, vm->current_scene_memory, nullptr, render_function, 0);
+		}
+
+		if (vm->gc->gc_counter >= GC_THRESHOLD) {
+			vm->gc->run();
+			vm->gc->gc_counter = 0;
 		}
 
 		SDL_GL_SwapWindow(window);

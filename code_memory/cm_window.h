@@ -14,6 +14,7 @@
 #include "../sys_file.h"
 #include "../operand.h"
 #include "cm_image.h"
+#include "cm_array.h"
 
 #include "../FileWatcher.hpp"
 

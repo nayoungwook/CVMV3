@@ -9,10 +9,9 @@ enum operand_type {
 	operand_string = 1,
 	operand_bool = 2,
 	operand_address = 3,
-	operand_array = 4,
-	operand_vector = 5,
-	operand_op_address = 6,
-	operand_null = 7,
+	operand_vector = 4,
+	operand_op_address = 5,
+	operand_null = 6,
 };
 
 class Memory;
@@ -20,11 +19,11 @@ class Operand {
 private:
 	std::wstring data;
 	operand_type type;
-	std::vector<Operand*>* array_data;
+	std::vector<Operand*>* vector_elements;
 public:
 	void set_data(std::wstring data);
 	std::wstring get_data() const;
-	std::vector<Operand*>* get_array_data();
+	std::vector<Operand*>* get_vector_elements();
 
 	operand_type get_type() const;
 	Operand(std::wstring const& data, operand_type type);

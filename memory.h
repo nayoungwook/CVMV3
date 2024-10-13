@@ -2,6 +2,7 @@
 
 #include "operand.h"
 #include "code_memory/cm_class.h"
+#include "code_memory/cm_array.h"
 
 class Memory {
 private:
@@ -18,5 +19,14 @@ public:
 	CMClass* get_backup_cm_class();
 	void set_cm_class(CMClass* cm_class);
 	Memory(std::unordered_map<unsigned int, CMClass*>::iterator cm_class);
-	~Memory();
+	virtual ~Memory();
+};
+
+class ArrayMemory : public Memory {
+public:
+	std::vector<Operand*>* array_elements;
+
+	ArrayMemory(std::unordered_map<unsigned int, CMClass*>::iterator cm_class, std::vector<Operand*>* array_elements);
+
+	virtual ~ArrayMemory();
 };

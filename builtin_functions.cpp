@@ -18,7 +18,7 @@ void FunctionFrame::builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, 
 	width = this->stack->peek(), this->stack->pop();
 	height = this->stack->peek(), this->stack->pop();
 
-	std::vector<Operand*>* position_array = extract_value_of_opernad(position)->get_array_data();
+	std::vector<Operand*>* position_array = extract_value_of_opernad(position)->get_vector_elements();
 
 	float _x = std::stof(position_array->at(0)->get_data()),
 		_y = std::stof(position_array->at(1)->get_data());
@@ -62,7 +62,7 @@ void FunctionFrame::builtin_text(Operator* op, CVM* vm, FunctionFrame* caller, M
 	Operand* size = this->stack->peek();
 	this->stack->pop();
 
-	std::vector<Operand*>* position_array = extract_value_of_opernad(position)->get_array_data();
+	std::vector<Operand*>* position_array = extract_value_of_opernad(position)->get_vector_elements();
 
 	float _x = std::stof(position_array->at(0)->get_data()),
 		_y = std::stof(position_array->at(1)->get_data());
@@ -101,24 +101,35 @@ void FunctionFrame::print_operand(Operand* data) {
 		break;
 	case operand_vector:
 		std::cout << "(";
-		for (int i = 0; i < data->get_array_data()->size(); i++) {
-			print_operand(data->get_array_data()->at(i));
-			if (i != data->get_array_data()->size() - 1) {
+		for (int i = 0; i < data->get_vector_elements()->size(); i++) {
+			print_operand(data->get_vector_elements()->at(i));
+			if (i != data->get_vector_elements()->size() - 1) {
 				std::cout << ",";
 			}
 		}
 		std::cout << ")";
 		break;
-	case operand_array:
-		std::cout << "[";
-		for (int i = 0; i < data->get_array_data()->size(); i++) {
-			print_operand(data->get_array_data()->at(i));
-			if (i != data->get_array_data()->size() - 1) {
-				std::cout << ",";
+
+	case operand_address: {
+		Memory* memory = reinterpret_cast<Memory*>(std::stoull(data->get_data()));
+		if (memory->get_cm_class()->get_type() == code_array) {
+			ArrayMemory* arr_memory = (ArrayMemory*)memory;
+			std::cout << "[";
+			for (int i = 0; i < arr_memory->array_elements->size(); i++) {
+				print_operand(arr_memory->array_elements->at(i));
+				if (i != arr_memory->array_elements->size() - 1) {
+					std::cout << ",";
+				}
 			}
+			std::cout << "]";
 		}
-		std::cout << "]";
+		else {
+			std::wcout << memory->get_cm_class()->name;
+		}
+
 		break;
+	}
+
 	default:
 		std::wcout << content;
 		break;
@@ -188,7 +199,7 @@ void FunctionFrame::builtin_load_scene(Operator* op, CVM* vm, FunctionFrame* cal
 		vm->current_scene_memory = scene;
 		vm->gc->current_scene = scene;
 
-		CMFunction * init_function =
+		CMFunction* init_function =
 			scene->get_cm_class()->member_functions->find(scene->get_cm_class()->get_init_function_id())->second;
 		run_function(vm, vm->current_scene_memory, nullptr, init_function, 0);
 

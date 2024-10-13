@@ -27,8 +27,19 @@ void register_parsed_file(std::vector<Token*>& parsed_tokens, CVM* vm) {
 	}
 }
 
+void load_builtin_array(CVM* vm) {
+	unsigned int builtin_id = vm->builtin_class.size();
+
+	CMArray* cm = new CMArray(builtin_id, 0);
+
+	vm->array_code_memory_id = builtin_id;
+
+	vm->builtin_class.insert(std::make_pair(builtin_id, cm));
+}
+
 CVM::CVM() {
 	this->gc = new CGC(this->stack_area, this->heap_area, this->global_area);
+	load_builtin_array(this);
 }
 
 int main(int argc, char* args[]) {

@@ -142,6 +142,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="builtin_functions.cpp" />
+    <ClCompile Include="code_memory\cm_array.cpp" />
     <ClCompile Include="code_memory\cm_camera.cpp" />
     <ClCompile Include="code_memory\cm_class.cpp" />
     <ClCompile Include="code_memory\cm_function.cpp" />
@@ -168,6 +169,7 @@
     <ClCompile Include="sys_util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="code_memory\cm_array.h" />
     <ClInclude Include="code_memory\cm_camera.h" />
     <ClInclude Include="code_memory\cm_class.h" />
     <ClInclude Include="code_memory\cm_function.h" />

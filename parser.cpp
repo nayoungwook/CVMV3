@@ -381,7 +381,7 @@ CodeMemory* get_code_memory(CVM* vm, std::vector<Token*>& tokens) {
 
 		enabled_options.insert(option);
 
-		CHESTNUT_LOG(L"debug_view_gc_log enabled.", log_level::log_warn);
+		CHESTNUT_LOG(option + L" enabled.", log_level::log_warn);
 	}
 
 	return nullptr;

@@ -23,11 +23,11 @@ public:
 
 class CGC {
 private:
-	int gc_counter = 0;
 	std::vector<FunctionFrame*>& stack_area;
 	std::vector<Memory*>& heap_area;
 	std::unordered_map<unsigned int, Operand*>& global_area;
 public:
+	int gc_counter = 0;
 	Memory* current_scene = nullptr;
 	CGC(std::vector<FunctionFrame*>& stack_area, std::vector<Memory*>& heap, std::unordered_map<unsigned int, Operand*>& global_area);
 	void increase_gc_counter();

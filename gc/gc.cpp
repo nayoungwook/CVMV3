@@ -105,12 +105,9 @@ void CGC::run() {
 	}
 
 	if (gc_log_enabled) {
-		std::cout << std::endl;
-		CHESTNUT_LOG(L"[GC] memory " + std::to_wstring(deleted_count) + L" deleted.", log_level::log_default);
 		CHESTNUT_LOG(L"Root memory count : " + std::to_wstring(root_memories.size()), log_level::log_default);
 		CHESTNUT_LOG(L"Marked node count : " + std::to_wstring(marked_memories.size()), log_level::log_default);
 		CHESTNUT_LOG(L"Unmarked node count : " + std::to_wstring(this->heap_area.size() - marked_memories.size()), log_level::log_default);
-		std::cout << std::endl;
 	}
 
 	// delete unmarked nodes.
@@ -145,13 +142,11 @@ void CGC::run() {
 		delete del_target;
 	}
 
+	if (gc_log_enabled) {
+		CHESTNUT_LOG(L"[GC] memory " + std::to_wstring(deleted_count) + L" deleted.", log_level::log_default);
+	}
 }
 
 void CGC::increase_gc_counter() {
 	this->gc_counter++;
-
-	if (this->gc_counter >= GC_THRESHOLD) {
-		this->run();
-		this->gc_counter = 0;
-	}
 }

@@ -62,6 +62,8 @@ public:
 
 	int proj_width, proj_height;
 
+	unsigned int array_code_memory_id = 0;
+
 	CGC* gc;
 	static Memory* current_scene_memory;
 
@@ -70,4 +72,5 @@ public:
 	CVM();
 };
 
+void load_builtin_array(CVM* vm);
 void register_parsed_file(std::vector<Token*>& parsed_tokens, CVM* vm);

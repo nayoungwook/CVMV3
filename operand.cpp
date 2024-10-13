@@ -5,20 +5,20 @@ Operand::Operand(std::wstring const& data, operand_type type) : data(data), type
 
 Operand::~Operand() {
 	if (this->type == operand_vector) {
-		for (int i = 0; i < array_data->size(); i++) {
-			delete array_data->at(i);
+		for (int i = 0; i < vector_elements->size(); i++) {
+			delete vector_elements->at(i);
 		}
-		delete array_data;
+		delete vector_elements;
 	}
 }
 
 Operand::Operand(std::vector<Operand*>* array_data, operand_type type)
 	: type(type) {
-	this->array_data = array_data;
+	this->vector_elements = array_data;
 }
 
-std::vector<Operand*>* Operand::get_array_data() {
-	return array_data;
+std::vector<Operand*>* Operand::get_vector_elements() {
+	return vector_elements;
 }
 
 void Operand::set_data(std::wstring data) {
@@ -55,17 +55,13 @@ Operand* copy_operand(Operand* op) {
 	switch (op->get_type()) {
 	case operand_vector: {
 		std::vector<Operand*>* array_data = new std::vector<Operand*>;
-		std::vector<Operand*>* old_array_data = op->get_array_data();
+		std::vector<Operand*>* old_array_data = op->get_vector_elements();
 
 		for (Operand* op : *old_array_data) {
 			array_data->push_back(copy_operand(op));
 		}
 
 		copied_op = new Operand(array_data, op->get_type());
-		break;
-	}
-	case operand_array: {
-		copied_op = new Operand(op->get_array_data(), op->get_type());
 		break;
 	}
 	default: {
