@@ -368,16 +368,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			return;
 		}
 
-		if (_array->at(index)->get_type() == operand_address) {
-			std::unordered_map<Memory*, Node*>::iterator gc_node_iterator = gc_nodes.find(caller_class);
-			Memory* remove_target_element = reinterpret_cast<Memory*>(std::stoull(target_element->get_data()));
-
-			for (int i = 0; i < gc_node_iterator->second->childs.size(); i++) {
-				if (gc_node_iterator->second->childs[i]->memory == remove_target_element) {
-					gc_node_iterator->second->childs.erase(gc_node_iterator->second->childs.begin() + i);
-					break;
-				}
-			}
+		if (target_element->get_type() == operand_address) {
+			disconnectNode(caller_class, reinterpret_cast<Memory*>(std::stoull(target_element->get_data())));
 		}
 
 		_array->erase(_array->begin() + index);
@@ -394,11 +386,17 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		this->stack->pop();
 
 		Operand* target_element = extract_value_of_opernad(_target_element);
-		Operand* index = extract_value_of_opernad(_index);
+		_index = extract_value_of_opernad(_index);
 
 		std::vector<Operand*>* _array = ((ArrayMemory*)caller_class)->array_elements;
 
-		_array->at(std::stoi(index->get_data())) = target_element;
+		int index = std::stoi(_index->get_data());
+
+		if (_array->at(index)->get_type() == operand_address) {
+			disconnectNode(caller_class, reinterpret_cast<Memory*>(std::stoull(_array->at(index)->get_data())));
+		}
+
+		_array->at(index) = target_element;
 
 		if (target_element->get_type() == operand_address) {
 			// modifying nodes for attr
@@ -431,7 +429,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			this->stack->push(new Operand(data, operand_string));
 			break;
-	}
+		}
 
 		case op_push_number: {
 			this->stack->push(new Operand(op->operands[0]->identifier, operand_number));
@@ -459,6 +457,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			caller->stack->push(op);
 
+			vm->stack_area.pop_back();
 			delete this;
 			return;
 		};
@@ -788,22 +787,16 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			peek->variable_name = name;
 
 			if (peek->get_type() == operand_address) {
-				// modifying nodes for attr
-				Memory* chlid_memory = reinterpret_cast<Memory*>(std::stoull(peek->get_data()));
-				gc_nodes[caller_class]->childs.push_back(gc_nodes[chlid_memory]);
-
 				// disconnect node between already assigned varaible
 				if (caller_class->member_variables.find(id) != caller_class->member_variables.end()) {
 					Memory* already_assigned_memory = reinterpret_cast<Memory*>(std::stoull(caller_class->member_variables[id]->get_data()));
-					std::unordered_map<Memory*, Node*>::iterator gc_node_iterator = gc_nodes.find(caller_class);
 
-					for (int i = 0; i < gc_node_iterator->second->childs.size(); i++) {
-						if (gc_node_iterator->second->childs[i]->memory == already_assigned_memory) {
-							gc_node_iterator->second->childs.erase(gc_node_iterator->second->childs.begin() + i);
-							break;
-						}
-					}
+					disconnectNode(caller_class, already_assigned_memory);
 				}
+
+				// modifying nodes for attr
+				Memory* chlid_memory = reinterpret_cast<Memory*>(std::stoull(peek->get_data()));
+				gc_nodes[caller_class]->childs.push_back(gc_nodes[chlid_memory]);
 			}
 
 			if (caller_class->member_variables.find(id) == caller_class->member_variables.end()) {
@@ -868,6 +861,11 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				std::wstring name = L"";
 
 				if (attr_memory->member_variables.find(store_id) != attr_memory->member_variables.end()) {
+
+					if (attr_memory->member_variables[store_id]->get_type() == operand_address) {
+						disconnectNode(attr_memory, reinterpret_cast<Memory*>(std::stoull(attr_memory->member_variables[store_id]->get_data())));
+					}
+
 					name = attr_memory->member_variables[store_id]->variable_name;
 					delete attr_memory->member_variables[store_id];
 					attr_memory->member_variables.erase(attr_memory->member_variables.find(store_id));
@@ -1116,7 +1114,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			break;
 		}
 
-}
+		}
 
 #ifdef OPERATOR_TIME_STAMP
 		finish = clock();

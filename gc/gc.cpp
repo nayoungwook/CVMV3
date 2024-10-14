@@ -13,6 +13,17 @@ CGC::CGC(std::vector<FunctionFrame*>& stack_area, std::vector<Memory*>& heap_are
 std::unordered_map<Memory*, Node*> gc_nodes;
 extern std::unordered_set<std::wstring> enabled_options;
 
+void disconnectNode(Memory* target, Memory* remove_target_element) {
+	std::unordered_map<Memory*, Node*>::iterator gc_node_iterator = gc_nodes.find(target);
+
+	for (int i = 0; i < gc_node_iterator->second->childs.size(); i++) {
+		if (gc_node_iterator->second->childs[i]->memory == remove_target_element) {
+			gc_node_iterator->second->childs.erase(gc_node_iterator->second->childs.begin() + i);
+			break;
+		}
+	}
+}
+
 void CGC::run() {
 
 	bool gc_log_enabled = enabled_options.find(L"debug_view_gc_log") != enabled_options.end();
@@ -43,6 +54,8 @@ void CGC::run() {
 	// root memories
 	std::vector<Memory*> root_memories;
 
+	std::cout << this->stack_area.size() << std::endl;
+
 	// for local variables
 	for (FunctionFrame* current_frame : this->stack_area) {
 		std::unordered_map<unsigned int, Operand*> local_area = current_frame->local_area;
@@ -52,7 +65,8 @@ void CGC::run() {
 			Operand* op = extract_value_of_opernad(local_area_iterator->second);
 
 			if (op->get_type() == operand_address) {
-				root_memories.push_back(reinterpret_cast<Memory*>(std::stoull(op->get_data())));
+				Memory* root_memory = reinterpret_cast<Memory*>(std::stoull(op->get_data()));
+				root_memories.push_back(root_memory);
 			}
 		}
 	}
@@ -71,6 +85,8 @@ void CGC::run() {
 	// for additional builtin variables
 	root_memories.push_back(this->current_scene);
 
+	CHESTNUT_LOG(L"Root memories collected", log_level::log_default);
+
 	// start searching with queue
 	std::queue<Node*> q;
 	std::unordered_set<Memory*> marked_memories;
@@ -85,6 +101,7 @@ void CGC::run() {
 		Node* root_node = gc_nodes[root];
 		q.push(root_node);
 	}
+	CHESTNUT_LOG(L"Marked.", log_level::log_default);
 
 	while (!q.empty()) {
 		Node* node = q.front();
@@ -119,8 +136,8 @@ void CGC::run() {
 
 		if (!alive) {
 			delete_target_memories.push(this->heap_area[i]);
+			deleted_count++;
 		}
-		deleted_count++;
 	}
 
 	while (!delete_target_memories.empty()) {

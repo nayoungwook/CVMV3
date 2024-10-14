@@ -34,3 +34,5 @@ public:
 
 	void run();
 };
+
+void disconnectNode(Memory* m1, Memory* m2);
