@@ -1,6 +1,7 @@
 #include "operand.h"
 
 Operand::Operand(std::wstring const& data, operand_type type) : data(data), type(type) {
+	if (type == operand_number) num_data = std::stod(data);
 }
 
 Operand::~Operand() {
@@ -23,6 +24,7 @@ std::vector<Operand*>* Operand::get_vector_elements() {
 
 void Operand::set_data(std::wstring data) {
 	this->data = data;
+	if (type == operand_number) num_data = std::stod(data);
 }
 
 std::wstring Operand::get_data() const {

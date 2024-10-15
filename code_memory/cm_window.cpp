@@ -284,6 +284,13 @@ void window_loop(CVM* vm, SDL_Window* window) {
 			vm->gc->gc_counter = 0;
 		}
 
+		if (current_ticks - backup_ticks != 0) {
+			vm->fps = 1000 / (current_ticks - backup_ticks);
+			if (vm->global_area.find(2) != vm->global_area.end()) {
+				vm->global_area[2]->set_data(std::to_wstring(vm->fps));
+			}
+		}
+
 		SDL_GL_SwapWindow(window);
 		if ((1000 / 60) > (SDL_GetTicks() - start_time))
 		{
@@ -343,6 +350,8 @@ void load_builtin_variables(CVM* vm) {
 	}
 	Operand* mouse_memory = new Operand(mouse_elements, operand_vector);
 	vm->global_area.insert(std::make_pair(1, mouse_memory));
+
+	vm->global_area.insert(std::make_pair(2, new Operand(L"0", operand_number)));
 }
 
 CMWindow::CMWindow(unsigned int id, CVM* vm, std::wstring const& title, int width, int height)

@@ -42,6 +42,7 @@ public:
 	void builtin_random_range(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 	void builtin_sqrt(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 	void builtin_text(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+	void builtin_color(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 };
 
 void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CMFunction* code_memory, int parameter_count);

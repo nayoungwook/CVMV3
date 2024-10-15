@@ -288,17 +288,17 @@ void FunctionFrame::object_builtin_render(CVM* vm, FunctionFrame* caller, Memory
 
 	Operand* position_op = extract_value_of_opernad(caller_class->member_variables[OBJECT_POSITION]);
 
-	float _x = std::stof(extract_value_of_opernad(position_op->get_vector_elements()->at(0))->get_data()),
-		_y = std::stof(extract_value_of_opernad(position_op->get_vector_elements()->at(1))->get_data());
+	float _x = extract_value_of_opernad(position_op->get_vector_elements()->at(0))->num_data,
+		_y = extract_value_of_opernad(position_op->get_vector_elements()->at(1))->num_data;
 
 	Operand* width_op = caller_class->member_variables[OBJECT_WIDTH];
 	Operand* height_op = caller_class->member_variables[OBJECT_HEIGHT];
 
-	float f_width = std::stof(extract_value_of_opernad(width_op)->get_data())
-		, f_height = std::stof(extract_value_of_opernad(height_op)->get_data());
+	float f_width = extract_value_of_opernad(width_op)->num_data
+		, f_height = extract_value_of_opernad(height_op)->num_data;
 
 	Operand* rotation_op = caller_class->member_variables[OBJECT_ROTATION];
-	float f_rotation = std::stof(extract_value_of_opernad(rotation_op)->get_data());
+	float f_rotation = extract_value_of_opernad(rotation_op)->num_data;
 
 	std::unordered_map<std::wstring, CMImage*>::iterator image_data_iter = vm->resources.find(extract_value_of_opernad(texture_op)->get_data());
 
@@ -516,8 +516,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* target = extract_value_of_opernad(this->stack->peek());
 			this->stack->pop();
 
-			double v = std::stod(target->get_data()) + 1;
-			target->set_data(std::to_wstring(v));
+			target->num_data++;
 
 			break;
 		}
@@ -526,8 +525,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* target = extract_value_of_opernad(this->stack->peek());
 			this->stack->pop();
 
-			double v = std::stod(target->get_data()) - 1;
-			target->set_data(std::to_wstring(v));
+			target->num_data--;
 
 			break;
 		}
@@ -578,10 +576,11 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					Operand* vector_operand = lhs->get_type() == operand_vector ? lhs : rhs;
 					Operand* number_operand = lhs->get_type() == operand_number ? lhs : rhs;
 
-					double rhs_v = std::stod(number_operand->get_data());
+					double rhs_v = number_operand->num_data;
+
 					std::vector<Operand*>* array_data = vector_operand->get_vector_elements();
 					for (int i = 0; i < array_data->size(); i++) {
-						double lhs_v = std::stod(array_data->at(i)->get_data());
+						double lhs_v = array_data->at(i)->num_data;
 
 						switch (type) {
 						case op_add:
@@ -624,8 +623,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			case op_add:
 				if (lhs->get_type() == operand_number)
 					this->stack->push(new Operand(std::to_wstring(
-						std::stod(lhs->get_data())
-						+ std::stod(rhs->get_data())), operand_number));
+						lhs->num_data + rhs->num_data), operand_number));
 				else if (lhs->get_type() == operand_vector)
 					this->stack->push(calcaulte_vector_operand(lhs, rhs, cal_add));
 
@@ -633,8 +631,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			case op_sub:
 				if (lhs->get_type() == operand_number)
 					this->stack->push(new Operand(std::to_wstring(
-						std::stod(lhs->get_data())
-						- std::stod(rhs->get_data())), operand_number));
+						lhs->num_data - rhs->num_data), operand_number));
 				else if (lhs->get_type() == operand_vector)
 					this->stack->push(calcaulte_vector_operand(lhs, rhs, cal_sub));
 
@@ -642,8 +639,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			case op_mul:
 				if (lhs->get_type() == operand_number)
 					this->stack->push(new Operand(std::to_wstring(
-						std::stod(lhs->get_data())
-						* std::stod(rhs->get_data())), operand_number));
+						lhs->num_data * rhs->num_data), operand_number));
 				else if (lhs->get_type() == operand_vector)
 					this->stack->push(calcaulte_vector_operand(lhs, rhs, cal_mult));
 
@@ -656,8 +652,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					}
 
 					this->stack->push(new Operand(std::to_wstring(
-						std::stod(lhs->get_data())
-						/ std::stod(rhs->get_data())), operand_number));
+						lhs->num_data / rhs->num_data), operand_number));
 
 				}
 				else if (lhs->get_type() == operand_vector)
@@ -667,7 +662,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			case op_pow:
 				if (lhs->get_type() == operand_number) {
 					this->stack->push(new Operand(std::to_wstring(
-						pow(std::stod(lhs->get_data()), std::stod(rhs->get_data()))), operand_number));
+						pow(lhs->num_data, rhs->num_data)), operand_number));
 				}
 				else if (lhs->get_type() == operand_vector)
 					this->stack->push(calcaulte_vector_operand(lhs, rhs, cal_pow));
@@ -679,8 +674,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 							"RUNTIME_DEVIDED_BY_ZERO", "0x04", op->get_line_number());
 					}
 					this->stack->push(new Operand(std::to_wstring(
-						(int)std::stod(lhs->get_data())
-						% (int)std::stod(rhs->get_data())), operand_number));
+						(int)lhs->num_data
+						% (int)rhs->num_data), operand_number));
 				}
 				else if (lhs->get_type() == operand_vector)
 					this->stack->push(calcaulte_vector_operand(lhs, rhs, cal_mod));
@@ -688,25 +683,25 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			}
 
 			case op_greater: {
-				bool result = std::stod(lhs->get_data()) < std::stod(rhs->get_data());
+				bool result = lhs->num_data < rhs->num_data;
 				this->stack->push(new Operand(result ? L"true" : L"false", operand_bool));
 				break;
 			}
 
 			case op_lesser: {
-				bool result = std::stod(lhs->get_data()) > std::stod(rhs->get_data());
+				bool result = lhs->num_data > rhs->num_data;
 				this->stack->push(new Operand(result ? L"true" : L"false", operand_bool));
 				break;
 			}
 
 			case op_eq_lesser: {
-				bool result = std::stod(lhs->get_data()) >= std::stod(rhs->get_data());
+				bool result = lhs->num_data >= rhs->num_data;
 				this->stack->push(new Operand(result ? L"true" : L"false", operand_bool));
 				break;
 			}
 
 			case op_eq_greater: {
-				bool result = std::stod(lhs->get_data()) <= std::stod(rhs->get_data());
+				bool result = lhs->num_data <= rhs->num_data;
 				this->stack->push(new Operand(result ? L"true" : L"false", operand_bool));
 				break;
 			}
@@ -715,7 +710,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				bool result = lhs->get_data() == rhs->get_data();
 
 				if (lhs->get_type() == operand_number)
-					result = std::stod(lhs->get_data()) == std::stod(rhs->get_data());
+					result = lhs->num_data == rhs->num_data;
 
 				this->stack->push(new Operand(result ? L"true" : L"false", operand_bool));
 				break;
@@ -723,6 +718,10 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			case op_not_equal: {
 				bool result = lhs->get_data() != rhs->get_data();
+
+				if (lhs->get_type() == operand_number)
+					result = lhs->num_data != rhs->num_data;
+
 				this->stack->push(new Operand(result ? L"true" : L"false", operand_bool));
 				break;
 			}

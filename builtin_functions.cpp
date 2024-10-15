@@ -83,12 +83,40 @@ void FunctionFrame::builtin_text(Operator* op, CVM* vm, FunctionFrame* caller, M
 	std::wstring font_name = extract_value_of_opernad(font)->get_data();
 	int i_size = (int)std::stof(extract_value_of_opernad(size)->get_data());
 
-	render_text(vm->font_resources[font_name], shader_cm, str->get_data(), _x, _y, 1, 1, 1, 1, f_rotation, vm->proj_width, vm->proj_height, i_size);
+	render_text(vm->font_resources[font_name], shader_cm, str->get_data(), _x, _y, vm->r, vm->g, vm->b, 1, f_rotation, vm->proj_width, vm->proj_height, i_size);
 
 	delete font;
 	delete str;
 	delete position;
 	delete size;
+}
+
+
+void FunctionFrame::builtin_color(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	int parameter_count = std::stoi(op->operands[1]->identifier);
+
+	Operand* _r = this->stack->peek(); // r
+	this->stack->pop();
+	Operand* _g = this->stack->peek(); // g
+	this->stack->pop();
+	Operand* _b = this->stack->peek(); // b
+	this->stack->pop();
+
+	Operand* r = extract_value_of_opernad(_r),
+		* g = extract_value_of_opernad(_g),
+		* b = extract_value_of_opernad(_b);
+
+	float r_f = std::stof(r->get_data());
+	float g_f = std::stof(g->get_data());
+	float b_f = std::stof(b->get_data());
+
+	vm->r = (int)(r_f * 255);
+	vm->g = (int)(g_f * 255);
+	vm->b = (int)(b_f * 255);
+
+	delete _r;
+	delete _g;
+	delete _b;
 }
 
 void FunctionFrame::print_operand(Operand* data) {
@@ -386,6 +414,9 @@ void FunctionFrame::run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Me
 		break;
 	case BUILTIN_TEXT: // text
 		this->builtin_text(op, vm, caller, caller_class);
+		break;
+	case BUILTIN_COLOR: // COLOR
+		this->builtin_color(op, vm, caller, caller_class);
 		break;
 	}
 }

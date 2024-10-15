@@ -40,17 +40,17 @@ void render_image(CMShader* shader, unsigned int texture_id, unsigned int vao, f
 	glDisable(GL_TEXTURE_2D);
 }
 
-void render_text(TTF_Font* font, CMShader* shader, std::wstring const& str, float x, float y, float _r, float _g, float _b, float _a, float rotation, int proj_width, int proj_height, int size) {
+void render_text(TTF_Font* font, CMShader* shader, std::wstring const& str, float x, float y, int _r, int _g, int _b, int _a, float rotation, int proj_width, int proj_height, int size) {
 
 	if (font == nullptr) {
 		CHESTNUT_THROW_ERROR(L"Failed to render Text. You must assign font for it.",
 			"RUNTIME_NO_FONT_FOR_OBJECT", "0x13", 0);
 	}
 
-	SDL_Color color = { 0, 0, 0, 0 };
+	SDL_Color color = { _r, _g, _b, 0 };
 
-	SDL_Surface* _temp_surface = TTF_RenderUNICODE_Solid(font, (Uint16*) str.c_str(), color);
-	
+	SDL_Surface* _temp_surface = TTF_RenderUNICODE_Solid(font, (Uint16*)str.c_str(), color);
+
 	SDL_Surface* surface = SDL_ConvertSurfaceFormat(_temp_surface, SDL_PIXELFORMAT_RGBA32, 0);
 
 	unsigned int vao, vbo, ebo;

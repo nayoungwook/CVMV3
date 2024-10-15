@@ -54,8 +54,6 @@ void CGC::run() {
 	// root memories
 	std::vector<Memory*> root_memories;
 
-	std::cout << this->stack_area.size() << std::endl;
-
 	// for local variables
 	for (FunctionFrame* current_frame : this->stack_area) {
 		std::unordered_map<unsigned int, Operand*> local_area = current_frame->local_area;
@@ -85,7 +83,8 @@ void CGC::run() {
 	// for additional builtin variables
 	root_memories.push_back(this->current_scene);
 
-	CHESTNUT_LOG(L"Root memories collected", log_level::log_default);
+	if (gc_log_enabled)
+		CHESTNUT_LOG(L"Root memories collected", log_level::log_default);
 
 	// start searching with queue
 	std::queue<Node*> q;
@@ -101,7 +100,9 @@ void CGC::run() {
 		Node* root_node = gc_nodes[root];
 		q.push(root_node);
 	}
-	CHESTNUT_LOG(L"Marked.", log_level::log_default);
+
+	if (gc_log_enabled)
+		CHESTNUT_LOG(L"Marked.", log_level::log_default);
 
 	while (!q.empty()) {
 		Node* node = q.front();

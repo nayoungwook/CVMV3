@@ -24,6 +24,7 @@ public:
 	void set_data(std::wstring data);
 	std::wstring get_data() const;
 	std::vector<Operand*>* get_vector_elements();
+	double num_data = 0;
 
 	operand_type get_type() const;
 	Operand(std::wstring const& data, operand_type type);

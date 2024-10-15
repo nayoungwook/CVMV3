@@ -33,6 +33,7 @@ static const int BUILTIN_ABS = 10;
 static const int BUILTIN_RANDOM_RANGE = 11;
 static const int BUILTIN_SQRT = 12;
 static const int BUILTIN_TEXT = 13;
+static const int BUILTIN_COLOR = 14;
 
 class FunctionFrame;
 
@@ -63,6 +64,10 @@ public:
 	int proj_width, proj_height;
 
 	unsigned int array_code_memory_id = 0;
+
+	unsigned int r = 255, g = 255, b = 255;
+
+	unsigned int fps = 0;
 
 	CGC* gc;
 	static Memory* current_scene_memory;
