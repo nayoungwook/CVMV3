@@ -42,6 +42,7 @@ CVM::CVM() {
 	load_builtin_array(this);
 }
 
+
 int main(int argc, char* args[]) {
 
 	initialize_engine();

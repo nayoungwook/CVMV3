@@ -63,7 +63,7 @@ void CGC::run() {
 			Operand* op = extract_value_of_opernad(local_area_iterator->second);
 
 			if (op->get_type() == operand_address) {
-				Memory* root_memory = reinterpret_cast<Memory*>(std::stoull(op->get_data()));
+				Memory* root_memory = (Memory*) op->data;
 				root_memories.push_back(root_memory);
 			}
 		}
@@ -76,7 +76,7 @@ void CGC::run() {
 		Operand* op = extract_value_of_opernad(global_area_iterator->second);
 
 		if (op->get_type() == operand_address) {
-			root_memories.push_back(reinterpret_cast<Memory*>(std::stoull(op->get_data())));
+			root_memories.push_back((Memory*) op->data);
 		}
 	}
 

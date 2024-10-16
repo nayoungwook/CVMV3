@@ -236,8 +236,9 @@ void window_loop(CVM* vm, SDL_Window* window) {
 				int win_w, win_h;
 				SDL_GetWindowSize(window, &win_w, &win_h);
 				int mouse_x = event.motion.x - win_w / 2, mouse_y = event.motion.y - win_h / 2;
-				vm->global_area[1]->get_vector_elements()->at(0)->set_data(std::to_wstring(mouse_x));
-				vm->global_area[1]->get_vector_elements()->at(1)->set_data(std::to_wstring(mouse_y));
+
+				*((double*)(vm->global_area[1]->get_vector_elements()->at(0)->data)) = mouse_x;
+				*((double*)(vm->global_area[1]->get_vector_elements()->at(1)->data)) = mouse_y;
 			}
 			}
 		}
@@ -251,13 +252,12 @@ void window_loop(CVM* vm, SDL_Window* window) {
 		glClearColor(0.05f, 0.05f, 0.06f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		CMScene* current_scene_cm = (CMScene*)vm->current_scene_memory->get_cm_class();
+		unsigned int init_funciton_id = current_scene_cm->get_init_function_id();
+		unsigned int tick_funciton_id = current_scene_cm->get_tick_function_id();
+		unsigned int render_funciton_id = current_scene_cm->get_render_function_id();
+
 		if (vm->current_scene_memory != nullptr) {
-			CMScene* current_scene_cm = (CMScene*)vm->current_scene_memory->get_cm_class();
-
-			unsigned int init_funciton_id = current_scene_cm->get_init_function_id();
-			unsigned int tick_funciton_id = current_scene_cm->get_tick_function_id();
-			unsigned int render_funciton_id = current_scene_cm->get_render_function_id();
-
 			CMScene* scene = current_scene_cm;
 
 			CMFunction* tick_function =
@@ -266,12 +266,6 @@ void window_loop(CVM* vm, SDL_Window* window) {
 		}
 
 		if (vm->current_scene_memory != nullptr) {
-			CMScene* current_scene_cm = (CMScene*)vm->current_scene_memory->get_cm_class();
-
-			unsigned int init_funciton_id = current_scene_cm->get_init_function_id();
-			unsigned int tick_funciton_id = current_scene_cm->get_tick_function_id();
-			unsigned int render_funciton_id = current_scene_cm->get_render_function_id();
-
 			CMScene* scene = current_scene_cm;
 
 			CMFunction* render_function =
@@ -287,7 +281,7 @@ void window_loop(CVM* vm, SDL_Window* window) {
 		if (current_ticks - backup_ticks != 0) {
 			vm->fps = 1000 / (current_ticks - backup_ticks);
 			if (vm->global_area.find(2) != vm->global_area.end()) {
-				vm->global_area[2]->set_data(std::to_wstring(vm->fps));
+				*((double*)vm->global_area[2]->data) = (int)vm->fps;
 			}
 		}
 
@@ -346,12 +340,18 @@ void load_builtin_variables(CVM* vm) {
 	// for mouse
 	std::vector<Operand*>* mouse_elements = new std::vector<Operand*>;
 	for (int i = 0; i < 2; i++) {
-		mouse_elements->push_back(new Operand(L"0", operand_number));
+		mouse_elements->push_back(new Operand(8, operand_number));
 	}
+
+	*((double*)mouse_elements->at(0)->data) = 0;
+	*((double*)mouse_elements->at(1)->data) = 0;
+
 	Operand* mouse_memory = new Operand(mouse_elements, operand_vector);
 	vm->global_area.insert(std::make_pair(1, mouse_memory));
 
-	vm->global_area.insert(std::make_pair(2, new Operand(L"0", operand_number)));
+	Operand* fps_memory = new Operand(8, operand_number);
+	*((double*)fps_memory->data) = 0;
+	vm->global_area.insert(std::make_pair(2, fps_memory));
 }
 
 CMWindow::CMWindow(unsigned int id, CVM* vm, std::wstring const& title, int width, int height)

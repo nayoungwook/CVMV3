@@ -1,16 +1,7 @@
-#IMPORT buki 1
+#LOAD buki "buki.jpg" 1
 
 
-#FONT Godo "Godo.ttf" 2
-
-
-#LOAD bullet "bullet.png" 4
-
-
-#OPTION debug_view_gc_log 6
-
-
-OBJECT 1 (Bullet) -1 {
+OBJECT 0 (Player) -1 {
 $INITIALIZE 0 (constructor) default void {
     @PUSH_NUMBER 0 0
 
@@ -34,279 +25,76 @@ $INITIALIZE 0 (constructor) default void {
 
 @STORE_CLASS 4 (sprite) 0
 
-@PUSH_NUMBER 0 10
-
-@STORE_CLASS 5 (deathTimer) 10
-
-@ARRAY 0 0
-
-@STORE_CLASS 6 (arr) 11
-
 }
-FUNC 0 (tick) public void  {
-        @PUSH_NUMBER 10 22
-
-        @PUSH_NUMBER 0 22
-
-    @VECTOR 2 22
-
-    @PUSH_THIS 0
-
-@LOAD_ATTR 0 (position) 0
-
-
-
-    @ADD 22
-    @PUSH_THIS 0
-
-@STORE_ATTR 0 (position) 0
-
-
-    @PUSH_NUMBER 0.03f 24
-
-    @PUSH_THIS 0
-
-@LOAD_ATTR 5 (deathTimer) 0
-
-
-
-    @ADD 24
-    @PUSH_THIS 0
-
-@STORE_ATTR 5 (deathTimer) 0
-
-
-    @PUSH_NUMBER 1 25
-
-    @PUSH_THIS 25
-
-@LOAD_ATTR 5 (deathTimer) 25
-
-
-
-    @EQ_LESSER 0
-
-    @IF 0xe 25
-    @PUSH_THIS 26
-
-@LOAD_ATTR 6 (arr) 26
-
-@PUSH_THIS 26
-
-
-
-@CALL_ATTR 2 (remove) 1 26
-
-
-
-    @GOTO 0xd 25
-    @LABEL 0xe 25
-    @LABEL 0xd 25
-
+FUNC 0 (init) public void  {
 }
 
-FUNC 1 (init) public void  {
+FUNC 1 (render) public void  {
 }
 
-FUNC 2 (render) public void  {
+FUNC 2 (tick) public void  {
 }
 
-$CONSTRUCTOR 0 (constructor) default void pos vector arr array {
-@PUSH_STRING "bullet" 14
+$CONSTRUCTOR 0 (constructor) default void {
+@PUSH_STRING "buki" 5
 @PUSH_THIS 0
 
 @STORE_ATTR 4 (sprite) 0
 
 
-@LOAD_LOCAL 1 (arr) 15
-
-
-
-@PUSH_THIS 0
-
-@STORE_ATTR 6 (arr) 0
-
-
-@LOAD_LOCAL 0 (pos) 16
-
-
-
-@PUSH_THIS 0
-
-@STORE_ATTR 0 (position) 0
-
-
-@PUSH_NUMBER 30 17
-@PUSH_THIS 0
-
-@STORE_ATTR 1 (width) 0
-
-
-@PUSH_NUMBER 30 18
-@PUSH_THIS 0
-
-@STORE_ATTR 2 (height) 0
-
-
 }
 
 }
 
-SCENE 2 (Game) -1 {
+SCENE 1 (Game) -1 {
 $INITIALIZE 0 (constructor) default void {
-@PUSH_NULL 32
+@PUSH_NULL 11
 
 
 
-@STORE_CLASS 0 (buki) 32
-
-@ARRAY 0 0
-
-@STORE_CLASS 1 (arr) 33
+@STORE_CLASS 0 (player) 11
 
 }
-FUNC 0 (init) public void  {
-    @LOAD_CLASS 1 (arr) 36
+FUNC 0 (tick) public void  {
+}
 
+FUNC 1 (render) public void  {
+    @PUSH_THIS 22
 
+@LOAD_ATTR 0 (player) 22
 
-    @NEW 0 (Shibuki) 1 36
-@PUSH_THIS 0
+@CALL_ATTR 1 (render) 0 22
 
-@STORE_ATTR 0 (buki) 0
 
 
 }
 
-FUNC 1 (tick) public void  {
-    @PUSH_THIS 40
-
-@LOAD_ATTR 0 (buki) 40
-
-@CALL_ATTR 1 (tick) 0 40
-
-
-
-    @PUSH_NUMBER 0 42
-
-    @STORE_LOCAL 0 (i) 0
-
-    @GOTO 0xf 42
-    @LABEL 0x10 42
-    @LOAD_CLASS 1 (arr) 43
-@LOAD_LOCAL 0 (i) 43
-
-
-
-
-@ARRAY_GET 43
-
-@CALL_ATTR 0 (tick) 0 43
-
-
-
-    @PUSH_NUMBER 1 0
-
-    @LOAD_LOCAL 0 (i) 0
-
-
-
-
-    @ADD 42
-    @STORE_LOCAL 0 (i) 0
-
-
-    @LABEL 0xf 42
-        @LOAD_CLASS 1 (arr) 42
-
-@CALL_ATTR 1 (size) 0 42
-
-
-
-    @LOAD_LOCAL 0 (i) 42
-
-
-
-
-    @GREATER 0
-
-    @FOR 0x10 42
-
-}
-
-FUNC 2 (render) public void  {
-    @PUSH_NUMBER 0 48
-
-    @STORE_LOCAL 0 (i) 0
-
-    @GOTO 0x11 48
-    @LABEL 0x12 48
-    @LOAD_CLASS 1 (arr) 49
-@LOAD_LOCAL 0 (i) 49
-
-
-
-
-@ARRAY_GET 49
-
-@CALL_ATTR 2 (render) 0 49
-
-
-
-    @PUSH_NUMBER 1 0
-
-    @LOAD_LOCAL 0 (i) 0
-
-
-
-
-    @ADD 48
-    @STORE_LOCAL 0 (i) 0
-
-
-    @LABEL 0x11 48
-        @LOAD_CLASS 1 (arr) 48
-
-@CALL_ATTR 1 (size) 0 48
-
-
-
-    @LOAD_LOCAL 0 (i) 48
-
-
-
-
-    @GREATER 0
-
-    @FOR 0x12 48
-
-    @PUSH_THIS 52
-
-@LOAD_ATTR 0 (buki) 52
-
-@CALL_ATTR 2 (render) 0 52
-
-
-
+FUNC 2 (init) public void  {
 }
 
 $CONSTRUCTOR 0 (constructor) default void {
+@NEW 0 (Player) 0 14
+@PUSH_THIS 0
+
+@STORE_ATTR 0 (player) 0
+
+
 }
 
 }
 
 FUNC 0 (main) default void  {
-    @NEW 2 (Game) 0 57
+    @NEW 1 (Game) 0 27
 
-    @CALL_BUILTIN 2 (load_scene) 1 57
+    @CALL_BUILTIN 2 (load_scene) 1 27
 
-    @PUSH_NUMBER 600 58
+    @PUSH_NUMBER 600 29
 
-    @PUSH_NUMBER 800 58
+    @PUSH_NUMBER 800 29
 
-    @PUSH_STRING "buki shooting game!" 58
+    @PUSH_STRING "title" 29
 
-    @CALL_BUILTIN 1 (window) 3 58
+    @CALL_BUILTIN 1 (window) 3 29
 
 }
 

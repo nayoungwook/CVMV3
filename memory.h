@@ -10,6 +10,7 @@ private:
 	Memory* parent_memory = nullptr;
 	CMClass* backup_class = nullptr;
 public:
+	std::wstring type = L"memory";
 	std::unordered_map<unsigned int, Operand*> member_variables;
 	std::unordered_map<unsigned int, std::wstring> member_variable_names;
 	void store_parent_memory(Memory* memory);

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <cwchar>
 
 enum operand_type {
 	operand_number = 0,
@@ -17,17 +18,16 @@ enum operand_type {
 class Memory;
 class Operand {
 private:
-	std::wstring data;
 	operand_type type;
 	std::vector<Operand*>* vector_elements;
 public:
-	void set_data(std::wstring data);
-	std::wstring get_data() const;
 	std::vector<Operand*>* get_vector_elements();
-	double num_data = 0;
+
+	void* data;
+	int size;
 
 	operand_type get_type() const;
-	Operand(std::wstring const& data, operand_type type);
+	Operand(int size, operand_type type);
 	Operand(std::vector<Operand*>* array_data, operand_type type);
 	~Operand();
 
