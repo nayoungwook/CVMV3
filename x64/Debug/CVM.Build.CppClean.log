@@ -1,10 +1,9 @@
 c:\users\user\source\repos\chestnut\cvm\x64\debug\vc143.pdb
 c:\users\user\source\repos\chestnut\cvm\x64\debug\vc143.idb
-c:\users\user\source\repos\chestnut\cvm\x64\debug\parser.obj
-c:\users\user\source\repos\chestnut\cvm\x64\debug\operator.obj
 c:\users\user\source\repos\chestnut\cvm\x64\debug\operand.obj
 c:\users\user\source\repos\chestnut\cvm\x64\debug\memory.obj
 c:\users\user\source\repos\chestnut\cvm\x64\debug\math.obj
+c:\users\user\source\repos\chestnut\cvm\x64\debug\gc.obj
 c:\users\user\source\repos\chestnut\cvm\x64\debug\function_frame.obj
 c:\users\user\source\repos\chestnut\cvm\x64\debug\sys_error.obj
 c:\users\user\source\repos\chestnut\cvm\x64\debug\stb_image.obj
@@ -19,11 +18,14 @@ c:\users\user\source\repos\chestnut\cvm\x64\debug\cm_image.obj
 c:\users\user\source\repos\chestnut\cvm\x64\debug\cm_function.obj
 c:\users\user\source\repos\chestnut\cvm\x64\debug\cm_class.obj
 c:\users\user\source\repos\chestnut\cvm\x64\debug\cm_camera.obj
+c:\users\user\source\repos\chestnut\cvm\x64\debug\cm_array.obj
 c:\users\user\source\repos\chestnut\cvm\x64\debug\builtin_functions.obj
 c:\users\user\source\repos\chestnut\cvm\x64\debug\sys_util.obj
 c:\users\user\source\repos\chestnut\cvm\x64\debug\sys_logger.obj
 c:\users\user\source\repos\chestnut\cvm\x64\debug\sys_file.obj
 c:\users\user\source\repos\chestnut\cvm\x64\debug\stack.obj
+c:\users\user\source\repos\chestnut\cvm\x64\debug\parser.obj
+c:\users\user\source\repos\chestnut\cvm\x64\debug\operator.obj
 c:\users\user\source\repos\chestnut\x64\debug\cvm.exe
 c:\users\user\source\repos\chestnut\x64\debug\cvm.pdb
 c:\users\user\source\repos\chestnut\cvm\x64\debug\cvm.ilk

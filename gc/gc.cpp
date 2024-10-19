@@ -56,6 +56,7 @@ void CGC::run() {
 
 	// for local variables
 	for (FunctionFrame* current_frame : this->stack_area) {
+
 		std::unordered_map<unsigned int, Operand*> local_area = current_frame->local_area;
 		std::unordered_map<unsigned int, Operand*>::iterator local_area_iterator = local_area.begin();
 
@@ -63,7 +64,7 @@ void CGC::run() {
 			Operand* op = extract_value_of_opernad(local_area_iterator->second);
 
 			if (op->get_type() == operand_address) {
-				Memory* root_memory = (Memory*) op->data;
+				Memory* root_memory = (Memory*)op->data;
 				root_memories.push_back(root_memory);
 			}
 		}
@@ -76,7 +77,7 @@ void CGC::run() {
 		Operand* op = extract_value_of_opernad(global_area_iterator->second);
 
 		if (op->get_type() == operand_address) {
-			root_memories.push_back((Memory*) op->data);
+			root_memories.push_back((Memory*)op->data);
 		}
 	}
 

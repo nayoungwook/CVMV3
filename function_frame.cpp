@@ -110,8 +110,10 @@ Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, double (*cal)(doub
 		double rhs_v = *((double*)rhs_vector->get_vector_elements()->at(i)->data);
 
 		double calculated_v = cal(lhs_v, rhs_v);
+		Operand* op = new Operand(8, operand_number);
+		*((double*)op->data) = calculated_v;
 
-		calculated_result->push_back(new Operand(8, operand_number));
+		calculated_result->push_back(op);
 	}
 
 	return new Operand(calculated_result, operand_vector);
@@ -181,14 +183,21 @@ Memory* create_object(CVM* vm, std::unordered_map<unsigned int, CMClass*>::itera
 			memory->member_variables.insert(std::make_pair(OBJECT_POSITION, new Operand(position_data, operand_vector)));
 		}
 
-		if (!width_declared) memory->member_variables.insert(std::make_pair(OBJECT_WIDTH, new Operand(8, operand_number)));
-		if (!height_declared) memory->member_variables.insert(std::make_pair(OBJECT_HEIGHT, new Operand(8, operand_number)));
-		if (!rotation_declared) memory->member_variables.insert(std::make_pair(OBJECT_ROTATION, new Operand(8, operand_number)));
+		if (!width_declared) {
+			memory->member_variables.insert(std::make_pair(OBJECT_WIDTH, new Operand(8, operand_number)));
+			*((double*)memory->member_variables.at(OBJECT_WIDTH)->data) = 30;
+		}
+		if (!height_declared) {
+			memory->member_variables.insert(std::make_pair(OBJECT_HEIGHT, new Operand(8, operand_number)));
+			*((double*)memory->member_variables.at(OBJECT_HEIGHT)->data) = 30;
+		}
+		if (!rotation_declared) {
+			memory->member_variables.insert(std::make_pair(OBJECT_ROTATION, new Operand(8, operand_number)));
+			*((double*)memory->member_variables.at(OBJECT_ROTATION)->data) = 0;
+		}
+
 		if (!texture_declared) memory->member_variables.insert(std::make_pair(OBJECT_SPRITE, new Operand(0, operand_null)));
 
-		*((double*)memory->member_variables.at(OBJECT_WIDTH)->data) = 100;
-		*((double*)memory->member_variables.at(OBJECT_HEIGHT)->data) = 100;
-		*((double*)memory->member_variables.at(OBJECT_ROTATION)->data) = 0;
 	}
 	return memory;
 }
@@ -299,17 +308,17 @@ void FunctionFrame::object_builtin_render(CVM* vm, FunctionFrame* caller, Memory
 
 	Operand* position_op = extract_value_of_opernad(caller_class->member_variables[OBJECT_POSITION]);
 
-	float _x = (float) *((double*)extract_value_of_opernad(position_op->get_vector_elements()->at(0))->data),
-		_y = (float) *((double*)extract_value_of_opernad(position_op->get_vector_elements()->at(1))->data);
+	float _x = (float)*((double*)extract_value_of_opernad(position_op->get_vector_elements()->at(0))->data),
+		_y = (float)*((double*)extract_value_of_opernad(position_op->get_vector_elements()->at(1))->data);
 
 	Operand* width_op = caller_class->member_variables[OBJECT_WIDTH];
 	Operand* height_op = caller_class->member_variables[OBJECT_HEIGHT];
 
-	float f_width = (float) *((double*)extract_value_of_opernad(width_op)->data)
-		, f_height = (float) *((double*)extract_value_of_opernad(height_op)->data);
+	float f_width = (float)*((double*)extract_value_of_opernad(width_op)->data)
+		, f_height = (float)*((double*)extract_value_of_opernad(height_op)->data);
 
 	Operand* rotation_op = caller_class->member_variables[OBJECT_ROTATION];
-	float f_rotation = (float) *((double*)extract_value_of_opernad(rotation_op)->data);
+	float f_rotation = (float)*((double*)extract_value_of_opernad(rotation_op)->data);
 
 	std::wstring image_name = *((std::wstring*)(extract_value_of_opernad(texture_op)->data));
 	std::unordered_map<std::wstring, CMImage*>::iterator image_data_iter = vm->resources.find(image_name);
@@ -352,8 +361,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 	if (cm_type == code_array_size) {
 		Operand* result = new Operand(8, operand_number);
-		std::wstring size_wstr = std::to_wstring(((ArrayMemory*)caller_class)->array_elements->size());
-		result->data = &size_wstr;
+		double size_wstr = ((ArrayMemory*)caller_class)->array_elements->size();
+		*((double*) result->data) = size_wstr;
 		caller->stack->push(result);
 
 		delete this;
@@ -404,7 +413,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 		std::vector<Operand*>* _array = ((ArrayMemory*)caller_class)->array_elements;
 
-		int index = (int) *((double*)_index->data);
+		int index = (int)*((double*)_index->data);
 
 		if (_array->at(index)->get_type() == operand_address) {
 			disconnectNode(caller_class, (Memory*)(_array->at(index)->data));
@@ -436,6 +445,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		start = clock();
 
 #endif
+
 		switch (type) {
 		case op_push_string: {
 			std::wstring raw_data = op->operands[0]->identifier;
@@ -444,7 +454,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* res_op = new Operand(0, operand_string);
 			res_op->data = data;
 			res_op->size = data->length();
-			
+
 			this->stack->push(res_op);
 			break;
 		}
@@ -653,7 +663,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					*((double*)result->data) = *((double*)rhs->data) + *((double*)lhs->data);
 				}
 				else if (lhs->get_type() == operand_vector)
-					result = calcaulte_vector_operand(lhs, rhs, cal_add);
+					result = calcaulte_vector_operand(rhs, lhs, cal_add);
 
 				break;
 			}
@@ -663,7 +673,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					*((double*)result->data) = *((double*)rhs->data) - *((double*)lhs->data);
 				}
 				else if (lhs->get_type() == operand_vector)
-					result = (calcaulte_vector_operand(lhs, rhs, cal_sub));
+					result = (calcaulte_vector_operand(rhs, lhs, cal_sub));
 
 				break;
 			}
@@ -673,7 +683,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					*((double*)result->data) = *((double*)rhs->data) * *((double*)lhs->data);
 				}
 				else if (lhs->get_type() == operand_vector)
-					result = calcaulte_vector_operand(lhs, rhs, cal_mult);
+					result = calcaulte_vector_operand(rhs, lhs, cal_mult);
 
 				break;
 			}
@@ -688,7 +698,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					*((double*)result->data) = *((double*)rhs->data) / *((double*)lhs->data);
 				}
 				else if (lhs->get_type() == operand_vector)
-					this->stack->push(calcaulte_vector_operand(lhs, rhs, cal_div));
+					this->stack->push(calcaulte_vector_operand(rhs, lhs, cal_div));
 
 				break;
 			case op_pow:
@@ -697,7 +707,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					*((double*)result->data) = pow(*((double*)rhs->data), *((double*)lhs->data));
 				}
 				else if (lhs->get_type() == operand_vector)
-					result = (calcaulte_vector_operand(lhs, rhs, cal_pow));
+					result = (calcaulte_vector_operand(rhs, lhs, cal_pow));
 				break;
 			case op_mod: {
 				if (lhs->get_type() == operand_number) {
@@ -709,7 +719,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					*((double*)result->data) = (int)*((double*)rhs->data) % (int)*((double*)lhs->data);
 				}
 				else if (lhs->get_type() == operand_vector)
-					result = (calcaulte_vector_operand(lhs, rhs, cal_mod));
+					result = (calcaulte_vector_operand(rhs, lhs, cal_mod));
 				break;
 			}
 
@@ -820,10 +830,10 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 					disconnectNode(caller_class, already_assigned_memory);
 				}
-
+				
 				// modifying nodes for attr
-				Memory* chlid_memory = (Memory*)peek;
-				gc_nodes[caller_class]->childs.push_back(gc_nodes[chlid_memory]);
+				Memory* child_memory = (Memory*)(peek->data);
+				gc_nodes[caller_class]->childs.push_back(gc_nodes[child_memory]);
 			}
 
 			if (caller_class->member_variables.find(id) == caller_class->member_variables.end()) {

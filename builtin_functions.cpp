@@ -351,7 +351,7 @@ void FunctionFrame::builtin_abs(Operator* op, CVM* vm, FunctionFrame* caller, Me
 	Operand* v = extract_value_of_opernad(_v);
 
 	Operand* result = new Operand(8, operand_number);
-	*((double*)result->data) = std::sin(*((double*)v->data));
+	*((double*)result->data) = std::abs(*((double*)v->data));
 
 	this->stack->push(result);
 
@@ -399,7 +399,7 @@ void FunctionFrame::builtin_sqrt(Operator* op, CVM* vm, FunctionFrame* caller, M
 void FunctionFrame::run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 	unsigned int id = std::stoi(op->operands[0]->identifier);
 	int parameter_count = std::stoi(op->operands[1]->identifier);
-
+	
 	switch (id) {
 	case BUILTIN_PRINT: // print
 		this->builtin_print(op, vm, caller, caller_class);

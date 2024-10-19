@@ -1,7 +1,80 @@
 #LOAD buki "buki.jpg" 1
 
 
+#LOAD brick "brick.png" 2
+
+
 OBJECT 0 (Player) -1 {
+$INITIALIZE 0 (constructor) default void {
+    @PUSH_NUMBER 0 0
+
+    @PUSH_NUMBER 0 0
+
+@VECTOR 2 0
+
+@STORE_CLASS 0 (position) 0
+@PUSH_NUMBER 100 0
+
+@STORE_CLASS 1 (width) 0
+@PUSH_NUMBER 100 0
+
+@STORE_CLASS 2 (height) 0
+@PUSH_NUMBER 0 0
+
+@STORE_CLASS 3 (rotation) 0
+@PUSH_NULL 0
+
+
+
+@STORE_CLASS 4 (sprite) 0
+
+@ARRAY 0 0
+
+@STORE_CLASS 5 (bricks) 6
+
+}
+FUNC 0 (tick) public void  {
+}
+
+FUNC 1 (init) public void  {
+}
+
+FUNC 2 (render) public void  {
+}
+
+$CONSTRUCTOR 0 (constructor) default void bricks array {
+@PUSH_STRING "buki" 9
+@PUSH_THIS 0
+
+@STORE_ATTR 4 (sprite) 0
+
+
+@PUSH_NUMBER 50 10
+@PUSH_THIS 0
+
+@STORE_ATTR 1 (width) 0
+
+
+@PUSH_NUMBER 50 11
+@PUSH_THIS 0
+
+@STORE_ATTR 2 (height) 0
+
+
+@LOAD_LOCAL 0 (bricks) 13
+
+
+
+@PUSH_THIS 0
+
+@STORE_ATTR 5 (bricks) 0
+
+
+}
+
+}
+
+OBJECT 1 (Brick) -1 {
 $INITIALIZE 0 (constructor) default void {
     @PUSH_NUMBER 0 0
 
@@ -35,37 +108,112 @@ FUNC 1 (render) public void  {
 FUNC 2 (tick) public void  {
 }
 
-$CONSTRUCTOR 0 (constructor) default void {
-@PUSH_STRING "buki" 5
+$CONSTRUCTOR 0 (constructor) default void pos vector {
+@PUSH_STRING "brick" 23
 @PUSH_THIS 0
 
 @STORE_ATTR 4 (sprite) 0
 
 
-}
+@PUSH_NUMBER 50 24
+@PUSH_THIS 0
+
+@STORE_ATTR 1 (width) 0
+
+
+@PUSH_NUMBER 50 25
+@PUSH_THIS 0
+
+@STORE_ATTR 2 (height) 0
+
+
+@LOAD_LOCAL 0 (pos) 26
+
+
+
+@PUSH_THIS 0
+
+@STORE_ATTR 0 (position) 0
+
 
 }
 
-SCENE 1 (Game) -1 {
+}
+
+SCENE 2 (Game) -1 {
 $INITIALIZE 0 (constructor) default void {
-@PUSH_NULL 11
+@PUSH_NULL 32
+@STORE_CLASS 0 (player) 32
 
+@ARRAY 0 0
 
-
-@STORE_CLASS 0 (player) 11
+@STORE_CLASS 1 (bricks) 33
 
 }
 FUNC 0 (tick) public void  {
+    @PUSH_THIS 44
+
+@LOAD_ATTR 0 (player) 44
+
+@CALL_ATTR 0 (tick) 0 44
+
+
+
 }
 
 FUNC 1 (render) public void  {
-    @PUSH_THIS 22
+    @PUSH_THIS 48
 
-@LOAD_ATTR 0 (player) 22
+@LOAD_ATTR 0 (player) 48
 
-@CALL_ATTR 1 (render) 0 22
+@CALL_ATTR 2 (render) 0 48
 
 
+
+    @PUSH_NUMBER 0 50
+
+    @STORE_LOCAL 0 (i) 0
+
+    @GOTO 0x1 50
+    @LABEL 0x2 50
+    @LOAD_CLASS 1 (bricks) 51
+@LOAD_LOCAL 0 (i) 51
+
+
+
+
+@ARRAY_GET 51
+
+@CALL_ATTR 1 (render) 0 51
+
+
+
+    @PUSH_NUMBER 1 0
+
+    @LOAD_LOCAL 0 (i) 0
+
+
+
+
+    @ADD 50
+    @STORE_LOCAL 0 (i) 0
+
+
+    @LABEL 0x1 50
+        @LOAD_CLASS 1 (bricks) 50
+
+@CALL_ATTR 1 (size) 0 50
+
+
+
+    @LOAD_LOCAL 0 (i) 50
+
+
+
+
+    @GREATER 0
+
+    @FOR 0x2 50
 
 }
 
@@ -73,28 +221,94 @@ FUNC 2 (init) public void  {
 }
 
 $CONSTRUCTOR 0 (constructor) default void {
-@NEW 0 (Player) 0 14
+@LOAD_CLASS 1 (bricks) 36
+
+
+
+@NEW 0 (Player) 1 36
 @PUSH_THIS 0
 
 @STORE_ATTR 0 (player) 0
 
+
+@PUSH_NUMBER 0 38
+
+@STORE_LOCAL 0 (i) 0
+
+@GOTO 0x3 38
+@LABEL 0x4 38
+@LOAD_CLASS 1 (bricks) 39
+
+    @PUSH_NUMBER 250 39
+
+@PUSH_NUMBER -1 0
+
+@MUL 0
+
+    @PUSH_NUMBER 50 39
+
+@LOAD_LOCAL 0 (i) 39
+
+
+
+
+@PUSH_NUMBER 10 39
+
+@PUSH_NUMBER -1 0
+
+@MUL 0
+
+@ADD 0
+
+@MUL 0
+
+@VECTOR 2 39
+
+@NEW 1 (Brick) 1 39
+
+@CALL_ATTR 0 (push) 1 39
+
+
+
+@PUSH_NUMBER 1 0
+
+@LOAD_LOCAL 0 (i) 0
+
+
+
+
+@ADD 38
+@STORE_LOCAL 0 (i) 0
+
+
+@LABEL 0x3 38
+@PUSH_NUMBER 20 38
+
+@LOAD_LOCAL 0 (i) 38
+
+
+
+
+@GREATER 0
+
+@FOR 0x4 38
 
 }
 
 }
 
 FUNC 0 (main) default void  {
-    @NEW 1 (Game) 0 27
+    @NEW 2 (Game) 0 57
 
-    @CALL_BUILTIN 2 (load_scene) 1 27
+    @CALL_BUILTIN 2 (load_scene) 1 57
 
-    @PUSH_NUMBER 600 29
+    @PUSH_NUMBER 600 58
 
-    @PUSH_NUMBER 800 29
+    @PUSH_NUMBER 800 58
 
-    @PUSH_STRING "title" 29
+    @PUSH_STRING "title" 58
 
-    @CALL_BUILTIN 1 (window) 3 29
+    @CALL_BUILTIN 1 (window) 3 58
 
 }
 
