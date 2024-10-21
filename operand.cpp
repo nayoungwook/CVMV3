@@ -5,7 +5,7 @@ Operand::Operand(int size, operand_type type) : type(type), size(size) {
 		data = nullptr;
 	else {
 		if (type == operand_string)
-			data = (void*)malloc(sizeof(wchar_t) * (size + 1));
+			data = new std::wstring();
 		else
 			data = (void*)malloc(sizeof(char) * size);
 	}
@@ -17,10 +17,6 @@ Operand::~Operand() {
 			delete vector_elements->at(i);
 		}
 		delete vector_elements;
-	}
-
-	if (type == operand_number) {
-		double d = *((double*)data);
 	}
 
 	if (this->type != operand_address && this->type != operand_op_address && data != nullptr && this->type != operand_string)
