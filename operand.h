@@ -31,8 +31,20 @@ public:
 	Operand(std::vector<Operand*>* array_data, operand_type type);
 	~Operand();
 
+	template <typename T>
+	T get_number_data();
+
 	std::wstring variable_name = L"";
 };
+
+template<typename T>
+T Operand::get_number_data() {
+	switch (type)
+	{
+	case operand_number:
+		return (T)* (double*)data;
+	}
+}
 
 Operand* create_address_operand(Memory* op);
 Operand* create_op_address_operand(Operand* op);

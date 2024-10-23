@@ -7,8 +7,8 @@
 
 class Stack {
 private:
-	std::deque<Operand*> operands;
 public:
+	std::deque<Operand*> operands;
 	Operand* peek();
 	void pop();
 	void push(Operand* op);
