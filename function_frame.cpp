@@ -28,6 +28,15 @@ const std::wstring get_type_string_of_operand(Operand* op) {
 	case operand_number:
 		type_string_operand = L"number";
 		break;
+	case operand_float:
+		type_string_operand = L"float";
+		break;
+	case operand_integer:
+		type_string_operand = L"int";
+		break;
+	case operand_none:
+		type_string_operand = L"none";
+		break;
 	case operand_address:
 		if (((Memory*)op->data)->type == L"memory")
 			type_string_operand = ((Memory*)op->data)->get_cm_class()->name;
@@ -99,7 +108,7 @@ void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CM
 	frame->run(vm, caller_frame, caller_class);
 }
 
-Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, double (*cal)(double l, double r)) {
+Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, float (*cal)(float l, float r)) {
 	Operand* lhs_vector = lhs;
 	Operand* rhs_vector = rhs;
 
@@ -110,9 +119,8 @@ Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, double (*cal)(doub
 		float lhs_v = lhs_vector->get_vector_elements()->at(i)->get_number_data<float>();
 		float rhs_v = rhs_vector->get_vector_elements()->at(i)->get_number_data<float>();
 
-		double calculated_v = cal(lhs_v, rhs_v);
-		Operand* op = new Operand(8, operand_number);
-		*((double*)op->data) = calculated_v;
+		float calculated_v = cal(lhs_v, rhs_v);
+		Operand* op = new Operand(calculated_v);
 
 		calculated_result->push_back(op);
 	}
@@ -120,33 +128,33 @@ Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, double (*cal)(doub
 	return new Operand(calculated_result, operand_vector);
 }
 
-double cal_add(double lhs, double rhs) {
+float cal_add(float lhs, float rhs) {
 	return lhs + rhs;
 }
 
-double cal_sub(double lhs, double rhs) {
+float cal_sub(float lhs, float rhs) {
 	return lhs - rhs;
 }
 
-double cal_mult(double lhs, double rhs) {
+float cal_mult(float lhs, float rhs) {
 	return lhs * rhs;
 }
 
-double cal_div(double lhs, double rhs) {
+float cal_div(float lhs, float rhs) {
 	if (rhs != 0) {
 		return lhs / rhs;
 	}
 	return 0;
 }
 
-double cal_mod(double lhs, double rhs) {
+float cal_mod(float lhs, float rhs) {
 	if (rhs != 0) {
 		return (int)lhs % (int)rhs;
 	}
 	return 0;
 }
 
-double cal_pow(double lhs, double rhs) {
+float cal_pow(float lhs, float rhs) {
 	return pow(lhs, rhs);
 }
 
@@ -175,29 +183,23 @@ Memory* create_object(CVM* vm, std::unordered_map<unsigned int, CMClass*>::itera
 
 		if (!position_declared) {
 			std::vector<Operand*>* position_data = new std::vector<Operand*>;
-			position_data->push_back(new Operand(8, operand_number));
-			position_data->push_back(new Operand(8, operand_number));
-
-			*((double*)position_data->at(0)->data) = 0;
-			*((double*)position_data->at(1)->data) = 0;
+			position_data->push_back(new Operand(.0f));
+			position_data->push_back(new Operand(.0f));
 
 			memory->member_variables.insert(std::make_pair(OBJECT_POSITION, new Operand(position_data, operand_vector)));
 		}
 
 		if (!width_declared) {
-			memory->member_variables.insert(std::make_pair(OBJECT_WIDTH, new Operand(8, operand_number)));
-			*((double*)memory->member_variables.at(OBJECT_WIDTH)->data) = 30;
+			memory->member_variables.insert(std::make_pair(OBJECT_WIDTH, new Operand(100.0f)));
 		}
 		if (!height_declared) {
-			memory->member_variables.insert(std::make_pair(OBJECT_HEIGHT, new Operand(8, operand_number)));
-			*((double*)memory->member_variables.at(OBJECT_HEIGHT)->data) = 30;
+			memory->member_variables.insert(std::make_pair(OBJECT_HEIGHT, new Operand(100.0f)));
 		}
 		if (!rotation_declared) {
-			memory->member_variables.insert(std::make_pair(OBJECT_ROTATION, new Operand(8, operand_number)));
-			*((double*)memory->member_variables.at(OBJECT_ROTATION)->data) = 0;
+			memory->member_variables.insert(std::make_pair(OBJECT_ROTATION, new Operand(.0f)));
 		}
 
-		if (!texture_declared) memory->member_variables.insert(std::make_pair(OBJECT_SPRITE, new Operand(0, operand_null)));
+		if (!texture_declared) memory->member_variables.insert(std::make_pair(OBJECT_SPRITE, new Operand()));
 
 	}
 	return memory;
@@ -213,15 +215,15 @@ bool operand_compare(Operand* op1, Operand* op2) {
 		return op1->get_vector_elements() == op2->get_vector_elements();
 
 	case operand_address:
-		return ((Memory*)op1->data) == ((Memory*)op2->data);
+		return op1->get_memory_data() == op2->get_memory_data();
 	case operand_bool:
-		return *((bool*)op1->data) == *((bool*)op2->data);
+		return op1->get_bool_data<bool>() == op2->get_bool_data<bool>();
 	case operand_number:
-		return *((double*)op1->data) == *((double*)op2->data);
+		return op1->get_number_data<float>() == op2->get_number_data<float>();
 	case operand_null:
 		return op2->data == nullptr;
 	case operand_string:
-		return *((std::wstring*)op1->data) == *((std::wstring*)op2->data);
+		return op1->get_string_data<std::wstring>() == op2->get_string_data<std::wstring>();
 	}
 
 	return op1->data == op2->data;
@@ -254,18 +256,27 @@ Operand* cast_operand(Operator* op, std::wstring cast_type, Operand* target) {
 		std::wstring target_str;
 		switch (target->get_type()) {
 		case operand_bool:
-			target_str = *((bool*)target->data) ? L"true" : L"false";
+			target_str = target->get_bool_data<bool>() ? L"true" : L"false";
 			break;
 		case operand_number:
-			target_str = std::to_wstring(*((double*)target->data));
+			target_str = std::to_wstring(target->get_number_data<double>());
+			break;
+		case operand_integer:
+			target_str = std::to_wstring(target->get_number_data<int>());
+			break;
+		case operand_float:
+			target_str = std::to_wstring(target->get_number_data<float>());
 			break;
 		case operand_null:
 			target_str = L"null";
 			break;
+		case operand_none:
+			target_str = L"None";
+			break;
 		case operand_vector:
 			target_str += L"(";
 			for (int i = 0; i < target->get_vector_elements()->size(); i++) {
-				target_str += std::to_wstring((*(double*)target->get_vector_elements()->at(i)->data));
+				target_str += std::to_wstring(target->get_vector_elements()->at(i)->get_number_data<float>());
 				if (i != target->get_vector_elements()->size() - 1) {
 					target_str += L",";
 				}
@@ -274,12 +285,10 @@ Operand* cast_operand(Operator* op, std::wstring cast_type, Operand* target) {
 			break;
 		}
 
-		result = new Operand(target_str.size(), operand_string);
-		*((std::wstring*)result->data) = target_str;
+		result = new Operand(target_str);
 	}
 	else if (cast_type == L"number") {
-		result = new Operand(target->size, operand_number);
-		*((double*)result->data) = *((double*)target->data);
+		result = new Operand((int)target->size);
 		/*
 			CHESTNUT_THROW_ERROR(L"Failed to cast " + get_type_string_of_operand(target) + L" into " + cast_type + L" " + target->get_data() + L" is not a number.",
 				"FAILED_TO_CAST", "0x12", op->get_line_number());
@@ -288,12 +297,10 @@ Operand* cast_operand(Operator* op, std::wstring cast_type, Operand* target) {
 	else if (cast_type == L"bool") {
 		switch (target_type) {
 		case operand_number:
-			result = new Operand(1, operand_bool);
-			*((bool*)result->data) = *((bool*)target->data) == true;
+			result = new Operand(target->get_number_data<int>() == 1);
 			break;
 		case operand_string:
-			result = new Operand(1, operand_bool);
-			*((bool*)result->data) = *((std::wstring*)target->data) == L"true" ? true : false;
+			result = new Operand(target->get_string_data<std::wstring>() == L"true");
 			break;
 		}
 	}
@@ -331,19 +338,19 @@ void FunctionFrame::object_builtin_render(CVM* vm, FunctionFrame* caller, Memory
 
 	Operand* position_op = extract_value_of_opernad(caller_class->member_variables[OBJECT_POSITION]);
 
-	float _x = (float)*((double*)extract_value_of_opernad(position_op->get_vector_elements()->at(0))->data),
-		_y = (float)*((double*)extract_value_of_opernad(position_op->get_vector_elements()->at(1))->data);
+	float _x = extract_value_of_opernad(position_op->get_vector_elements()->at(0))->get_number_data<float>(),
+		_y = extract_value_of_opernad(position_op->get_vector_elements()->at(1))->get_number_data<float>();
 
 	Operand* width_op = caller_class->member_variables[OBJECT_WIDTH];
 	Operand* height_op = caller_class->member_variables[OBJECT_HEIGHT];
 
-	float f_width = (float)*((double*)extract_value_of_opernad(width_op)->data)
-		, f_height = (float)*((double*)extract_value_of_opernad(height_op)->data);
+	float f_width = extract_value_of_opernad(width_op)->get_number_data<float>()
+		, f_height = extract_value_of_opernad(height_op)->get_number_data<float>();
 
 	Operand* rotation_op = caller_class->member_variables[OBJECT_ROTATION];
-	float f_rotation = (float)*((double*)extract_value_of_opernad(rotation_op)->data);
+	float f_rotation = extract_value_of_opernad(rotation_op)->get_number_data<float>();
 
-	std::wstring image_name = *((std::wstring*)(extract_value_of_opernad(texture_op)->data));
+	std::wstring image_name = extract_value_of_opernad(texture_op)->get_string_data<std::wstring>();
 	std::unordered_map<std::wstring, CMImage*>::iterator image_data_iter = vm->resources.find(image_name);
 
 	assert(image_data_iter != vm->resources.end());
@@ -375,7 +382,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 		if (target_element->get_type() == operand_address) {
 			// modifying nodes for attr
-			gc_nodes[caller_class]->childs.push_back(gc_nodes[(Memory*)target_element->data]);
+			gc_nodes[caller_class]->childs.push_back(gc_nodes[target_element->get_memory_data()]);
 		}
 
 		delete this;
@@ -383,9 +390,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 	}
 
 	if (cm_type == code_array_size) {
-		Operand* result = new Operand(8, operand_number);
-		double size_wstr = ((ArrayMemory*)caller_class)->array_elements->size();
-		*((double*)result->data) = size_wstr;
+		int size_wstr = (int)((ArrayMemory*)caller_class)->array_elements->size();
+		Operand* result = new Operand(size_wstr);
 		caller->stack->push(result);
 
 		delete this;
@@ -436,17 +442,17 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 		std::vector<Operand*>* _array = ((ArrayMemory*)caller_class)->array_elements;
 
-		int index = (int)*((double*)_index->data);
+		int index = _index->get_number_data<int>();
 
 		if (_array->at(index)->get_type() == operand_address) {
-			disconnectNode(caller_class, (Memory*)(_array->at(index)->data));
+			disconnectNode(caller_class, _array->at(index)->get_memory_data());
 		}
 
 		_array->at(index) = target_element;
 
 		if (target_element->get_type() == operand_address) {
 			// modifying nodes for attr
-			gc_nodes[caller_class]->childs.push_back(gc_nodes[(Memory*)target_element->data]);
+			gc_nodes[caller_class]->childs.push_back(gc_nodes[target_element->get_memory_data()]);
 		}
 
 		delete this;
@@ -468,14 +474,14 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		start = clock();
 
 #endif
+
+//		std::cout << type << " ";
+
 		switch (type) {
 		case op_push_string: {
 			std::wstring raw_data = op->operands[0]->identifier;
 			raw_data = raw_data.substr(1, raw_data.size() - 2);
-			std::wstring* data = new std::wstring(raw_data.begin(), raw_data.end());
-			Operand* res_op = new Operand(0, operand_string);
-			res_op->data = data;
-			res_op->size = data->length();
+			Operand* res_op = new Operand(raw_data);
 
 			this->stack->push(res_op);
 			break;
@@ -483,14 +489,27 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 		case op_push_number: {
 			std::wstring num_str = op->operands[0]->identifier;
-			Operand* res_op = new Operand(8, operand_number);
-			*((double*)res_op->data) = std::stod(num_str);
+			Operand* res_op = new Operand(std::stod(num_str));
+			this->stack->push(res_op);
+			break;
+		}
+
+		case op_push_integer: {
+			std::wstring num_str = op->operands[0]->identifier;
+			Operand* res_op = new Operand(std::stoi(num_str));
+			this->stack->push(res_op);
+			break;
+		}
+
+		case op_push_float: {
+			std::wstring num_str = op->operands[0]->identifier;
+			Operand* res_op = new Operand(std::stof(num_str));
 			this->stack->push(res_op);
 			break;
 		}
 
 		case op_push_null: {
-			this->stack->push(new Operand(0, operand_null));
+			this->stack->push(new Operand());
 			break;
 		}
 
@@ -500,8 +519,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_push_bool: {
-			Operand* res_op = new Operand(1, operand_bool);
-			*((bool*)res_op->data) = op->operands[0]->identifier == L"true" ? true : false;
+			Operand* res_op = new Operand(op->operands[0]->identifier == L"true");
 			this->stack->push(res_op);
 			break;
 		}
@@ -521,7 +539,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* condition = this->stack->peek();
 			this->stack->pop();
 
-			if (*((bool*)extract_value_of_opernad(condition)->data) == true) {
+			if (extract_value_of_opernad(condition)->get_bool_data<bool>()) {
 				std::wstring id = op->operands[0]->identifier;
 				line = vm->label_id->find(id)->second;
 			}
@@ -548,8 +566,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		case op_keybaord: {
 			std::wstring key = to_upper_all(op->operands[0]->identifier);
 			bool result = vm->key_data.find(key) != vm->key_data.end();
-			Operand* res_op = new Operand(1, operand_bool);
-			*((bool*)res_op->data) = result;
+			Operand* res_op = new Operand(result);
 			this->stack->push(res_op);
 			break;
 		}
@@ -558,7 +575,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* condition = this->stack->peek();
 			this->stack->pop();
 
-			if (*((bool*)extract_value_of_opernad(condition)->data) == false) {
+			if (!extract_value_of_opernad(condition)->get_bool_data<bool>()) {
 				std::wstring id = op->operands[0]->identifier;
 				line = vm->label_id->find(id)->second;
 			}
@@ -572,7 +589,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* target = extract_value_of_opernad(this->stack->peek());
 			this->stack->pop();
 
-			*((double*)target->data) = *((double*)target->data) + 1;
+			target->increase();
 
 			break;
 		}
@@ -581,7 +598,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* target = extract_value_of_opernad(this->stack->peek());
 			this->stack->pop();
 
-			*((double*)target->data) = *((double*)target->data) - 1;
+			target->decrease();
 
 			break;
 		}
@@ -621,44 +638,44 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* lhs = extract_value_of_opernad(lhs_op);
 			Operand* rhs = extract_value_of_opernad(rhs_op);
 
-			if (lhs->get_type() != rhs->get_type()) {
+			if (lhs->get_type() != rhs->get_type() && !(lhs->is_number_type() && rhs->is_number_type())) {
 				if (
-					(lhs->get_type() == operand_vector && rhs->get_type() == operand_number) ||
-					(rhs->get_type() == operand_vector && lhs->get_type() == operand_number)
+					(lhs->get_type() == operand_vector && rhs->is_number_type()) ||
+					(rhs->get_type() == operand_vector && lhs->is_number_type())
 					) {
 
 					std::vector<Operand*>* calculated_vector = new std::vector<Operand*>;
 
 					Operand* vector_operand = lhs->get_type() == operand_vector ? lhs : rhs;
-					Operand* number_operand = lhs->get_type() == operand_number ? lhs : rhs;
+					Operand* number_operand = lhs->is_number_type() ? lhs : rhs;
 
-					double rhs_v = *((double*)number_operand->data);
+					float rhs_v = number_operand->get_number_data<float>();
 
 					std::vector<Operand*>* array_data = vector_operand->get_vector_elements();
 					for (int i = 0; i < array_data->size(); i++) {
-						double lhs_v = *((double*)array_data->at(i)->data);
-						Operand* result = new Operand(8, operand_number);
+						float lhs_v = array_data->at(i)->get_number_data<float>();
+						float result = 0;
 						switch (type) {
 						case op_add:
-							*((double*)result->data) = lhs_v + rhs_v;
+							result = lhs_v + rhs_v;
 							break;
 						case op_sub:
-							*((double*)result->data) = lhs_v - rhs_v;
+							result = lhs_v - rhs_v;
 							break;
 						case op_mul:
-							*((double*)result->data) = lhs_v * rhs_v;
+							result = lhs_v * rhs_v;
 							break;
 						case op_div:
-							*((double*)result->data) = lhs_v / rhs_v;
+							result = lhs_v / rhs_v;
 							break;
 						case op_pow:
-							*((double*)result->data) = pow(lhs_v, rhs_v);
+							result = pow(lhs_v, rhs_v);
 							break;
 						case op_mod:
-							*((double*)result->data) = (int)lhs_v % (int)rhs_v;
+							result = (int)lhs_v % (int)rhs_v;
 							break;
 						}
-						calculated_vector->push_back(result);
+						calculated_vector->push_back(new Operand(result));
 					}
 
 					this->stack->push(new Operand(calculated_vector, operand_vector));
@@ -680,14 +697,11 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			switch (type) {
 			case op_add: {
-				if (lhs->get_type() == operand_number) {
-					result = new Operand(8, operand_number);
-					*((double*)result->data) = *((double*)rhs->data) + *((double*)lhs->data);
+				if (lhs->is_number_type()) {
+					result = new Operand(rhs->get_number_data<double>() + lhs->get_number_data<double>());
 				}
 				else if (lhs->get_type() == operand_string) {
-					std::wstring str_result = *((std::wstring*)rhs->data) + *((std::wstring*)lhs->data);
-					result = new Operand(str_result.size(), operand_string);
-					*((std::wstring*)result->data) = str_result;
+					result = new Operand(rhs->get_string_data<std::wstring>() + lhs->get_string_data<std::wstring>());
 				}
 				else if (lhs->get_type() == operand_vector)
 					result = calcaulte_vector_operand(rhs, lhs, cal_add);
@@ -695,9 +709,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				break;
 			}
 			case op_sub: {
-				if (lhs->get_type() == operand_number) {
-					result = new Operand(8, operand_number);
-					*((double*)result->data) = *((double*)rhs->data) - *((double*)lhs->data);
+				if (lhs->is_number_type()) {
+					result = new Operand(rhs->get_number_data<double>() - lhs->get_number_data<double>());
 				}
 				else if (lhs->get_type() == operand_vector)
 					result = (calcaulte_vector_operand(rhs, lhs, cal_sub));
@@ -705,9 +718,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				break;
 			}
 			case op_mul: {
-				if (lhs->get_type() == operand_number) {
-					result = new Operand(8, operand_number);
-					*((double*)result->data) = *((double*)rhs->data) * *((double*)lhs->data);
+				if (lhs->is_number_type()) {
+					result = new Operand(rhs->get_number_data<double>() * lhs->get_number_data<double>());
 				}
 				else if (lhs->get_type() == operand_vector)
 					result = calcaulte_vector_operand(rhs, lhs, cal_mult);
@@ -715,35 +727,31 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 				break;
 			}
 			case op_div:
-
-				if (lhs->get_type() == operand_number) {
-					if (*((double*)rhs->data) == 0) {
+				if (lhs->is_number_type()) {
+					if (rhs->get_number_data<int>() == 0) {
 						CHESTNUT_THROW_ERROR(L"Divided by zero. So sorry but We don\'t have Limit system here yet.",
 							"RUNTIME_DEVIDED_BY_ZERO", "0x04", op->get_line_number());
 					}
-					result = new Operand(8, operand_number);
-					*((double*)result->data) = *((double*)rhs->data) / *((double*)lhs->data);
+					result = new Operand(rhs->get_number_data<double>() / lhs->get_number_data<double>());
 				}
 				else if (lhs->get_type() == operand_vector)
 					this->stack->push(calcaulte_vector_operand(rhs, lhs, cal_div));
 
 				break;
 			case op_pow:
-				if (lhs->get_type() == operand_number) {
-					result = new Operand(8, operand_number);
-					*((double*)result->data) = pow(*((double*)rhs->data), *((double*)lhs->data));
+				if (lhs->is_number_type()) {
+					result = new Operand(std::pow(rhs->get_number_data<float>(), lhs->get_number_data<int>()));
 				}
 				else if (lhs->get_type() == operand_vector)
 					result = (calcaulte_vector_operand(rhs, lhs, cal_pow));
 				break;
 			case op_mod: {
-				if (lhs->get_type() == operand_number) {
-					if (*((double*)rhs->data) == 0) {
+				if (lhs->is_number_type()) {
+					if (rhs->get_number_data<int>() == 0) {
 						CHESTNUT_THROW_ERROR(L"Divided by zero. So sorry but We don\'t have Limit system here yet.",
 							"RUNTIME_DEVIDED_BY_ZERO", "0x04", op->get_line_number());
 					}
-					result = new Operand(8, operand_number);
-					*((double*)result->data) = (int)*((double*)rhs->data) % (int)*((double*)lhs->data);
+					result = new Operand(rhs->get_number_data<int>() % lhs->get_number_data<int>());
 				}
 				else if (lhs->get_type() == operand_vector)
 					result = (calcaulte_vector_operand(rhs, lhs, cal_mod));
@@ -751,58 +759,49 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			}
 
 			case op_greater: {
-				result = new Operand(1, operand_bool);
-				*((bool*)result->data) = *((double*)lhs->data) > *((double*)rhs->data);
+				result = new Operand(rhs->get_number_data<double>() < lhs->get_number_data<double>());
 				break;
 			}
 
 			case op_lesser: {
-				result = new Operand(1, operand_bool);
-				*((bool*)result->data) = *((double*)lhs->data) < *((double*)rhs->data);
+				result = new Operand(rhs->get_number_data<double>() > lhs->get_number_data<double>());
 				break;
 			}
 
 			case op_eq_lesser: {
-				result = new Operand(1, operand_bool);
-				*((bool*)result->data) = *((double*)lhs->data) <= *((double*)rhs->data);
+				result = new Operand(rhs->get_number_data<double>() >= lhs->get_number_data<double>());
 				break;
 			}
 
 			case op_eq_greater: {
-				result = new Operand(1, operand_bool);
-				*((bool*)result->data) = *((double*)lhs->data) >= *((double*)rhs->data);
+				result = new Operand(rhs->get_number_data<double>() <= lhs->get_number_data<double>());
 				break;
 			}
 
 			case op_equal: {
-				result = new Operand(1, operand_bool);
-				*((bool*)result->data) = operand_compare(lhs, rhs);
-
+				result = new Operand(operand_compare(lhs, rhs));
 				break;
 			}
 
 			case op_not_equal: {
-				result = new Operand(1, operand_bool);
-				*((bool*)result->data) = !operand_compare(lhs, rhs);
+				result = new Operand(!operand_compare(lhs, rhs));
 				break;
 			}
 
 			case op_or: {
-				bool _lhs = *((bool*)lhs->data);
-				bool _rhs = *((bool*)rhs->data);
+				bool _lhs = lhs->get_bool_data<bool>();
+				bool _rhs = rhs->get_bool_data<bool>();
 
-				result = new Operand(1, operand_bool);
-				*((bool*)result->data) = _lhs || _rhs;
+				result = new Operand(_lhs || _rhs);
 
 				break;
 			}
 
 			case op_and: {
-				bool _lhs = *((bool*)lhs->data);
-				bool _rhs = *((bool*)rhs->data);
+				bool _lhs = lhs->get_bool_data<bool>();
+				bool _rhs = rhs->get_bool_data<bool>();
 
-				result = new Operand(1, operand_bool);
-				*((bool*)result->data) = _lhs && _rhs;
+				result = new Operand(_lhs && _rhs);
 
 				break;
 			}
@@ -832,7 +831,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			if (peek->get_type() == operand_address) {
 				// modifying nodes for attr
-				gc_nodes[caller_class]->childs.push_back(gc_nodes[(Memory*)peek->data]);
+				gc_nodes[caller_class]->childs.push_back(gc_nodes[peek->get_memory_data()]);
 			}
 
 			delete peek_op;
@@ -921,7 +920,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			operand_type op_type = attr_target->get_type();
 
 			if (op_type == operand_address) {
-				Memory* attr_memory = (Memory*)attr_target->data;
+				Memory* attr_memory = attr_target->get_memory_data();
 				std::wstring name = L"";
 
 				if (attr_memory->member_variables.find(store_id) != attr_memory->member_variables.end()) {
@@ -957,7 +956,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		case op_array_get: {
 			Operand* index_peek = this->stack->peek();
 			this->stack->pop();
-			int index = (int)*((double*)extract_value_of_opernad(index_peek)->data);
+			int index = extract_value_of_opernad(index_peek)->get_number_data<int>();
 
 			Operand* array_operand = this->stack->peek(); // do not delete it.
 			this->stack->pop();

@@ -50,6 +50,8 @@ enum operator_type {
 	op_super_call = 42,
 	op_keybaord = 43,
 	op_cast = 44,
+	op_push_integer = 45,
+	op_push_float = 46,
 };
 
 class Operator {

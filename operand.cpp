@@ -1,13 +1,81 @@
 #include "operand.h"
 
-Operand::Operand(int size, operand_type type) : type(type), size(size) {
-	if (size <= 0)
-		data = nullptr;
-	else {
-		if (type == operand_string)
-			data = new std::wstring();
-		else
-			data = (void*)malloc(sizeof(char) * size);
+Operand::Operand(int i) {
+	this->type = operand_integer;
+	data = (int*)malloc(sizeof(int));
+	*(int*)data = i;
+}
+
+Operand::Operand(float f) {
+	this->type = operand_float;
+	data = (float*)malloc(sizeof(float));
+	*(float*)data = f;
+}
+
+Operand::Operand(double d) {
+	this->type = operand_number;
+	data = (double*)malloc(sizeof(double));
+	*(double*)data = d;
+}
+
+Operand::Operand(bool b) {
+	this->type = operand_bool;
+	data = (bool*)malloc(sizeof(bool));
+	*(bool*)data = b;
+}
+
+Operand::Operand(std::wstring str) {
+	this->type = operand_string;
+	data = new std::wstring();
+	*(std::wstring*)data = str;
+}
+
+Operand::Operand(Memory* add) {
+	this->type = operand_address;
+	this->data = add;
+}
+
+Operand::Operand(Operand* add) {
+	this->type = operand_op_address;
+	this->data = add;
+}
+
+Operand::Operand() {
+	this->type = operand_null;
+}
+
+void Operand::increase() {
+	switch (type) {
+	case operand_number:
+		*((double*)data) = *((double*)data) + 1;
+		break;
+	case operand_float:
+		*((float*)data) = *((float*)data) + 1;
+		break;
+	case operand_integer:
+		*((int*)data) = *((int*)data) + 1;
+		break;
+	}
+}
+
+void Operand::decrease() {
+	switch (type) {
+	case operand_number:
+		*((double*)data) = *((double*)data) - 1;
+		break;
+	case operand_float:
+		*((float*)data) = *((float*)data) - 1;
+		break;
+	case operand_integer:
+		*((int*)data) = *((int*)data) - 1;
+		break;
+	}
+}
+
+Memory* Operand::get_memory_data() {
+	switch (type) {
+	case operand_address:
+		return (Memory*)data;
 	}
 }
 
@@ -30,6 +98,10 @@ Operand::Operand(std::vector<Operand*>* array_data, operand_type type)
 
 std::vector<Operand*>* Operand::get_vector_elements() {
 	return vector_elements;
+}
+
+bool Operand::is_number_type() {
+	return type == operand_number || type == operand_integer || type == operand_float;
 }
 
 operand_type Operand::get_type() const {
@@ -68,24 +140,45 @@ Operand* copy_operand(Operand* op) {
 		break;
 	}
 
-	case operand_address:
-	case operand_op_address:
-	{
-		copied_op = new Operand(0, op->get_type());
-		copied_op->data = op->data;
+	case operand_number: {
+		copied_op = new Operand(op->get_number_data<double>());
 		break;
 	}
 
-	default: {
-		copied_op = new Operand(op->size, op->get_type());
-		
-		if (op->get_type() == operand_string) {
-			copied_op->data = op->data;
-		}
-		else {
-			memcpy(copied_op->data, op->data, sizeof(char) * op->size);
-		}
+	case operand_float: {
+		copied_op = new Operand(op->get_number_data<float>());
+		break;
+	}
 
+	case operand_integer: {
+		copied_op = new Operand(op->get_number_data<int>());
+		break;
+	}
+
+	case operand_bool: {
+		copied_op = new Operand(op->get_bool_data<bool>());
+		break;
+	}
+
+	case operand_string: {
+		copied_op = new Operand(op->get_string_data<std::wstring>());
+		break;
+	}
+
+	case operand_address:
+	{
+		copied_op = new Operand((Memory*)op->data);
+		break;
+	}
+
+	case operand_op_address:
+	{
+		copied_op = new Operand((Operand*)op->data);
+		break;
+	}
+	case operand_null:
+	{
+		copied_op = new Operand();
 		break;
 	}
 	}
@@ -94,13 +187,11 @@ Operand* copy_operand(Operand* op) {
 }
 
 Operand* create_address_operand(Memory* op) {
-	Operand* result = new Operand(0, operand_address);
-	result->data = op;
+	Operand* result = new Operand(op);
 	return result;
 }
 
 Operand* create_op_address_operand(Operand* op) {
-	Operand* result = new Operand(0, operand_op_address);
-	result->data = op;
+	Operand* result = new Operand(op);
 	return result;
 }

@@ -17,6 +17,16 @@ Operator* get_operator(std::unordered_map<std::wstring, unsigned int>* label_id,
 
 		operands.push_back(pull_token(tokens)); // content
 	}
+	else if (token->identifier == L"@PUSH_INTEGER") {
+		type = op_push_integer;
+
+		operands.push_back(pull_token(tokens)); // content
+	}
+	else if (token->identifier == L"@PUSH_FLOAT") {
+		type = op_push_float;
+
+		operands.push_back(pull_token(tokens)); // content
+	}
 	else if (token->identifier == L"@PUSH_BOOL") {
 		type = op_push_bool;
 

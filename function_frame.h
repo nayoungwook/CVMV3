@@ -46,7 +46,7 @@ public:
 };
 
 void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CMFunction* code_memory, int parameter_count);
-Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, double (*cal)(double l, double r));
+Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, float (*cal)(float l, float r));
 Memory* create_object(CVM* vm, std::unordered_map<unsigned int, CMClass*>::iterator code_memory, FunctionFrame* frame, unsigned int constructor_parameter_count);
 
 Operand* cast_operand(Operator* op, std::wstring cast_type, Operand* target);
@@ -54,11 +54,11 @@ Operand* cast_operand(Operator* op, std::wstring cast_type, Operand* target);
 const std::wstring get_type_string_of_operand(Operand* op);
 void check_type_for_store(CVM* vm, std::wstring const& type1, std::wstring const& type2);
 
-double cal_add(double lhs, double rhs);
-double cal_sub(double lhs, double rhs);
-double cal_mult(double lhs, double rhs);
-double cal_div(double lhs, double rhs);
-double cal_mod(double lhs, double rhs);
-double cal_pow(double lhs, double rhs);
+float cal_add(float lhs, float rhs);
+float cal_sub(float lhs, float rhs);
+float cal_mult(float lhs, float rhs);
+float cal_div(float lhs, float rhs);
+float cal_mod(float lhs, float rhs);
+float cal_pow(float lhs, float rhs);
 
 bool operand_compare(Operand* op1, Operand* op2);

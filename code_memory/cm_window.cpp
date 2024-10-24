@@ -281,7 +281,8 @@ void window_loop(CVM* vm, SDL_Window* window) {
 		if (current_ticks - backup_ticks != 0) {
 			vm->fps = 1000 / (current_ticks - backup_ticks);
 			if (vm->global_area.find(2) != vm->global_area.end()) {
-				*((double*)vm->global_area[2]->data) = (int)vm->fps;
+				delete vm->global_area[2];
+				vm->global_area[2] = new Operand((int) vm->fps);
 			}
 		}
 
@@ -340,17 +341,13 @@ void load_builtin_variables(CVM* vm) {
 	// for mouse
 	std::vector<Operand*>* mouse_elements = new std::vector<Operand*>;
 	for (int i = 0; i < 2; i++) {
-		mouse_elements->push_back(new Operand(8, operand_number));
+		mouse_elements->push_back(new Operand(.0f));
 	}
-
-	*((double*)mouse_elements->at(0)->data) = 0;
-	*((double*)mouse_elements->at(1)->data) = 0;
 
 	Operand* mouse_memory = new Operand(mouse_elements, operand_vector);
 	vm->global_area.insert(std::make_pair(1, mouse_memory));
 
-	Operand* fps_memory = new Operand(8, operand_number);
-	*((double*)fps_memory->data) = 0;
+	Operand* fps_memory = new Operand(0);
 	vm->global_area.insert(std::make_pair(2, fps_memory));
 }
 
