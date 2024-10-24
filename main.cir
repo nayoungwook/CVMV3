@@ -171,6 +171,14 @@ FUNC 0 (tick) public void  {
 
 
 
+    @PUSH_THIS 27
+
+@LOAD_ATTR 5 (game) 27
+
+@CALL_ATTR 1 (increase_score) 0 27
+
+
+
     @GOTO 0x3 24
     @LABEL 0x4 24
     @LABEL 0x3 24
@@ -281,11 +289,11 @@ $INITIALIZE 0 (constructor) default void {
 
 }
 FUNC 0 (tick) public void  {
-        @PUSH_INTEGER 4 42
+        @PUSH_INTEGER 4 43
 
-        @PUSH_INTEGER 0 42
+        @PUSH_INTEGER 0 43
 
-    @VECTOR 2 42
+    @VECTOR 2 43
 
     @PUSH_THIS 0
 
@@ -293,7 +301,7 @@ FUNC 0 (tick) public void  {
 
 
 
-    @SUB 42
+    @SUB 43
     @PUSH_THIS 0
 
 @STORE_ATTR 0 (position) 0
@@ -308,15 +316,15 @@ FUNC 2 (render) public void  {
 }
 
 $CONSTRUCTOR 0 (constructor) default void {
-@PUSH_STRING "enemy" 34
+@PUSH_STRING "enemy" 35
 @PUSH_THIS 0
 
 @STORE_ATTR 4 (sprite) 0
 
 
-@PUSH_INTEGER 2 35
+@PUSH_INTEGER 2 36
 
-@PUSH_INTEGER 93 35
+@PUSH_INTEGER 93 36
 
 @DIV 0
 @PUSH_THIS 0
@@ -324,9 +332,9 @@ $CONSTRUCTOR 0 (constructor) default void {
 @STORE_ATTR 1 (width) 0
 
 
-@PUSH_INTEGER 2 36
+@PUSH_INTEGER 2 37
 
-@PUSH_INTEGER 84 36
+@PUSH_INTEGER 84 37
 
 @DIV 0
 @PUSH_THIS 0
@@ -334,19 +342,19 @@ $CONSTRUCTOR 0 (constructor) default void {
 @STORE_ATTR 2 (height) 0
 
 
-    @PUSH_INTEGER 300 38
+    @PUSH_INTEGER 300 39
 
-    @PUSH_INTEGER 400 38
+    @PUSH_INTEGER 400 39
 
-@PUSH_INTEGER 400 38
+@PUSH_INTEGER 400 39
 
 @PUSH_INTEGER -1 0
 
 @MUL 0
 
-    @CALL_BUILTIN 11 (random_range) 2 38
+    @CALL_BUILTIN 11 (random_range) 2 39
 
-@VECTOR 2 38
+@VECTOR 2 39
 @PUSH_THIS 0
 
 @STORE_ATTR 0 (position) 0
@@ -380,59 +388,32 @@ $INITIALIZE 0 (constructor) default void {
 
 @STORE_CLASS 4 (sprite) 0
 
-@PUSH_NULL 47
-@STORE_CLASS 5 (target_pos) 47
+@PUSH_NULL 48
+@STORE_CLASS 5 (target_pos) 48
 
-@PUSH_FLOAT 4.5f 48
+@PUSH_FLOAT 4.5f 49
 
-@STORE_CLASS 6 (speed) 48
+@STORE_CLASS 6 (speed) 49
 
-@PUSH_INTEGER 0 49
+@PUSH_INTEGER 0 50
 
-@STORE_CLASS 7 (shoot_timer) 49
+@STORE_CLASS 7 (shoot_timer) 50
 
-@PUSH_NULL 50
-@STORE_CLASS 8 (game) 50
+@PUSH_NULL 51
+@STORE_CLASS 8 (game) 51
 
 }
 FUNC 0 (tick) public void  {
-    @KEYBOARD w 63
+    @KEYBOARD w 64
 
-    @IF 0x6 63
-        @LOAD_CLASS 6 (speed) 64
-
-
-
-        @PUSH_INTEGER 0 64
-
-    @VECTOR 2 64
-
-    @PUSH_THIS 0
-
-@LOAD_ATTR 5 (target_pos) 0
+    @IF 0x6 64
+        @LOAD_CLASS 6 (speed) 65
 
 
 
-    @ADD 64
-    @PUSH_THIS 0
+        @PUSH_INTEGER 0 65
 
-@STORE_ATTR 5 (target_pos) 0
-
-
-    @GOTO 0x5 63
-    @LABEL 0x6 63
-    @LABEL 0x5 63
-
-    @KEYBOARD s 65
-
-    @IF 0x8 65
-        @LOAD_CLASS 6 (speed) 66
-
-
-
-        @PUSH_INTEGER 0 66
-
-    @VECTOR 2 66
+    @VECTOR 2 65
 
     @PUSH_THIS 0
 
@@ -440,26 +421,26 @@ FUNC 0 (tick) public void  {
 
 
 
-    @SUB 66
+    @ADD 65
     @PUSH_THIS 0
 
 @STORE_ATTR 5 (target_pos) 0
 
 
-    @GOTO 0x7 65
-    @LABEL 0x8 65
-    @LABEL 0x7 65
+    @GOTO 0x5 64
+    @LABEL 0x6 64
+    @LABEL 0x5 64
 
-    @KEYBOARD a 67
+    @KEYBOARD s 66
 
-    @IF 0xa 67
-        @PUSH_INTEGER 0 68
-
-        @LOAD_CLASS 6 (speed) 68
+    @IF 0x8 66
+        @LOAD_CLASS 6 (speed) 67
 
 
 
-    @VECTOR 2 68
+        @PUSH_INTEGER 0 67
+
+    @VECTOR 2 67
 
     @PUSH_THIS 0
 
@@ -467,26 +448,26 @@ FUNC 0 (tick) public void  {
 
 
 
-    @SUB 68
+    @SUB 67
     @PUSH_THIS 0
 
 @STORE_ATTR 5 (target_pos) 0
 
 
-    @GOTO 0x9 67
-    @LABEL 0xa 67
-    @LABEL 0x9 67
+    @GOTO 0x7 66
+    @LABEL 0x8 66
+    @LABEL 0x7 66
 
-    @KEYBOARD d 69
+    @KEYBOARD a 68
 
-    @IF 0xc 69
-        @PUSH_INTEGER 0 70
+    @IF 0xa 68
+        @PUSH_INTEGER 0 69
 
-        @LOAD_CLASS 6 (speed) 70
+        @LOAD_CLASS 6 (speed) 69
 
 
 
-    @VECTOR 2 70
+    @VECTOR 2 69
 
     @PUSH_THIS 0
 
@@ -494,21 +475,48 @@ FUNC 0 (tick) public void  {
 
 
 
-    @ADD 70
+    @SUB 69
     @PUSH_THIS 0
 
 @STORE_ATTR 5 (target_pos) 0
 
 
-    @GOTO 0xb 69
-    @LABEL 0xc 69
-    @LABEL 0xb 69
+    @GOTO 0x9 68
+    @LABEL 0xa 68
+    @LABEL 0x9 68
 
-    @PUSH_INTEGER 5 72
+    @KEYBOARD d 70
 
-    @PUSH_THIS 72
+    @IF 0xc 70
+        @PUSH_INTEGER 0 71
 
-@LOAD_ATTR 0 (position) 72
+        @LOAD_CLASS 6 (speed) 71
+
+
+
+    @VECTOR 2 71
+
+    @PUSH_THIS 0
+
+@LOAD_ATTR 5 (target_pos) 0
+
+
+
+    @ADD 71
+    @PUSH_THIS 0
+
+@STORE_ATTR 5 (target_pos) 0
+
+
+    @GOTO 0xb 70
+    @LABEL 0xc 70
+    @LABEL 0xb 70
+
+    @PUSH_INTEGER 5 73
+
+    @PUSH_THIS 73
+
+@LOAD_ATTR 0 (position) 73
 
 
 
@@ -516,9 +524,9 @@ FUNC 0 (tick) public void  {
 
 @MUL 0
 
-    @PUSH_THIS 72
+    @PUSH_THIS 73
 
-@LOAD_ATTR 5 (target_pos) 72
+@LOAD_ATTR 5 (target_pos) 73
 
 
 
@@ -532,24 +540,24 @@ FUNC 0 (tick) public void  {
 
 
 
-    @ADD 72
+    @ADD 73
     @PUSH_THIS 0
 
 @STORE_ATTR 0 (position) 0
 
 
-    @PUSH_INTEGER 1 74
+    @PUSH_INTEGER 1 75
 
-    @PUSH_THIS 74
+    @PUSH_THIS 75
 
-@LOAD_ATTR 7 (shoot_timer) 74
+@LOAD_ATTR 7 (shoot_timer) 75
 
 
 
     @GREATER 0
 
-    @IF 0xe 74
-    @PUSH_NUMBER 0.05 75
+    @IF 0xe 75
+    @PUSH_NUMBER 0.05 76
 
     @PUSH_THIS 0
 
@@ -557,64 +565,64 @@ FUNC 0 (tick) public void  {
 
 
 
-    @ADD 75
+    @ADD 76
     @PUSH_THIS 0
 
 @STORE_ATTR 7 (shoot_timer) 0
 
 
-    @GOTO 0xd 74
-    @LABEL 0xe 74
-    @LABEL 0xd 74
+    @GOTO 0xd 75
+    @LABEL 0xe 75
+    @LABEL 0xd 75
 
-    @PUSH_INTEGER 1 77
+    @PUSH_INTEGER 1 78
 
-    @PUSH_THIS 77
+    @PUSH_THIS 78
 
-@LOAD_ATTR 7 (shoot_timer) 77
+@LOAD_ATTR 7 (shoot_timer) 78
 
 
 
     @EQ_LESSER 0
 
-    @KEYBOARD space 77
+    @KEYBOARD space 78
 
     @AND 0
 
-    @IF 0x10 77
-    @PUSH_THIS 78
+    @IF 0x10 78
+    @PUSH_THIS 79
 
-@LOAD_ATTR 8 (game) 78
+@LOAD_ATTR 8 (game) 79
 
-@LOAD_ATTR 1 (bullets) 78
+@LOAD_ATTR 1 (bullets) 79
 
-@PUSH_THIS 78
+@PUSH_THIS 79
 
-@LOAD_ATTR 8 (game) 78
-
-
-
-@PUSH_THIS 78
-
-@LOAD_ATTR 0 (position) 78
+@LOAD_ATTR 8 (game) 79
 
 
 
-@NEW 0 (Bullet) 2 78
+@PUSH_THIS 79
 
-@CALL_ATTR 0 (push) 1 78
+@LOAD_ATTR 0 (position) 79
 
 
 
-    @PUSH_INTEGER 0 79
+@NEW 0 (Bullet) 2 79
+
+@CALL_ATTR 0 (push) 1 79
+
+
+
+    @PUSH_INTEGER 0 80
 @PUSH_THIS 0
 
 @STORE_ATTR 7 (shoot_timer) 0
 
 
-    @GOTO 0xf 77
-    @LABEL 0x10 77
-    @LABEL 0xf 77
+    @GOTO 0xf 78
+    @LABEL 0x10 78
+    @LABEL 0xf 78
 
 }
 
@@ -625,15 +633,15 @@ FUNC 2 (render) public void  {
 }
 
 $CONSTRUCTOR 0 (constructor) default void game Game {
-@PUSH_STRING "ship" 53
+@PUSH_STRING "ship" 54
 @PUSH_THIS 0
 
 @STORE_ATTR 4 (sprite) 0
 
 
-@PUSH_INTEGER 2 54
+@PUSH_INTEGER 2 55
 
-@PUSH_INTEGER 98 54
+@PUSH_INTEGER 98 55
 
 @DIV 0
 @PUSH_THIS 0
@@ -641,9 +649,9 @@ $CONSTRUCTOR 0 (constructor) default void game Game {
 @STORE_ATTR 1 (width) 0
 
 
-@PUSH_INTEGER 2 55
+@PUSH_INTEGER 2 56
 
-@PUSH_INTEGER 75 55
+@PUSH_INTEGER 75 56
 
 @DIV 0
 @PUSH_THIS 0
@@ -651,23 +659,23 @@ $CONSTRUCTOR 0 (constructor) default void game Game {
 @STORE_ATTR 2 (height) 0
 
 
-    @PUSH_INTEGER 250 56
+    @PUSH_INTEGER 250 57
 
 @PUSH_INTEGER -1 0
 
 @MUL 0
 
-    @PUSH_INTEGER 0 56
+    @PUSH_INTEGER 0 57
 
-@VECTOR 2 56
+@VECTOR 2 57
 @PUSH_THIS 0
 
 @STORE_ATTR 0 (position) 0
 
 
-@PUSH_THIS 57
+@PUSH_THIS 58
 
-@LOAD_ATTR 0 (position) 57
+@LOAD_ATTR 0 (position) 58
 
 
 @PUSH_THIS 0
@@ -675,7 +683,7 @@ $CONSTRUCTOR 0 (constructor) default void game Game {
 @STORE_ATTR 5 (target_pos) 0
 
 
-@LOAD_LOCAL 0 (game) 58
+@LOAD_LOCAL 0 (game) 59
 
 
 
@@ -690,32 +698,32 @@ $CONSTRUCTOR 0 (constructor) default void game Game {
 
 SCENE 3 (Game) -1 {
 $INITIALIZE 0 (constructor) default void {
-@PUSH_NULL 85
-@STORE_CLASS 0 (ship) 85
+@PUSH_NULL 86
+@STORE_CLASS 0 (ship) 86
 
 @ARRAY 0 0
 
-@STORE_CLASS 1 (bullets) 86
+@STORE_CLASS 1 (bullets) 87
 
 @ARRAY 0 0
 
-@STORE_CLASS 2 (enemies) 87
+@STORE_CLASS 2 (enemies) 88
 
-@PUSH_INTEGER 0 88
+@PUSH_INTEGER 0 89
 
-@STORE_CLASS 3 (score) 88
+@STORE_CLASS 3 (score) 89
 
-@PUSH_INTEGER 0 90
+@PUSH_INTEGER 0 91
 
-@STORE_CLASS 4 (enemy_timer) 90
+@STORE_CLASS 4 (enemy_timer) 91
 
 }
 FUNC 0 (init) public void  {
-    @PUSH_THIS 93
+    @PUSH_THIS 94
 
 
 
-    @NEW 2 (Ship) 1 93
+    @NEW 2 (Ship) 1 94
 @PUSH_THIS 0
 
 @STORE_ATTR 0 (ship) 0
@@ -723,153 +731,152 @@ FUNC 0 (init) public void  {
 
 }
 
-FUNC 1 (render) public void  {
-    @PUSH_INTEGER 0 97
-
-    @STORE_LOCAL 0 (i) 0
-
-    @GOTO 0x11 97
-    @LABEL 0x12 97
-    @PUSH_THIS 98
-
-@LOAD_ATTR 1 (bullets) 98
-
-@LOAD_LOCAL 0 (i) 98
-
-
-
-
-@ARRAY_GET 98
-@CALL_ATTR 2 (render) 0 98
-
-
-
+FUNC 1 (increase_score) public void  {
     @PUSH_INTEGER 1 0
 
-    @LOAD_LOCAL 0 (i) 0
+    @PUSH_THIS 0
+
+@LOAD_ATTR 3 (score) 0
 
 
 
+    @ADD 98
+    @PUSH_THIS 0
 
-    @ADD 97
-    @STORE_LOCAL 0 (i) 0
+@STORE_ATTR 3 (score) 0
 
-
-    @LABEL 0x11 97
-        @LOAD_CLASS 1 (bullets) 97
-
-@CALL_ATTR 1 (size) 0 97
-
-
-
-    @LOAD_LOCAL 0 (i) 97
-
-
-
-
-    @GREATER 0
-
-    @FOR 0x12 97
-
-    @PUSH_INTEGER 0 101
-
-    @STORE_LOCAL 0 (i) 0
-
-    @GOTO 0x13 101
-    @LABEL 0x14 101
-    @PUSH_THIS 102
-
-@LOAD_ATTR 2 (enemies) 102
-
-@LOAD_LOCAL 0 (i) 102
-
-
-
-
-@ARRAY_GET 102
-@CALL_ATTR 2 (render) 0 102
-
-
-
-    @PUSH_INTEGER 1 0
-
-    @LOAD_LOCAL 0 (i) 0
-
-
-
-
-    @ADD 101
-    @STORE_LOCAL 0 (i) 0
-
-
-    @LABEL 0x13 101
-        @LOAD_CLASS 2 (enemies) 101
-
-@CALL_ATTR 1 (size) 0 101
-
-
-
-    @LOAD_LOCAL 0 (i) 101
-
-
-
-
-    @GREATER 0
-
-    @FOR 0x14 101
-
-    @PUSH_THIS 105
-
-@LOAD_ATTR 0 (ship) 105
-
-@CALL_ATTR 2 (render) 0 105
-
-
-
-    @PUSH_INTEGER 24 106
-
-        @PUSH_INTEGER 250 106
-
-    @PUSH_INTEGER 350 106
-
-@PUSH_INTEGER -1 0
-
-@MUL 0
-
-@VECTOR 2 106
-
-    @LOAD_CLASS 3 (score) 106
-
-
-
-@CAST string 106
-
-@PUSH_STRING "score : " 106
-
-@ADD 0
-
-    @PUSH_STRING "Godo" 106
-
-    @CALL_BUILTIN 13 (text) 4 106
 
 }
 
-FUNC 2 (tick) public void  {
+FUNC 2 (render) public void  {
+    @PUSH_INTEGER 0 102
+
+    @STORE_LOCAL 0 (i) 0
+
+    @GOTO 0x11 102
+    @LABEL 0x12 102
+    @PUSH_THIS 103
+
+@LOAD_ATTR 1 (bullets) 103
+
+@LOAD_LOCAL 0 (i) 103
+
+
+
+
+@ARRAY_GET 103
+@CALL_ATTR 2 (render) 0 103
+
+
+
+    @PUSH_INTEGER 1 0
+
+    @LOAD_LOCAL 0 (i) 0
+
+
+
+
+    @ADD 102
+    @STORE_LOCAL 0 (i) 0
+
+
+    @LABEL 0x11 102
+        @LOAD_CLASS 1 (bullets) 102
+
+@CALL_ATTR 1 (size) 0 102
+
+
+
+    @LOAD_LOCAL 0 (i) 102
+
+
+
+
+    @GREATER 0
+
+    @FOR 0x12 102
+
+    @PUSH_INTEGER 0 106
+
+    @STORE_LOCAL 0 (i) 0
+
+    @GOTO 0x13 106
+    @LABEL 0x14 106
+    @PUSH_THIS 107
+
+@LOAD_ATTR 2 (enemies) 107
+
+@LOAD_LOCAL 0 (i) 107
+
+
+
+
+@ARRAY_GET 107
+@CALL_ATTR 2 (render) 0 107
+
+
+
+    @PUSH_INTEGER 1 0
+
+    @LOAD_LOCAL 0 (i) 0
+
+
+
+
+    @ADD 106
+    @STORE_LOCAL 0 (i) 0
+
+
+    @LABEL 0x13 106
+        @LOAD_CLASS 2 (enemies) 106
+
+@CALL_ATTR 1 (size) 0 106
+
+
+
+    @LOAD_LOCAL 0 (i) 106
+
+
+
+
+    @GREATER 0
+
+    @FOR 0x14 106
+
     @PUSH_THIS 110
 
 @LOAD_ATTR 0 (ship) 110
 
-@CALL_ATTR 0 (tick) 0 110
+@CALL_ATTR 2 (render) 0 110
 
 
 
-    @PUSH_INTEGER 1000 112
+    @LOAD_CLASS 3 (score) 111
 
-    @PUSH_INTEGER 10 112
 
-    @PUSH_INTEGER 1 112
 
-    @CALL_BUILTIN 11 (random_range) 2 112
+@CAST int 111
+
+    @CALL_BUILTIN 0 (print) 1 111
+
+}
+
+FUNC 3 (tick) public void  {
+    @PUSH_THIS 116
+
+@LOAD_ATTR 0 (ship) 116
+
+@CALL_ATTR 0 (tick) 0 116
+
+
+
+    @PUSH_INTEGER 1000 118
+
+    @PUSH_INTEGER 10 118
+
+    @PUSH_INTEGER 1 118
+
+    @CALL_BUILTIN 11 (random_range) 2 118
 
 @DIV 0
 
@@ -879,60 +886,60 @@ FUNC 2 (tick) public void  {
 
 
 
-    @ADD 112
+    @ADD 118
     @PUSH_THIS 0
 
 @STORE_ATTR 4 (enemy_timer) 0
 
 
-    @PUSH_INTEGER 1 114
+    @PUSH_INTEGER 1 120
 
-    @PUSH_THIS 114
+    @PUSH_THIS 120
 
-@LOAD_ATTR 4 (enemy_timer) 114
+@LOAD_ATTR 4 (enemy_timer) 120
 
 
 
     @EQ_LESSER 0
 
-    @IF 0x16 114
-    @PUSH_THIS 115
+    @IF 0x16 120
+    @PUSH_THIS 121
 
-@LOAD_ATTR 2 (enemies) 115
+@LOAD_ATTR 2 (enemies) 121
 
-@NEW 1 (Enemy) 0 115
+@NEW 1 (Enemy) 0 121
 
-@CALL_ATTR 0 (push) 1 115
+@CALL_ATTR 0 (push) 1 121
 
 
 
-    @PUSH_INTEGER 0 116
+    @PUSH_INTEGER 0 122
 @PUSH_THIS 0
 
 @STORE_ATTR 4 (enemy_timer) 0
 
 
-    @GOTO 0x15 114
-    @LABEL 0x16 114
-    @LABEL 0x15 114
+    @GOTO 0x15 120
+    @LABEL 0x16 120
+    @LABEL 0x15 120
 
-    @PUSH_INTEGER 0 119
+    @PUSH_INTEGER 0 125
 
     @STORE_LOCAL 0 (i) 0
 
-    @GOTO 0x17 119
-    @LABEL 0x18 119
-    @PUSH_THIS 120
+    @GOTO 0x17 125
+    @LABEL 0x18 125
+    @PUSH_THIS 126
 
-@LOAD_ATTR 1 (bullets) 120
+@LOAD_ATTR 1 (bullets) 126
 
-@LOAD_LOCAL 0 (i) 120
-
-
+@LOAD_LOCAL 0 (i) 126
 
 
-@ARRAY_GET 120
-@CALL_ATTR 0 (tick) 0 120
+
+
+@ARRAY_GET 126
+@CALL_ATTR 0 (tick) 0 126
 
 
 
@@ -943,43 +950,43 @@ FUNC 2 (tick) public void  {
 
 
 
-    @ADD 119
+    @ADD 125
     @STORE_LOCAL 0 (i) 0
 
 
-    @LABEL 0x17 119
-        @LOAD_CLASS 1 (bullets) 119
+    @LABEL 0x17 125
+        @LOAD_CLASS 1 (bullets) 125
 
-@CALL_ATTR 1 (size) 0 119
+@CALL_ATTR 1 (size) 0 125
 
 
 
-    @LOAD_LOCAL 0 (i) 119
+    @LOAD_LOCAL 0 (i) 125
 
 
 
 
     @GREATER 0
 
-    @FOR 0x18 119
+    @FOR 0x18 125
 
-    @PUSH_INTEGER 0 123
+    @PUSH_INTEGER 0 129
 
     @STORE_LOCAL 0 (i) 0
 
-    @GOTO 0x19 123
-    @LABEL 0x1a 123
-    @PUSH_THIS 124
+    @GOTO 0x19 129
+    @LABEL 0x1a 129
+    @PUSH_THIS 130
 
-@LOAD_ATTR 2 (enemies) 124
+@LOAD_ATTR 2 (enemies) 130
 
-@LOAD_LOCAL 0 (i) 124
-
-
+@LOAD_LOCAL 0 (i) 130
 
 
-@ARRAY_GET 124
-@CALL_ATTR 0 (tick) 0 124
+
+
+@ARRAY_GET 130
+@CALL_ATTR 0 (tick) 0 130
 
 
 
@@ -990,25 +997,25 @@ FUNC 2 (tick) public void  {
 
 
 
-    @ADD 123
+    @ADD 129
     @STORE_LOCAL 0 (i) 0
 
 
-    @LABEL 0x19 123
-        @LOAD_CLASS 2 (enemies) 123
+    @LABEL 0x19 129
+        @LOAD_CLASS 2 (enemies) 129
 
-@CALL_ATTR 1 (size) 0 123
+@CALL_ATTR 1 (size) 0 129
 
 
 
-    @LOAD_LOCAL 0 (i) 123
+    @LOAD_LOCAL 0 (i) 129
 
 
 
 
     @GREATER 0
 
-    @FOR 0x1a 123
+    @FOR 0x1a 129
 
 }
 
@@ -1018,17 +1025,17 @@ $CONSTRUCTOR 0 (constructor) default void {
 }
 
 FUNC 0 (main) default void  {
-    @NEW 3 (Game) 0 131
+    @NEW 3 (Game) 0 137
 
-    @CALL_BUILTIN 2 (load_scene) 1 131
+    @CALL_BUILTIN 2 (load_scene) 1 137
 
-    @PUSH_INTEGER 600 133
+    @PUSH_INTEGER 600 139
 
-    @PUSH_INTEGER 800 133
+    @PUSH_INTEGER 800 139
 
-    @PUSH_STRING "title" 133
+    @PUSH_STRING "title" 139
 
-    @CALL_BUILTIN 1 (window) 3 133
+    @CALL_BUILTIN 1 (window) 3 139
 
 }
 

@@ -37,6 +37,12 @@ const std::wstring get_type_string_of_operand(Operand* op) {
 	case operand_none:
 		type_string_operand = L"none";
 		break;
+	case operand_null:
+		type_string_operand = L"null";
+		break;
+	case operand_op_address:
+		type_string_operand = L"op_address";
+		break;
 	case operand_address:
 		if (((Memory*)op->data)->type == L"memory")
 			type_string_operand = ((Memory*)op->data)->get_cm_class()->name;
@@ -243,13 +249,13 @@ Operand* cast_operand(Operator* op, std::wstring cast_type, Operand* target) {
 	Memory* target_memory = nullptr;
 
 	if (cast_type == get_type_string_of_operand(target)) {
-		return target;
+		return copy_operand(target);
 	}
 
 	if (target->get_type() == operand_address) {
-		target_memory = ((Memory*)target);
+		target_memory = target->get_memory_data();
 		if (target_memory->get_cm_class()->name == cast_type)
-			return target;
+			return copy_operand(target);
 	}
 
 	if (cast_type == L"string") {
@@ -293,6 +299,9 @@ Operand* cast_operand(Operator* op, std::wstring cast_type, Operand* target) {
 			CHESTNUT_THROW_ERROR(L"Failed to cast " + get_type_string_of_operand(target) + L" into " + cast_type + L" " + target->get_data() + L" is not a number.",
 				"FAILED_TO_CAST", "0x12", op->get_line_number());
 		*/
+	}
+	else if (cast_type == L"int") {
+		result = new Operand(target->get_number_data<int>());
 	}
 	else if (cast_type == L"bool") {
 		switch (target_type) {
@@ -475,7 +484,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 #endif
 
-//		std::cout << type << " ";
+		//		std::cout << type << " ";
 
 		switch (type) {
 		case op_push_string: {
@@ -588,7 +597,6 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		case op_inc: {
 			Operand* target = extract_value_of_opernad(this->stack->peek());
 			this->stack->pop();
-
 			target->increase();
 
 			break;
@@ -1192,8 +1200,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		CHESTNUT_LOG(L"Operator " + std::to_wstring(op->get_type()) + L" end with : " + std::wstring(diff.begin(), diff.end()) + L"ms.", log_level::log_default);
 #endif
 
-	}
+		}
 
 	vm->stack_area.pop_back();
 	delete this;
-}
+	}
