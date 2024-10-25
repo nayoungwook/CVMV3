@@ -19,10 +19,10 @@ FunctionFrame::~FunctionFrame() {
 	delete stack;
 }
 
-const std::wstring get_type_string_of_operand(Operand* op) {
+const inline std::wstring get_type_string_of_operand(Operand* op) {
 	std::wstring type_string_operand = L"";
 
-	Operand* extracted_op = extract_value_of_opernad(op);
+	Operand* extracted_op = op;
 
 	switch (extracted_op->get_type()) {
 	case operand_number:
@@ -75,25 +75,26 @@ void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CM
 			"RUNTIME_WRONG_PARAMETER", "0x02", 0);
 	}
 
-
 	if (is_defined_function) {
 		for (int i = 0; i < parameter_count; i++) {
 			Operand* op = caller_frame->stack->peek();
 			caller_frame->stack->pop();
+			/*
 
-			std::wstring type_string_of_operand = get_type_string_of_operand(op);
+				std::wstring type_string_of_operand = get_type_string_of_operand(op);
 
-			bool wrong_type = false;
+				bool wrong_type = false;
 
-			if (code_memory->get_param_types()[i] != type_string_of_operand) {
-				wrong_type = true;
-			}
+				if (code_memory->get_param_types()[i] != type_string_of_operand) {
+					wrong_type = true;
+				}
 
-			if (wrong_type) {
-				std::wstring name = caller_frame->get_code_memory()->name;
-				CHESTNUT_THROW_ERROR(L"Failed to call " + std::wstring(name.begin(), name.end()) + L". You pass the wrong parameters",
-					"RUNTIME_WRONG_PARAMETER", "0x02", 0);
-			}
+				if (wrong_type) {
+					std::wstring name = caller_frame->get_code_memory()->name;
+					CHESTNUT_THROW_ERROR(L"Failed to call " + std::wstring(name.begin(), name.end()) + L". You pass the wrong parameters",
+						"RUNTIME_WRONG_PARAMETER", "0x02", 0);
+				}
+			*/
 
 			frame->local_area.insert(std::make_pair(i, copy_operand(op)));
 		}
@@ -368,20 +369,17 @@ void FunctionFrame::object_builtin_render(CVM* vm, FunctionFrame* caller, Memory
 
 	render_image(shader_cm, image_data->get_texture(), image_data->get_vao(),
 		_x, _y, f_width, f_height, f_rotation, vm->proj_width, vm->proj_height);
-
-	delete this;
-	return;
 }
 
-//#define OPERATOR_TIME_STAMP
+void FunctionFrame::run_builtin(code_type cm_type, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
-void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
-	code_type cm_type = this->get_code_memory()->get_type();
-	if (cm_type == code_render) {
-		return object_builtin_render(vm, caller, caller_class);
+	switch (cm_type) {
+	case code_render: {
+		object_builtin_render(vm, caller, caller_class);
+		break;
 	}
 
-	if (cm_type == code_array_push) {
+	case code_array_push: {
 		Operand* _target_element = this->stack->peek();
 		this->stack->pop();
 
@@ -393,21 +391,17 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			// modifying nodes for attr
 			gc_nodes[caller_class]->childs.push_back(gc_nodes[target_element->get_memory_data()]);
 		}
-
-		delete this;
-		return;
+		break;
 	}
 
-	if (cm_type == code_array_size) {
+	case code_array_size: {
 		int size_wstr = (int)((ArrayMemory*)caller_class)->array_elements->size();
 		Operand* result = new Operand(size_wstr);
 		caller->stack->push(result);
-
-		delete this;
-		return;
+		break;
 	}
 
-	if (cm_type == code_array_remove) {
+	case code_array_remove: {
 
 		Operand* _target_element = this->stack->peek();
 		this->stack->pop();
@@ -435,11 +429,10 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 		_array->erase(_array->begin() + index);
 
-		delete this;
-		return;
+		break;
 	}
 
-	if (cm_type == code_array_set) {
+	case code_array_set: {
 		Operand* _target_element = this->stack->peek();
 		this->stack->pop();
 
@@ -463,9 +456,23 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			// modifying nodes for attr
 			gc_nodes[caller_class]->childs.push_back(gc_nodes[target_element->get_memory_data()]);
 		}
+		break;
+	}
 
-		delete this;
-		return;
+	}
+
+	delete this;
+	return;
+}
+
+//#define OPERATOR_TIME_STAMP
+
+void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	code_type cm_type = this->get_code_memory()->get_type();
+	bool is_builtin = !(cm_type == code_function || cm_type == code_initialize || cm_type == code_constructor);
+
+	if (is_builtin) {
+		return this->run_builtin(cm_type, vm, caller, caller_class);
 	}
 
 	vm->stack_area.push_back(this);
@@ -477,10 +484,9 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 #ifdef OPERATOR_TIME_STAMP
 
-		clock_t start, finish;
 		double duration;
 
-		start = clock();
+		auto start = std::chrono::high_resolution_clock::now();
 
 #endif
 
@@ -895,7 +901,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			std::wstring name = L"";
 			std::wstring type = L"";
 
-			if (local_area.find(id) != local_area.end()) {
+			if (local_area.contains(id)) {
 				delete local_area[id];
 				local_area[id] = peek;
 				name = local_area[id]->variable_name;
@@ -1191,17 +1197,15 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 #ifdef OPERATOR_TIME_STAMP
-		finish = clock();
-
-		duration = (double)(finish - start);
+		auto finish = std::chrono::high_resolution_clock::now();
 
 		std::wcout << std::endl;
-		std::wstring diff = std::to_wstring(duration);
-		CHESTNUT_LOG(L"Operator " + std::to_wstring(op->get_type()) + L" end with : " + std::wstring(diff.begin(), diff.end()) + L"ms.", log_level::log_default);
+		std::wstring diff = std::to_wstring(std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count());
+		CHESTNUT_LOG(L"Operator " + std::to_wstring(op->get_type()) + L" end with : " + std::wstring(diff.begin(), diff.end()) + L"ns.", log_level::log_default);
 #endif
 
-		}
+	}
 
 	vm->stack_area.pop_back();
 	delete this;
-	}
+}

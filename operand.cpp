@@ -108,7 +108,7 @@ operand_type Operand::get_type() const {
 	return type;
 }
 
-Operand* extract_value_of_opernad(Operand* op) {
+inline Operand* extract_value_of_opernad(Operand* op) {
 
 	Operand* result = op;
 

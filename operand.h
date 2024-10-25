@@ -94,4 +94,4 @@ T Operand::get_bool_data() {
 Operand* create_address_operand(Memory* op);
 Operand* create_op_address_operand(Operand* op);
 Operand* copy_operand(Operand* op);
-Operand* extract_value_of_opernad(Operand* op);
+inline Operand* extract_value_of_opernad(Operand* op);
