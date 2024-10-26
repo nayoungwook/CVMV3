@@ -12,10 +12,9 @@ enum operand_type {
 	operand_bool = 2,
 	operand_address = 3,
 	operand_vector = 4,
-	operand_op_address = 5,
-	operand_null = 6,
-	operand_integer = 7,
-	operand_float = 8,
+	operand_null = 5,
+	operand_integer = 6,
+	operand_float = 7,
 };
 
 class Memory;
@@ -92,6 +91,4 @@ T Operand::get_bool_data() {
 }
 
 Operand* create_address_operand(Memory* op);
-Operand* create_op_address_operand(Operand* op);
 Operand* copy_operand(Operand* op);
-inline Operand* extract_value_of_opernad(Operand* op);

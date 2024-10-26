@@ -48,6 +48,7 @@ public:
 	void builtin_color(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 };
 
+void add_parameter(bool is_defined_function, FunctionFrame* frame, FunctionFrame* caller_frame, CMFunction* code_memory, int parameter_count);
 void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CMFunction* code_memory, int parameter_count);
 Operand* calcaulte_vector_operand(Operand* lhs, Operand* rhs, float (*cal)(float l, float r));
 Memory* create_object(CVM* vm, std::unordered_map<unsigned int, CMClass*>::iterator code_memory, FunctionFrame* frame, unsigned int constructor_parameter_count);

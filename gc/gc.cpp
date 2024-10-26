@@ -61,7 +61,7 @@ void CGC::run() {
 		std::unordered_map<unsigned int, Operand*>::iterator local_area_iterator = local_area.begin();
 
 		for (; local_area_iterator != local_area.end(); local_area_iterator++) {
-			Operand* op = extract_value_of_opernad(local_area_iterator->second);
+			Operand* op = (local_area_iterator->second);
 
 			if (op->get_type() == operand_address) {
 				Memory* root_memory = (Memory*)op->data;
@@ -74,7 +74,7 @@ void CGC::run() {
 	std::unordered_map<unsigned int, Operand*>::iterator global_area_iterator = this->global_area.begin();
 
 	for (; global_area_iterator != this->global_area.end(); global_area_iterator++) {
-		Operand* op = extract_value_of_opernad(global_area_iterator->second);
+		Operand* op = (global_area_iterator->second);
 
 		if (op->get_type() == operand_address) {
 			root_memories.push_back((Memory*)op->data);

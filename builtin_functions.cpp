@@ -9,7 +9,7 @@ void FunctionFrame::builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, 
 	this->stack->pop();
 
 	std::unordered_map<std::wstring, CMImage*>::iterator image_data_iter
-		= vm->resources.find(extract_value_of_opernad(image)->get_string_data<std::wstring>());
+		= vm->resources.find((image)->get_string_data<std::wstring>());
 
 	assert(image_data_iter != vm->resources.end());
 
@@ -19,13 +19,13 @@ void FunctionFrame::builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, 
 	width = this->stack->peek(), this->stack->pop();
 	height = this->stack->peek(), this->stack->pop();
 
-	std::vector<Operand*>* position_array = extract_value_of_opernad(position)->get_vector_elements();
+	std::vector<Operand*>* position_array = (position)->get_vector_elements();
 
 	float _x = position_array->at(0)->get_number_data<float>(),
 		_y = position_array->at(1)->get_number_data<float>();
 
-	float f_width = extract_value_of_opernad(width)->get_number_data<float>(),
-		f_height = extract_value_of_opernad(height)->get_number_data<float>();
+	float f_width = (width)->get_number_data<float>(),
+		f_height = (height)->get_number_data<float>();
 
 	Memory* shader_memory = (Memory*)vm->global_area[SHADER_MEMORY]->data;
 	CMShader* shader_cm = (CMShader*)shader_memory->get_cm_class();
@@ -36,7 +36,7 @@ void FunctionFrame::builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, 
 		Operand* rotation = this->stack->peek();
 		this->stack->pop();
 
-		f_rotation = extract_value_of_opernad(rotation)->get_number_data<float>();
+		f_rotation = (rotation)->get_number_data<float>();
 		delete rotation;
 	}
 
@@ -63,7 +63,7 @@ void FunctionFrame::builtin_text(Operator* op, CVM* vm, FunctionFrame* caller, M
 	Operand* size = this->stack->peek();
 	this->stack->pop();
 
-	std::vector<Operand*>* position_array = extract_value_of_opernad(position)->get_vector_elements();
+	std::vector<Operand*>* position_array = (position)->get_vector_elements();
 
 	float _x = position_array->at(0)->get_number_data<float>(),
 		_y = position_array->at(1)->get_number_data<float>();
@@ -74,15 +74,15 @@ void FunctionFrame::builtin_text(Operator* op, CVM* vm, FunctionFrame* caller, M
 		Operand* rotation = this->stack->peek();
 		this->stack->pop();
 
-		f_rotation = extract_value_of_opernad(rotation)->get_number_data<float>();
+		f_rotation = (rotation)->get_number_data<float>();
 		delete rotation;
 	}
 
 	Memory* shader_memory = (Memory*)(vm->global_area[SHADER_MEMORY]->data);
 	CMShader* shader_cm = (CMShader*)shader_memory->get_cm_class();
 
-	std::wstring font_name = extract_value_of_opernad(font)->get_string_data<std::wstring>();
-	int i_size = extract_value_of_opernad(size)->get_number_data<int>();
+	std::wstring font_name = (font)->get_string_data<std::wstring>();
+	int i_size = (size)->get_number_data<int>();
 
 	render_text(vm->font_resources[font_name], shader_cm, str->get_string_data<std::wstring>(),
 		_x, _y, vm->r, vm->g, vm->b, 1, f_rotation, vm->proj_width, vm->proj_height, i_size);
@@ -97,16 +97,12 @@ void FunctionFrame::builtin_text(Operator* op, CVM* vm, FunctionFrame* caller, M
 void FunctionFrame::builtin_color(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 	int parameter_count = std::stoi(op->operands[1]->identifier);
 
-	Operand* _r = this->stack->peek(); // r
+	Operand* r = this->stack->peek(); // r
 	this->stack->pop();
-	Operand* _g = this->stack->peek(); // g
+	Operand* g = this->stack->peek(); // g
 	this->stack->pop();
-	Operand* _b = this->stack->peek(); // b
+	Operand* b = this->stack->peek(); // b
 	this->stack->pop();
-
-	Operand* r = extract_value_of_opernad(_r),
-		* g = extract_value_of_opernad(_g),
-		* b = extract_value_of_opernad(_b);
 
 	float r_f = r->get_number_data<float>();
 	float g_f = g->get_number_data<float>();
@@ -116,9 +112,9 @@ void FunctionFrame::builtin_color(Operator* op, CVM* vm, FunctionFrame* caller, 
 	vm->g = (int)(g_f * 255);
 	vm->b = (int)(b_f * 255);
 
-	delete _r;
-	delete _g;
-	delete _b;
+	delete r;
+	delete g;
+	delete b;
 }
 
 void FunctionFrame::print_operand(Operand* data) {
@@ -189,7 +185,7 @@ void FunctionFrame::builtin_print(Operator* op, CVM* vm, FunctionFrame* caller, 
 		Operand* _data = this->stack->peek();
 		this->stack->pop();
 
-		Operand* data = extract_value_of_opernad(_data);
+		Operand* data = (_data);
 
 		this->print_operand(data);
 
@@ -207,7 +203,7 @@ void FunctionFrame::builtin_window(Operator* op, CVM* vm, FunctionFrame* caller,
 		Operand* _data = this->stack->peek();
 		this->stack->pop();
 
-		Operand* data = extract_value_of_opernad(_data);
+		Operand* data = (_data);
 		operand_type type = data->get_type();
 
 		if (i == 0) title = data->get_string_data<std::wstring>();
@@ -237,7 +233,7 @@ void FunctionFrame::builtin_load_scene(Operator* op, CVM* vm, FunctionFrame* cal
 		Operand* _target = this->stack->peek();
 		this->stack->pop();
 
-		Operand* target = extract_value_of_opernad(_target);
+		Operand* target = (_target);
 
 		operand_type type = target->get_type();
 		Memory* scene = (Memory*)target->data;
@@ -256,16 +252,12 @@ void FunctionFrame::builtin_load_scene(Operator* op, CVM* vm, FunctionFrame* cal
 void FunctionFrame::builtin_background(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 	int parameter_count = std::stoi(op->operands[1]->identifier);
 
-	Operand* _r = this->stack->peek(); // r
+	Operand* r = this->stack->peek(); // r
 	this->stack->pop();
-	Operand* _g = this->stack->peek(); // g
+	Operand* g = this->stack->peek(); // g
 	this->stack->pop();
-	Operand* _b = this->stack->peek(); // b
+	Operand* b = this->stack->peek(); // b
 	this->stack->pop();
-
-	Operand* r = extract_value_of_opernad(_r),
-		* g = extract_value_of_opernad(_g),
-		* b = extract_value_of_opernad(_b);
 
 	float r_f = r->get_number_data<float>();
 	float g_f = g->get_number_data<float>();
@@ -274,9 +266,9 @@ void FunctionFrame::builtin_background(Operator* op, CVM* vm, FunctionFrame* cal
 	glClearColor(r_f, g_f, b_f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	delete _r;
-	delete _g;
-	delete _b;
+	delete r;
+	delete g;
+	delete b;
 }
 
 void FunctionFrame::builtin_random(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
@@ -295,7 +287,7 @@ void FunctionFrame::builtin_sin(Operator* op, CVM* vm, FunctionFrame* caller, Me
 	Operand* _v = this->stack->peek();
 	this->stack->pop();
 
-	Operand* v = extract_value_of_opernad(_v);
+	Operand* v = (_v);
 
 	Operand* result = new Operand((float)std::sin(v->get_number_data<float>()));
 
@@ -308,7 +300,7 @@ void FunctionFrame::builtin_cos(Operator* op, CVM* vm, FunctionFrame* caller, Me
 	Operand* _v = this->stack->peek();
 	this->stack->pop();
 
-	Operand* v = extract_value_of_opernad(_v);
+	Operand* v = (_v);
 
 	Operand* result = new Operand((float)std::cos(v->get_number_data<float>()));
 
@@ -321,7 +313,7 @@ void FunctionFrame::builtin_tan(Operator* op, CVM* vm, FunctionFrame* caller, Me
 	Operand* _v = this->stack->peek();
 	this->stack->pop();
 
-	Operand* v = extract_value_of_opernad(_v);
+	Operand* v = (_v);
 
 	Operand* result = new Operand((float)std::tan(v->get_number_data<float>()));
 
@@ -336,8 +328,8 @@ void FunctionFrame::builtin_atan(Operator* op, CVM* vm, FunctionFrame* caller, M
 	Operand* _v2 = this->stack->peek();
 	this->stack->pop();
 
-	Operand* v1 = extract_value_of_opernad(_v1);
-	Operand* v2 = extract_value_of_opernad(_v2);
+	Operand* v1 = (_v1);
+	Operand* v2 = (_v2);
 
 	Operand* result = new Operand((float)std::atan2(v1->get_number_data<float>(), v2->get_number_data<float>()));
 
@@ -351,7 +343,7 @@ void FunctionFrame::builtin_abs(Operator* op, CVM* vm, FunctionFrame* caller, Me
 	Operand* _v = this->stack->peek();
 	this->stack->pop();
 
-	Operand* v = extract_value_of_opernad(_v);
+	Operand* v = (_v);
 
 	Operand* result = new Operand(std::abs(v->get_number_data<double>()));
 
@@ -366,8 +358,8 @@ void FunctionFrame::builtin_random_range(Operator* op, CVM* vm, FunctionFrame* c
 	Operand* _v2 = this->stack->peek();
 	this->stack->pop();
 
-	Operand* v1 = extract_value_of_opernad(_v1);
-	Operand* v2 = extract_value_of_opernad(_v2);
+	Operand* v1 = (_v1);
+	Operand* v2 = (_v2);
 
 	std::random_device rd;
 
@@ -387,7 +379,7 @@ void FunctionFrame::builtin_sqrt(Operator* op, CVM* vm, FunctionFrame* caller, M
 	Operand* _v = this->stack->peek();
 	this->stack->pop();
 
-	Operand* v = extract_value_of_opernad(_v);
+	Operand* v = (_v);
 	float fv = (float)v->get_number_data<float>();
 
 	if (fv < 0) {

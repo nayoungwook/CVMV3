@@ -40,9 +40,6 @@ const inline std::wstring get_type_string_of_operand(Operand* op) {
 	case operand_null:
 		type_string_operand = L"null";
 		break;
-	case operand_op_address:
-		type_string_operand = L"op_address";
-		break;
 	case operand_address:
 		if (((Memory*)op->data)->type == L"memory")
 			type_string_operand = ((Memory*)op->data)->get_cm_class()->name;
@@ -63,18 +60,7 @@ const inline std::wstring get_type_string_of_operand(Operand* op) {
 	return type_string_operand;
 }
 
-void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CMFunction* code_memory, int parameter_count) {
-	FunctionFrame* frame = new FunctionFrame(code_memory);
-
-	bool is_defined_function
-		= code_memory->get_type() == code_function || code_memory->get_type() == code_constructor || code_memory->get_type() == code_initialize;
-
-	if (is_defined_function && parameter_count != code_memory->get_param_types().size()) {
-		std::wstring name = caller_frame->get_code_memory()->name;
-		CHESTNUT_THROW_ERROR(L"Failed to call " + name + L". You pass the wrong parameters",
-			"RUNTIME_WRONG_PARAMETER", "0x02", 0);
-	}
-
+void add_parameter(bool is_defined_function, FunctionFrame* frame, FunctionFrame* caller_frame, CMFunction* code_memory, int parameter_count) {
 	if (is_defined_function) {
 		for (int i = 0; i < parameter_count; i++) {
 			Operand* op = caller_frame->stack->peek();
@@ -100,17 +86,26 @@ void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CM
 		}
 	}
 	else {
-		std::vector<Operand*> array_params;
 		for (int i = 0; i < parameter_count; i++) {
-			Operand* op = caller_frame->stack->peek();
+			frame->stack->push(copy_operand(caller_frame->stack->peek()));
 			caller_frame->stack->pop();
-			array_params.push_back(op);
-		}
-
-		for (int i = 0; i < array_params.size(); i++) {
-			frame->stack->push(copy_operand(array_params[array_params.size() - i - 1]));
 		}
 	}
+}
+
+void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CMFunction* code_memory, int parameter_count) {
+	FunctionFrame* frame = new FunctionFrame(code_memory);
+
+	bool is_defined_function
+		= code_memory->get_type() == code_function || code_memory->get_type() == code_constructor || code_memory->get_type() == code_initialize;
+
+	if (is_defined_function && parameter_count != code_memory->get_param_types().size()) {
+		std::wstring name = caller_frame->get_code_memory()->name;
+		CHESTNUT_THROW_ERROR(L"Failed to call " + name + L". You pass the wrong parameters",
+			"RUNTIME_WRONG_PARAMETER", "0x02", 0);
+	}
+
+	add_parameter(is_defined_function, frame, caller_frame, code_memory, parameter_count);
 
 	frame->run(vm, caller_frame, caller_class);
 }
@@ -346,21 +341,21 @@ void FunctionFrame::object_builtin_render(CVM* vm, FunctionFrame* caller, Memory
 			"RUNTIME_NO_TEXTURE_FOR_OBJECT", "0x03", 0);
 	}
 
-	Operand* position_op = extract_value_of_opernad(caller_class->member_variables[OBJECT_POSITION]);
+	Operand* position_op = caller_class->member_variables[OBJECT_POSITION];
 
-	float _x = extract_value_of_opernad(position_op->get_vector_elements()->at(0))->get_number_data<float>(),
-		_y = extract_value_of_opernad(position_op->get_vector_elements()->at(1))->get_number_data<float>();
+	float _x = (position_op->get_vector_elements()->at(0))->get_number_data<float>(),
+		_y = (position_op->get_vector_elements()->at(1))->get_number_data<float>();
 
 	Operand* width_op = caller_class->member_variables[OBJECT_WIDTH];
 	Operand* height_op = caller_class->member_variables[OBJECT_HEIGHT];
 
-	float f_width = extract_value_of_opernad(width_op)->get_number_data<float>()
-		, f_height = extract_value_of_opernad(height_op)->get_number_data<float>();
+	float f_width = (width_op)->get_number_data<float>()
+		, f_height = (height_op)->get_number_data<float>();
 
 	Operand* rotation_op = caller_class->member_variables[OBJECT_ROTATION];
-	float f_rotation = extract_value_of_opernad(rotation_op)->get_number_data<float>();
+	float f_rotation = (rotation_op)->get_number_data<float>();
 
-	std::wstring image_name = extract_value_of_opernad(texture_op)->get_string_data<std::wstring>();
+	std::wstring image_name = (texture_op)->get_string_data<std::wstring>();
 	std::unordered_map<std::wstring, CMImage*>::iterator image_data_iter = vm->resources.find(image_name);
 
 	assert(image_data_iter != vm->resources.end());
@@ -380,10 +375,8 @@ void FunctionFrame::run_builtin(code_type cm_type, CVM* vm, FunctionFrame* calle
 	}
 
 	case code_array_push: {
-		Operand* _target_element = this->stack->peek();
+		Operand* target_element = this->stack->peek();
 		this->stack->pop();
-
-		Operand* target_element = extract_value_of_opernad(_target_element);
 
 		((ArrayMemory*)caller_class)->array_elements->push_back(target_element);
 
@@ -403,16 +396,15 @@ void FunctionFrame::run_builtin(code_type cm_type, CVM* vm, FunctionFrame* calle
 
 	case code_array_remove: {
 
-		Operand* _target_element = this->stack->peek();
+		Operand* target_element = this->stack->peek();
 		this->stack->pop();
 
-		Operand* target_element = extract_value_of_opernad(_target_element);
 		std::vector<Operand*>* _array = ((ArrayMemory*)caller_class)->array_elements;
 
 		int index = 0;
 
 		for (Operand* _element : (*_array)) {
-			if (operand_compare(extract_value_of_opernad(_element), target_element)) {
+			if (operand_compare((_element), target_element)) {
 				break;
 			}
 			index++;
@@ -433,14 +425,11 @@ void FunctionFrame::run_builtin(code_type cm_type, CVM* vm, FunctionFrame* calle
 	}
 
 	case code_array_set: {
-		Operand* _target_element = this->stack->peek();
+		Operand* target_element = this->stack->peek();
 		this->stack->pop();
 
 		Operand* _index = this->stack->peek();
 		this->stack->pop();
-
-		Operand* target_element = extract_value_of_opernad(_target_element);
-		_index = extract_value_of_opernad(_index);
 
 		std::vector<Operand*>* _array = ((ArrayMemory*)caller_class)->array_elements;
 
@@ -554,7 +543,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* condition = this->stack->peek();
 			this->stack->pop();
 
-			if (extract_value_of_opernad(condition)->get_bool_data<bool>()) {
+			if (condition->get_bool_data<bool>()) {
 				std::wstring id = op->operands[0]->identifier;
 				line = vm->label_id->find(id)->second;
 			}
@@ -590,7 +579,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			Operand* condition = this->stack->peek();
 			this->stack->pop();
 
-			if (!extract_value_of_opernad(condition)->get_bool_data<bool>()) {
+			if (!condition->get_bool_data<bool>()) {
 				std::wstring id = op->operands[0]->identifier;
 				line = vm->label_id->find(id)->second;
 			}
@@ -601,7 +590,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_inc: {
-			Operand* target = extract_value_of_opernad(this->stack->peek());
+			Operand* target = (this->stack->peek());
 			this->stack->pop();
 			target->increase();
 
@@ -609,7 +598,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_dec: {
-			Operand* target = extract_value_of_opernad(this->stack->peek());
+			Operand* target = (this->stack->peek());
 			this->stack->pop();
 
 			target->decrease();
@@ -643,14 +632,11 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 		{
 
-			Operand* rhs_op = this->stack->peek();
+			Operand* rhs = this->stack->peek();
 			this->stack->pop();
 
-			Operand* lhs_op = this->stack->peek();
+			Operand* lhs = this->stack->peek();
 			this->stack->pop();
-
-			Operand* lhs = extract_value_of_opernad(lhs_op);
-			Operand* rhs = extract_value_of_opernad(rhs_op);
 
 			if (lhs->get_type() != rhs->get_type() && !(lhs->is_number_type() && rhs->is_number_type())) {
 				if (
@@ -702,8 +688,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 						"TRIED_TO_CALCULATE_DIFFERENT_TYPES", "0x11", op->get_line_number());
 				}
 
-				delete lhs_op;
-				delete rhs_op;
+				delete lhs;
+				delete rhs;
 				break;
 			}
 
@@ -823,8 +809,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			this->stack->push(result);
 
-			delete lhs_op;
-			delete rhs_op;
+			delete lhs;
+			delete rhs;
 			break;
 		}
 
@@ -921,8 +907,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_store_attr: {
-			Operand* attr_target_op = this->stack->peek();
-			Operand* attr_target = extract_value_of_opernad(attr_target_op);
+			Operand* attr_target = this->stack->peek();
 			this->stack->pop();
 
 			Operand* store_value_op = this->stack->peek();
@@ -961,7 +946,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					"RUNTIME_FAILED_TO_STORE_VALUE_INTO_VECTOR", "0x09", op->get_line_number());
 			}
 
-			delete attr_target_op;
+			delete attr_target;
 			delete store_value_op;
 
 			break;
@@ -970,16 +955,16 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		case op_array_get: {
 			Operand* index_peek = this->stack->peek();
 			this->stack->pop();
-			int index = extract_value_of_opernad(index_peek)->get_number_data<int>();
+			int index = (index_peek)->get_number_data<int>();
 
 			Operand* array_operand = this->stack->peek(); // do not delete it.
 			this->stack->pop();
 
-			ArrayMemory* array_memory = (ArrayMemory*)extract_value_of_opernad(array_operand)->data;
+			ArrayMemory* array_memory = (ArrayMemory*)(array_operand)->data;
 
 			Operand* result = array_memory->array_elements->at(index);
 
-			this->stack->push(create_op_address_operand(result));
+			this->stack->push(copy_operand(result));
 
 			delete array_operand;
 			delete index_peek;
@@ -1020,10 +1005,9 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			for (int i = 0; i < vector_size; i++) {
 				Operand* _peek = this->stack->peek();
-				Operand* extracted_data = extract_value_of_opernad(_peek);
 				this->stack->pop();
 
-				elements->push_back(extracted_data);
+				elements->push_back(_peek);
 			}
 
 			result = new Operand(elements, operand_vector);
@@ -1076,15 +1060,13 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_cast: {
-			Operand* target_op = this->stack->peek();
+			Operand* target = this->stack->peek();
 			this->stack->pop();
-
-			Operand* target = extract_value_of_opernad(target_op);
 
 			std::wstring cast_type = op->operands[0]->identifier;
 			this->stack->push(cast_operand(op, cast_type, target));
 
-			delete target_op;
+			delete target;
 
 			break;
 		}
@@ -1127,8 +1109,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 		}
 
 		case op_load_attr: {
-			Operand* target_op = this->stack->peek();
-			Operand* target = extract_value_of_opernad(target_op);
+			Operand* target = this->stack->peek();
 			this->stack->pop();
 			operand_type type = target->get_type();
 			Operand* found_op = nullptr;
@@ -1152,7 +1133,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			this->stack->push(copy_operand(found_op));
 
-			delete target_op;
+			delete target;
 
 			break;
 		}
@@ -1161,20 +1142,19 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			unsigned int id = std::stoi(op->operands[0]->identifier);
 			int parameter_count = std::stoi(op->operands[1]->identifier);
 
-			std::vector<Operand*> operands;
+			std::stack<Operand*> parameter_store_stack;
 
 			for (int i = 0; i < parameter_count; i++) {
-				Operand* op = this->stack->peek();
+				parameter_store_stack.push(this->stack->peek());
 				this->stack->pop();
-				operands.push_back(op);
 			}
 
-			Operand* target_op = this->stack->peek();
-			Operand* target = extract_value_of_opernad(target_op);
+			Operand* target = this->stack->peek();
 			this->stack->pop();
 
 			for (int i = 0; i < parameter_count; i++) {
-				this->stack->push(operands[i]);
+				this->stack->push(parameter_store_stack.top());
+				parameter_store_stack.pop();
 			}
 
 			if (target->get_type() == operand_null) {
@@ -1189,7 +1169,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 			run_function(vm, memory, this, callee_function, parameter_count);
 
-			delete target_op;
+			delete target;
 
 			break;
 		}

@@ -35,11 +35,6 @@ Operand::Operand(Memory* add) {
 	this->data = add;
 }
 
-Operand::Operand(Operand* add) {
-	this->type = operand_op_address;
-	this->data = add;
-}
-
 Operand::Operand() {
 	this->type = operand_null;
 }
@@ -87,7 +82,7 @@ Operand::~Operand() {
 		delete vector_elements;
 	}
 
-	if (this->type != operand_address && this->type != operand_op_address && data != nullptr && this->type != operand_string)
+	if (this->type != operand_address && data != nullptr && this->type != operand_string)
 		delete data;
 }
 
@@ -108,24 +103,9 @@ operand_type Operand::get_type() const {
 	return type;
 }
 
-inline Operand* extract_value_of_opernad(Operand* op) {
-
-	Operand* result = op;
-
-	if (op->get_type() == operand_op_address) {
-		while (result->get_type() == operand_op_address) {
-			result = (Operand*)result->data;
-		}
-	}
-
-	return result;
-}
-
 Operand* copy_operand(Operand* op) {
 
 	Operand* copied_op = nullptr;
-
-	op = extract_value_of_opernad(op);
 
 	switch (op->get_type()) {
 	case operand_vector: {
@@ -170,12 +150,6 @@ Operand* copy_operand(Operand* op) {
 		copied_op = new Operand((Memory*)op->data);
 		break;
 	}
-
-	case operand_op_address:
-	{
-		copied_op = new Operand((Operand*)op->data);
-		break;
-	}
 	case operand_null:
 	{
 		copied_op = new Operand();
@@ -187,11 +161,6 @@ Operand* copy_operand(Operand* op) {
 }
 
 Operand* create_address_operand(Memory* op) {
-	Operand* result = new Operand(op);
-	return result;
-}
-
-Operand* create_op_address_operand(Operand* op) {
 	Operand* result = new Operand(op);
 	return result;
 }

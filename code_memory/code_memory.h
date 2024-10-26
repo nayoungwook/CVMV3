@@ -13,6 +13,8 @@ enum code_type {
 	code_array_remove = 9,
 	code_array_size = 10,
 	code_array_set = 11,
+	code_array_render = 12,
+	code_array_tick = 13,
 };
 
 class CodeMemory {
