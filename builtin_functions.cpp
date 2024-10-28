@@ -162,7 +162,7 @@ void FunctionFrame::print_operand(Operand* data) {
 		break;
 	}
 	case operand_bool: {
-		std::cout << data->get_bool_data<bool>() ? "true" : "false";
+		std::cout << data->get_bool_data() ? "true" : "false";
 		break;
 	}
 
@@ -276,7 +276,7 @@ void FunctionFrame::builtin_random(Operator* op, CVM* vm, FunctionFrame* caller,
 
 	std::mt19937 gen(rd());
 
-	std::uniform_int_distribution<int> dis(0, 999999999);
+	std::uniform_int_distribution<int> dis(0, 10);
 
 	Operand* result = new Operand((int)dis(gen));
 

@@ -18,7 +18,7 @@
 
 class CVM;
 
-Operator* get_operator(std::unordered_map<std::wstring, unsigned int>* label_id, int line_number, std::vector<Token*>& tokens);
+Operator* get_operator(CVM* vm, std::unordered_map<std::wstring, unsigned int>* label_id, int line_number, std::vector<Token*>& tokens);
 CodeMemory* get_code_memory(CVM* vm, std::vector<Token*>& tokens);
 
 enum class special_literal {

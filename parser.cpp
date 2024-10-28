@@ -1,6 +1,6 @@
 #include "parser.h"
 
-Operator* get_operator(std::unordered_map<std::wstring, unsigned int>* label_id, int line_number, std::vector<Token*>& tokens) {
+Operator* get_operator(CVM* vm, std::unordered_map<std::wstring, unsigned int>* label_id, int line_number, std::vector<Token*>& tokens) {
 	Token* token = pull_token(tokens);
 
 	Operator* result = nullptr;
@@ -9,28 +9,39 @@ Operator* get_operator(std::unordered_map<std::wstring, unsigned int>* label_id,
 
 	if (token->identifier == L"@PUSH_STRING") {
 		type = op_push_string;
+		Token* tok = pull_token(tokens);
+		std::wstring str = tok->identifier.substr(1, tok->identifier.size() - 2);
+		vm->string_const_pool.insert(std::make_pair(tok->identifier, str));
 
-		operands.push_back(pull_token(tokens)); // content
+		operands.push_back(tok); // content
 	}
 	else if (token->identifier == L"@PUSH_NUMBER") {
 		type = op_push_number;
+		Token* tok = pull_token(tokens);
+		vm->number_const_pool.insert(std::make_pair(tok->identifier, std::stod(tok->identifier)));
 
-		operands.push_back(pull_token(tokens)); // content
+		operands.push_back(tok); // content
 	}
 	else if (token->identifier == L"@PUSH_INTEGER") {
 		type = op_push_integer;
+		Token* tok = pull_token(tokens);
+		vm->integer_const_pool.insert(std::make_pair(tok->identifier, std::stod(tok->identifier)));
 
-		operands.push_back(pull_token(tokens)); // content
+		operands.push_back(tok); // content
 	}
 	else if (token->identifier == L"@PUSH_FLOAT") {
 		type = op_push_float;
+		Token* tok = pull_token(tokens);
+		vm->float_const_pool.insert(std::make_pair(tok->identifier, std::stof(tok->identifier)));
 
-		operands.push_back(pull_token(tokens)); // content
+		operands.push_back(tok); // content
 	}
 	else if (token->identifier == L"@PUSH_BOOL") {
 		type = op_push_bool;
+		Token* tok = pull_token(tokens);
+		vm->bool_const_pool.insert(std::make_pair(tok->identifier, tok->identifier == L"true"));
 
-		operands.push_back(pull_token(tokens)); // content
+		operands.push_back(tok); // content
 	}
 	else if (token->identifier == L"@PUSH_NULL") {
 		type = op_push_null;
@@ -245,7 +256,7 @@ CodeMemory* get_code_memory(CVM* vm, std::vector<Token*>& tokens) {
 
 		int i = 0;
 		while (tokens[0]->identifier != L"}") {
-			Operator* _operator = get_operator(vm->label_id, i, tokens);
+			Operator* _operator = get_operator(vm, vm->label_id, i, tokens);
 			if (_operator != nullptr)
 				operators.push_back(_operator);
 			i++;

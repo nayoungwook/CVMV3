@@ -34,7 +34,7 @@ public:
 	bool is_number_type();
 
 	operand_type get_type() const;
-	
+
 	Operand(int i);
 	Operand(float f);
 	Operand(double d);
@@ -52,9 +52,8 @@ public:
 
 	template <typename T>
 	T get_string_data();
-	
-	template <typename T>
-	T get_bool_data();
+
+	bool get_bool_data();
 
 	Memory* get_memory_data();
 
@@ -66,9 +65,9 @@ T Operand::get_number_data() {
 	switch (type)
 	{
 	case operand_number:
-		return (T)* (double*)data;
+		return (T) * (double*)data;
 	case operand_float:
-		return (T)* (float*)data;
+		return (T) * (float*)data;
 	case operand_integer:
 		return (T) * (int*)data;
 	}
@@ -79,14 +78,6 @@ T Operand::get_string_data() {
 	switch (type) {
 	case operand_string:
 		return (T) * (std::wstring*)data;
-	}
-}
-
-template<typename T>
-T Operand::get_bool_data() {
-	switch (type) {
-	case operand_bool:
-		return (T) * (bool*)data;
 	}
 }
 

@@ -59,6 +59,12 @@ public:
 
 	std::unordered_map<std::wstring, unsigned int>* label_id;
 
+	std::unordered_map<std::wstring, int> integer_const_pool;
+	std::unordered_map<std::wstring, std::wstring> string_const_pool;
+	std::unordered_map<std::wstring, float> float_const_pool;
+	std::unordered_map<std::wstring, double> number_const_pool;
+	std::unordered_map<std::wstring, bool> bool_const_pool;
+
 	std::unordered_set<std::wstring> key_data;
 
 	int proj_width, proj_height;

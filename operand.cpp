@@ -74,6 +74,13 @@ Memory* Operand::get_memory_data() {
 	}
 }
 
+bool Operand::get_bool_data() {
+	switch (type) {
+	case operand_bool:
+		return (bool)*(bool*)data;
+	}
+}
+
 Operand::~Operand() {
 	if (this->type == operand_vector) {
 		for (int i = 0; i < vector_elements->size(); i++) {
@@ -136,7 +143,7 @@ Operand* copy_operand(Operand* op) {
 	}
 
 	case operand_bool: {
-		copied_op = new Operand(op->get_bool_data<bool>());
+		copied_op = new Operand(op->get_bool_data());
 		break;
 	}
 
