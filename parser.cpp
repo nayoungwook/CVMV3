@@ -123,6 +123,9 @@ Operator* get_operator(CVM* vm, std::unordered_map<std::wstring, unsigned int>* 
 	else if (token->identifier == L"@AND") {
 		type = op_and;
 	}
+	else if (token->identifier == L"@NOT") {
+		type = op_not;
+	}
 	else if (token->identifier == L"@GREATER") {
 		type = op_greater;
 	}

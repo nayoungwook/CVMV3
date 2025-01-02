@@ -466,8 +466,9 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 	vm->stack_area.push_back(this);
 	std::vector<Operator*> operators = this->code_memory->get_operators();
+	size_t operators_size = operators.size();
 
-	for (int line = 0; line < operators.size(); line++) {
+	for (int line = 0; line < operators_size; line++) {
 		Operator* op = operators[line];
 		operator_type type = op->get_type();
 
@@ -479,7 +480,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 #endif
 
-		//		std::cout << type << " ";
+//		std::cout << type << " ";
 
 		switch (type) {
 		case op_push_string: {
@@ -578,6 +579,16 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			break;
 		}
 
+		case op_not: {
+			Operand* condition = this->stack->peek();
+			this->stack->pop();
+
+			this->stack->push(new Operand(!condition->get_bool_data()));
+
+			delete condition;
+
+			break;
+		}
 		case op_inc: {
 			Operand* target = (this->stack->peek());
 			this->stack->pop();

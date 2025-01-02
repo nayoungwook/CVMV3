@@ -52,6 +52,13 @@ enum operator_type {
 	op_cast = 44,
 	op_push_integer = 45,
 	op_push_float = 46,
+
+	op_incre_global = 47,
+	op_incre_local = 48,
+	op_incre_class = 49,
+	op_incre_attr = 50,
+
+	op_not = 51,
 };
 
 class Operator {
