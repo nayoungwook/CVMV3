@@ -1086,9 +1086,9 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			CMFunction* parent_constructor = parent_code_memory->constructor;
 			CMFunction* parent_initializer = parent_code_memory->initializer;
 
-			run_function(vm, caller_class, this, parent_constructor, parameter_count);
-
 			run_function(vm, caller_class, this, parent_initializer, 0);
+
+			run_function(vm, caller_class, this, parent_constructor, parameter_count);
 
 			std::unordered_map<unsigned int, CMFunction*>::iterator member_function_iter = parent_code_memory->member_functions->begin();
 

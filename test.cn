@@ -1,9 +1,0 @@
-#load ship "ship.png"
-
-func main(): void {
-  var b: bool = false;
-
-  if(!(!b)){
-	print("asdf");
-  }
-}
