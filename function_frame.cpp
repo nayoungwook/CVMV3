@@ -215,12 +215,15 @@ bool operand_compare(Operand* op1, Operand* op2) {
 	{
 	case operand_vector:
 		return op1->get_vector_elements() == op2->get_vector_elements();
-
 	case operand_address:
 		return op1->get_memory_data() == op2->get_memory_data();
 	case operand_bool:
 		return op1->get_bool_data() == op2->get_bool_data();
 	case operand_number:
+		return op1->get_number_data<float>() == op2->get_number_data<float>();
+	case operand_integer:
+		return op1->get_number_data<int>() == op2->get_number_data<int>();
+	case operand_float:
 		return op1->get_number_data<float>() == op2->get_number_data<float>();
 	case operand_null:
 		return op2->data == nullptr;
@@ -480,7 +483,7 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 
 #endif
 
-//		std::cout << type << " ";
+		//		std::cout << type << " ";
 
 		switch (type) {
 		case op_push_string: {

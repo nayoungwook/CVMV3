@@ -25,7 +25,7 @@ void render_image(CMShader* shader, unsigned int texture_id, unsigned int vao, f
 		(int)width / 2, (int)height / 2
 	};
 
-	Matrix4 world_transform = Matrix4::CreateScale(width, height, 1.0f) * Matrix4::CreateRotationZ(-rotation / 180 * Math::Pi) * Matrix4::CreateTranslation(Vector3(x, y, 0));
+	Matrix4 world_transform = Matrix4::CreateScale(width, height, 1.0f) * Matrix4::CreateRotationZ(-rotation) * Matrix4::CreateTranslation(Vector3(x, y, 0));
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, texture_id);
