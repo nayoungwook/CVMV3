@@ -144,12 +144,6 @@ Operator* get_operator(CVM* vm, std::unordered_map<std::wstring, unsigned int>* 
 	else if (token->identifier == L"@NOT_EQUAL") {
 		type = op_not_equal;
 	}
-	else if (token->identifier == L"@INCRE") {
-		type = op_inc;
-	}
-	else if (token->identifier == L"@DECRE") {
-		type = op_dec;
-	}
 	else if (token->identifier == L"@LABEL") {
 		type = op_label;
 
@@ -222,6 +216,45 @@ Operator* get_operator(CVM* vm, std::unordered_map<std::wstring, unsigned int>* 
 	else if (token->identifier == L"@KEYBOARD") {
 		operands.push_back(pull_token(tokens)); // key
 		type = op_keybaord;
+	}
+
+	std::wstring incre_decre_string = token->identifier.substr(0, 6);
+	if (incre_decre_string == L"@INCRE" || incre_decre_string == L"@DECRE") {
+		std::wstring scope_string = token->identifier.substr(6, token->identifier.size() - 1);
+
+		if (scope_string == L"_GLOBAL") {
+			if (incre_decre_string == L"@INCRE")
+				type = op_incre_global;
+			if (incre_decre_string == L"@DECRE")
+				type = op_decre_global;
+
+			operands.push_back(pull_token(tokens)); // id
+			operands.push_back(pull_token(tokens)); // name
+		}
+		else if (scope_string == L"_LOCAL") {
+			if (incre_decre_string == L"@INCRE")
+				type = op_incre_local;
+			if (incre_decre_string == L"@DECRE")
+				type = op_decre_local;
+
+			operands.push_back(pull_token(tokens)); // id
+			operands.push_back(pull_token(tokens)); // name
+		}
+		else if (scope_string == L"_ARRAY") {
+			if (incre_decre_string == L"@INCRE")
+				type = op_incre_array;
+			if (incre_decre_string == L"@DECRE")
+				type = op_decre_array;
+		}
+		else if (scope_string == L"_CLASS") {
+			if (incre_decre_string == L"@INCRE")
+				type = op_incre_class;
+			if (incre_decre_string == L"@DECRE")
+				type = op_decre_class;
+
+			operands.push_back(pull_token(tokens)); // id
+			pull_token(tokens);
+		}
 	}
 
 	std::wstring line_number_str = pull_token(tokens)->identifier;

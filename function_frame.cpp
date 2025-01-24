@@ -99,12 +99,6 @@ void run_function(CVM* vm, Memory* caller_class, FunctionFrame* caller_frame, CM
 	bool is_defined_function
 		= code_memory->get_type() == code_function || code_memory->get_type() == code_constructor || code_memory->get_type() == code_initialize;
 
-	if (is_defined_function && parameter_count != code_memory->get_param_types().size()) {
-		std::wstring name = caller_frame->get_code_memory()->name;
-		CHESTNUT_THROW_ERROR(L"Failed to call " + name + L". You pass the wrong parameters",
-			"RUNTIME_WRONG_PARAMETER", "0x02", 0);
-	}
-
 	add_parameter(is_defined_function, frame, caller_frame, code_memory, parameter_count);
 
 	frame->run(vm, caller_frame, caller_class);
@@ -532,6 +526,118 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			return;
 		};
 
+#pragma region OP_INCRE
+		case op_incre_global: {
+			unsigned int id = std::stoi(op->operands[0]->identifier);
+			Operand* found_op = vm->global_area[id];
+			found_op->increase();
+
+			break;
+		}
+
+		case op_incre_local: {
+			unsigned int id = std::stoi(op->operands[0]->identifier);
+			Operand* found_op = local_area[id];
+
+			found_op->increase();
+			break;
+		}
+
+		case op_incre_class: {
+			unsigned int id = std::stoi(op->operands[0]->identifier);
+			Operand* found_op = caller_class->member_variables[id];
+
+			if (found_op == nullptr) {
+				std::wstring var_name = op->operands[1]->identifier;
+				CHESTNUT_THROW_ERROR(L"We can\'t find variable named " + std::wstring(var_name.begin(), var_name.end()),
+					"RUNTIME_FAILED_TO_LOAD_MEMBER_VARIABLE", "0x05", op->get_line_number());
+			}
+
+			found_op->increase();
+			break;
+		}
+
+		case op_incre_array: {
+			Operand* index_peek = this->stack->peek();
+			this->stack->pop();
+			int index = (index_peek)->get_number_data<int>();
+
+			Operand* array_operand = this->stack->peek(); // do not delete it.
+			this->stack->pop();
+
+			ArrayMemory* array_memory = (ArrayMemory*)(array_operand)->data;
+
+			if (array_memory->array_elements->size() <= index) {
+				CHESTNUT_THROW_ERROR(L"Array index out of bounds.", "ARRAY_INDEX_OUT_OF_BOUNDS", "0x11", line);
+			}
+
+			Operand* result = array_memory->array_elements->at(index);
+
+			result->increase();
+
+			delete array_operand;
+			delete index_peek;
+
+			break;
+		}
+#pragma endregion OP_INCRE
+
+#pragma region OP_DECRE
+		case op_decre_global: {
+			unsigned int id = std::stoi(op->operands[0]->identifier);
+			Operand* found_op = vm->global_area[id];
+			found_op->decrease();
+
+			break;
+		}
+
+		case op_decre_local: {
+			unsigned int id = std::stoi(op->operands[0]->identifier);
+			Operand* found_op = local_area[id];
+
+			found_op->decrease();
+			break;
+		}
+
+		case op_decre_class: {
+			unsigned int id = std::stoi(op->operands[0]->identifier);
+			Operand* found_op = caller_class->member_variables[id];
+
+			if (found_op == nullptr) {
+				std::wstring var_name = op->operands[1]->identifier;
+				CHESTNUT_THROW_ERROR(L"We can\'t find variable named " + std::wstring(var_name.begin(), var_name.end()),
+					"RUNTIME_FAILED_TO_LOAD_MEMBER_VARIABLE", "0x05", op->get_line_number());
+			}
+
+			found_op->decrease();
+			break;
+		}
+
+		case op_decre_array: {
+			Operand* index_peek = this->stack->peek();
+			this->stack->pop();
+			int index = (index_peek)->get_number_data<int>();
+
+			Operand* array_operand = this->stack->peek(); // do not delete it.
+			this->stack->pop();
+
+			ArrayMemory* array_memory = (ArrayMemory*)(array_operand)->data;
+
+			if (array_memory->array_elements->size() <= index) {
+				CHESTNUT_THROW_ERROR(L"Array index out of bounds.", "ARRAY_INDEX_OUT_OF_BOUNDS", "0x11", line);
+			}
+
+			Operand* result = array_memory->array_elements->at(index);
+
+			result->decrease();
+
+			delete array_operand;
+			delete index_peek;
+
+			break;
+		}
+#pragma endregion OP_DECRE
+
 		case op_for: {
 			Operand* condition = this->stack->peek();
 			this->stack->pop();
@@ -589,22 +695,6 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			this->stack->push(new Operand(!condition->get_bool_data()));
 
 			delete condition;
-
-			break;
-		}
-		case op_inc: {
-			Operand* target = (this->stack->peek());
-			this->stack->pop();
-			target->increase();
-
-			break;
-		}
-
-		case op_dec: {
-			Operand* target = (this->stack->peek());
-			this->stack->pop();
-
-			target->decrease();
 
 			break;
 		}
@@ -958,6 +1048,10 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			this->stack->pop();
 
 			ArrayMemory* array_memory = (ArrayMemory*)(array_operand)->data;
+
+			if (array_memory->array_elements->size() <= index) {
+				CHESTNUT_THROW_ERROR(L"Array index out of bounds.", "ARRAY_INDEX_OUT_OF_BOUNDS", "0x11", line);
+			}
 
 			Operand* result = array_memory->array_elements->at(index);
 

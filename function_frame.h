@@ -30,7 +30,7 @@ public:
 
 	void run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 
-
+	// BUILTIN ACTIONS
 	void builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 	void builtin_print(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 	void builtin_window(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);

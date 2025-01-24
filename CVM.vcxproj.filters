@@ -37,6 +37,9 @@
     <Filter Include="헤더 파일\gc">
       <UniqueIdentifier>{db0a5c93-b73b-40b0-8509-8fb7de2b9d70}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\builtin">
+      <UniqueIdentifier>{95ab56e2-5358-43c2-bf87-943dcf7e4407}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cvm.cpp">
@@ -108,14 +111,17 @@
     <ClCompile Include="error\sys_error.cpp">
       <Filter>소스 파일\error</Filter>
     </ClCompile>
-    <ClCompile Include="builtin_functions.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="gc\gc.cpp">
       <Filter>소스 파일\gc</Filter>
     </ClCompile>
     <ClCompile Include="code_memory\cm_array.cpp">
       <Filter>소스 파일\code_memory</Filter>
+    </ClCompile>
+    <ClCompile Include="builtin_functions.cpp">
+      <Filter>소스 파일\builtin</Filter>
+    </ClCompile>
+    <ClCompile Include="builtin_math.cpp">
+      <Filter>소스 파일\builtin</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

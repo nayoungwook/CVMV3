@@ -142,6 +142,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="builtin_functions.cpp" />
+    <ClCompile Include="builtin_math.cpp" />
     <ClCompile Include="code_memory\cm_array.cpp" />
     <ClCompile Include="code_memory\cm_camera.cpp" />
     <ClCompile Include="code_memory\cm_class.cpp" />

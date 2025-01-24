@@ -27,7 +27,6 @@ void render_image(CMShader* shader, unsigned int texture_id, unsigned int vao, f
 
 	Matrix4 world_transform = Matrix4::CreateScale(width, height, 1.0f) * Matrix4::CreateRotationZ(-rotation) * Matrix4::CreateTranslation(Vector3(x, y, 0));
 
-	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, texture_id);
 
 	shader->set_matrix_uniform("uWorldTransform", world_transform);
@@ -36,8 +35,6 @@ void render_image(CMShader* shader, unsigned int texture_id, unsigned int vao, f
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
-
-	glDisable(GL_TEXTURE_2D);
 }
 
 void render_text(TTF_Font* font, CMShader* shader, std::wstring const& str, float x, float y, int _r, int _g, int _b, int _a, float rotation, int proj_width, int proj_height, int size) {
@@ -98,8 +95,8 @@ void render_text(TTF_Font* font, CMShader* shader, std::wstring const& str, floa
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0,
 		GL_RGBA, GL_UNSIGNED_BYTE, surface->pixels);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	Matrix4 world_transform = Matrix4::CreateScale(surface->w / 64 * size, surface->h / 64 * size, 1.0f) * Matrix4::CreateRotationZ(-rotation / 180 * Math::Pi) * Matrix4::CreateTranslation(Vector3(x, y, 0));
 	glEnable(GL_TEXTURE_2D);

@@ -21,8 +21,6 @@ enum operator_type {
 	op_mod = 13,
 	op_pow = 14,
 	op_ret = 15,
-	op_inc = 16,
-	op_dec = 17,
 	op_label = 18,
 	op_goto = 19,
 	op_for = 20,
@@ -53,12 +51,20 @@ enum operator_type {
 	op_push_integer = 45,
 	op_push_float = 46,
 
-	op_incre_global = 47,
-	op_incre_local = 48,
-	op_incre_class = 49,
-	op_incre_attr = 50,
-
 	op_not = 51,
+
+	op_incre_local = 52,
+	op_decre_local = 53,
+
+	op_incre_global = 54,
+	op_decre_global = 55,
+
+	op_incre_class = 56,
+	op_decre_class = 57,
+
+	op_incre_array = 58,
+	op_decre_array = 59,
+
 };
 
 class Operator {
