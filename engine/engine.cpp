@@ -29,8 +29,8 @@ void render_image(CMShader* shader, unsigned int texture_id, unsigned int vao, f
 
 	glBindTexture(GL_TEXTURE_2D, texture_id);
 
-	shader->set_matrix_uniform("uWorldTransform", world_transform);
-	shader->set_matrix_uniform("uViewProj", Matrix4::CreateSimpleViewProj(proj_width, proj_height));
+	shader->set_matrix_uniform("view", world_transform);
+	shader->set_matrix_uniform("proj", Matrix4::CreateSimpleViewProj(proj_width, proj_height));
 
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
@@ -101,8 +101,8 @@ void render_text(TTF_Font* font, CMShader* shader, std::wstring const& str, floa
 	Matrix4 world_transform = Matrix4::CreateScale(surface->w / 64 * size, surface->h / 64 * size, 1.0f) * Matrix4::CreateRotationZ(-rotation / 180 * Math::Pi) * Matrix4::CreateTranslation(Vector3(x, y, 0));
 	glEnable(GL_TEXTURE_2D);
 
-	shader->set_matrix_uniform("uWorldTransform", world_transform);
-	shader->set_matrix_uniform("uViewProj", Matrix4::CreateSimpleViewProj(proj_width, proj_height));
+	shader->set_matrix_uniform("view", world_transform);
+	shader->set_matrix_uniform("proj", Matrix4::CreateSimpleViewProj(proj_width, proj_height));
 
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);

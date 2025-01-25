@@ -282,7 +282,7 @@ void window_loop(CVM* vm, SDL_Window* window) {
 			vm->fps = 1000 / (current_ticks - backup_ticks);
 			if (vm->global_area.find(2) != vm->global_area.end()) {
 				delete vm->global_area[2];
-				vm->global_area[2] = new Operand((int) vm->fps);
+				vm->global_area[2] = new Operand((int)vm->fps);
 			}
 		}
 
@@ -325,16 +325,17 @@ SDL_Window* CMWindow::get_window() {
 void load_default_shader(CVM* vm) {
 	unsigned int builtin_id = vm->builtin_class.size();
 
-	CMShader* cm = new CMShader(builtin_id, L"fragment.glsl", L"transform.glsl");
+	CMShader* cm = new CMShader(builtin_id, L"shaders\\fragment.glsl", L"shaders\\vertex.glsl");
 
-	cm->register_uniform_data("uWorldTransform");
-	cm->register_uniform_data("uViewProj");
+	cm->register_uniform_data("view");
+	cm->register_uniform_data("proj");
+	cm->register_uniform_data("model");
 
 	vm->builtin_class.insert(std::make_pair(builtin_id, cm));
 
 	Memory* shader_memory = new Memory(vm->builtin_class.find(builtin_id));
 
-	vm->global_area.insert(std::make_pair(0, create_address_operand(shader_memory)));
+	vm->global_area.insert(std::make_pair(SHADER_MEMORY, create_address_operand(shader_memory)));
 }
 
 void load_builtin_variables(CVM* vm) {

@@ -24,11 +24,11 @@ public:
 	~FunctionFrame();
 	Stack* stack;
 	void run(CVM* vm, FunctionFrame* caller, Memory* caller_class);
-	void run_builtin(code_type cm_type, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+
+	void run_member_builtin(code_type cm_type, CVM* vm, FunctionFrame* caller, Memory* caller_class);
+	void run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 
 	void object_builtin_render(CVM* vm, FunctionFrame* caller, Memory* caller_class);
-
-	void run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
 
 	// BUILTIN ACTIONS
 	void builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class);
@@ -55,7 +55,7 @@ Memory* create_object(CVM* vm, std::unordered_map<unsigned int, CMClass*>::itera
 
 Operand* cast_operand(Operator* op, std::wstring cast_type, Operand* target);
 
-const inline std::wstring get_type_string_of_operand(Operand* op);
+const inline std::wstring get_type_name_of_operand(Operand* op);
 void check_type_for_store(CVM* vm, std::wstring const& type1, std::wstring const& type2);
 
 float cal_add(float lhs, float rhs);
@@ -65,4 +65,4 @@ float cal_div(float lhs, float rhs);
 float cal_mod(float lhs, float rhs);
 float cal_pow(float lhs, float rhs);
 
-bool operand_compare(Operand* op1, Operand* op2);
+bool compare_operand(Operand* op1, Operand* op2);

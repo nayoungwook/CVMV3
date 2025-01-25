@@ -21,7 +21,7 @@ CMConstructor::CMConstructor(std::vector<Operator*>& operators, unsigned int& id
 
 CMRender::CMRender(std::vector<Operator*>& operators, unsigned int id, std::vector<std::wstring>& param_types)
 	: CMFunction(L"render", operators, id, L"void", param_types, L"public") {
-	this->type = code_render;
+	this->type = code_member_render;
 }
 
 unsigned int CMFunction::get_id() const {

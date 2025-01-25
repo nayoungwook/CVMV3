@@ -1,11 +1,144 @@
-﻿  function_frame.cpp
+﻿  cm_window.cpp
 C:\Users\user\source\repos\Chestnut\CVM\FileWatcher.hpp(247,9): warning C4068: 알 수 없는 pragma 'mark'
-  (소스 파일 'function_frame.cpp'을(를) 컴파일하는 중)
+  (소스 파일 'code_memory/cm_window.cpp'을(를) 컴파일하는 중)
   
-C:\Users\user\source\repos\Chestnut\CVM\function_frame.cpp(148,19): warning C4244: 'return': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\user\source\repos\Chestnut\CVM\function_frame.cpp(769,28): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\user\source\repos\Chestnut\CVM\operand.h(74,1): warning C4715: 'Operand::get_number_data<float>': 모든 제어 경로에서 값을 반환하지는 않습니다.
-C:\Users\user\source\repos\Chestnut\CVM\operand.h(74,1): warning C4715: 'Operand::get_number_data<int>': 모든 제어 경로에서 값을 반환하지는 않습니다.
-C:\Users\user\source\repos\Chestnut\CVM\operand.h(82,1): warning C4715: 'Operand::get_string_data<std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t> > >': 모든 제어 경로에서 값을 반환하지는 않습니다.
-C:\Users\user\source\repos\Chestnut\CVM\operand.h(74,1): warning C4715: 'Operand::get_number_data<double>': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\user\source\repos\Chestnut\CVM\code_memory\cm_window.cpp(326,26): warning C4267: '초기화 중': 'size_t'에서 'unsigned int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xutility(4710,18): warning C4244: '=': 'wchar_t'에서 'char'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  (소스 파일 'code_memory/cm_window.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xutility(4710,18):
+      템플릿 인스턴스화 컨텍스트(가장 오래된 인스턴스화 컨텍스트)가
+          C:\Users\user\source\repos\Chestnut\CVM\code_memory\cm_window.cpp(195,24):
+          컴파일되는 함수 템플릿 인스턴스화 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)'에 대한 참조를 확인하세요.
+          with
+          [
+              _Elem=wchar_t,
+              _Iter=std::_String_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
+              _Alloc=std::allocator<char>
+          ]
+              C:\Users\user\source\repos\Chestnut\CVM\code_memory\cm_window.cpp(195,12):
+              'window_loop::<lambda_1>::operator ()'에서 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string'에 대한 첫 번째 참조를 확인하세요.
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xstring(793,17):
+          컴파일되는 함수 템플릿 인스턴스화 'void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<wchar_t*,wchar_t*,_Size_type>(_Iter,const _Sent,_Size)'에 대한 참조를 확인하세요.
+          with
+          [
+              _Size_type=unsigned __int64,
+              _Iter=wchar_t *,
+              _Sent=wchar_t *,
+              _Size=unsigned __int64
+          ]
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xstring(949,18):
+          컴파일되는 함수 템플릿 인스턴스화 '_OutIt *std::_Copy_n_unchecked4<wchar_t*,_Size,char*>(_InIt,_SizeTy,_OutIt)'에 대한 참조를 확인하세요.
+          with
+          [
+              _OutIt=char *,
+              _Size=unsigned __int64,
+              _InIt=wchar_t *,
+              _SizeTy=unsigned __int64
+          ]
+  
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xutility(4710,18): warning C4244: '=': 'const wchar_t'에서 'char'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  (소스 파일 'code_memory/cm_window.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xutility(4710,18):
+      템플릿 인스턴스화 컨텍스트(가장 오래된 인스턴스화 컨텍스트)가
+          C:\Users\user\source\repos\Chestnut\CVM\code_memory\cm_window.cpp(298,51):
+          컴파일되는 함수 템플릿 인스턴스화 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_const_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)'에 대한 참조를 확인하세요.
+          with
+          [
+              _Elem=wchar_t,
+              _Iter=std::_String_const_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
+              _Alloc=std::allocator<char>
+          ]
+              C:\Users\user\source\repos\Chestnut\CVM\code_memory\cm_window.cpp(298,21):
+              'create_window'에서 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string'에 대한 첫 번째 참조를 확인하세요.
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xstring(793,17):
+          컴파일되는 함수 템플릿 인스턴스화 'void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<const wchar_t*,const wchar_t*,_Size_type>(_Iter,const _Sent,_Size)'에 대한 참조를 확인하세요.
+          with
+          [
+              _Size_type=unsigned __int64,
+              _Iter=const wchar_t *,
+              _Sent=const wchar_t *,
+              _Size=unsigned __int64
+          ]
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xstring(949,18):
+          컴파일되는 함수 템플릿 인스턴스화 '_OutIt *std::_Copy_n_unchecked4<const wchar_t*,_Size,char*>(_InIt,_SizeTy,_OutIt)'에 대한 참조를 확인하세요.
+          with
+          [
+              _OutIt=char *,
+              _Size=unsigned __int64,
+              _InIt=const wchar_t *,
+              _SizeTy=unsigned __int64
+          ]
+  
+  cvm.cpp
+C:\Users\user\source\repos\Chestnut\CVM\FileWatcher.hpp(247,9): warning C4068: 알 수 없는 pragma 'mark'
+  (소스 파일 'cvm.cpp'을(를) 컴파일하는 중)
+  
+C:\Users\user\source\repos\Chestnut\CVM\cvm.cpp(31,26): warning C4267: '초기화 중': 'size_t'에서 'unsigned int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  parser.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\utility(292,61): warning C4244: '초기화 중': '_Ty'에서 '_Ty2'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\utility(292,61): warning C4244:         with
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\utility(292,61): warning C4244:         [
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\utility(292,61): warning C4244:             _Ty=double
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\utility(292,61): warning C4244:         ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\utility(292,61): warning C4244:         and
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\utility(292,61): warning C4244:         [
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\utility(292,61): warning C4244:             _Ty2=int
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\utility(292,61): warning C4244:         ]
+  (소스 파일 'parser.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\utility(292,61):
+      템플릿 인스턴스화 컨텍스트(가장 오래된 인스턴스화 컨텍스트)가
+          C:\Users\user\source\repos\Chestnut\CVM\parser.cpp(29,26):
+          컴파일되는 함수 템플릿 인스턴스화 'std::pair<std::_List_iterator<std::_List_val<std::_List_simple_types<_Ty>>>,bool> std::unordered_map<std::wstring,int,std::hash<std::wstring>,std::equal_to<std::wstring>,std::allocator<_Ty>>::insert<std::pair<_Kty,double>,0>(_Valty &&)'에 대한 참조를 확인하세요.
+          with
+          [
+              _Ty=std::pair<const std::wstring,int>,
+              _Kty=std::wstring,
+              _Valty=std::pair<std::wstring,double>
+          ]
+              C:\Users\user\source\repos\Chestnut\CVM\parser.cpp(29,32):
+              'get_operator'에서 'std::unordered_map<std::wstring,int,std::hash<std::wstring>,std::equal_to<std::wstring>,std::allocator<std::pair<const std::wstring,int>>>::insert'에 대한 첫 번째 참조를 확인하세요.
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\unordered_map(271,22):
+          컴파일되는 함수 템플릿 인스턴스화 'std::pair<std::_List_iterator<std::_List_val<std::_List_simple_types<_Ty>>>,bool> std::_Hash<std::_Umap_traits<_Kty,int,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>>::emplace<std::pair<_Kty,double>>(std::pair<_Kty,double> &&)'에 대한 참조를 확인하세요.
+          with
+          [
+              _Ty=std::pair<const std::wstring,int>,
+              _Kty=std::wstring,
+              _Hasher=std::hash<std::wstring>,
+              _Keyeq=std::equal_to<std::wstring>,
+              _Alloc=std::allocator<std::pair<const std::wstring,int>>
+          ]
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xhash(615,53):
+          컴파일되는 함수 템플릿 인스턴스화 'std::_List_node_emplace_op2<std::allocator<std::_List_node<std::pair<const std::wstring,int>,std::_Default_allocator_traits<_Alloc>::void_pointer>>>::_List_node_emplace_op2<_Ty>(_Alnode &,_Ty &&)'에 대한 참조를 확인하세요.
+          with
+          [
+              _Alloc=std::allocator<std::pair<const std::wstring,int>>,
+              _Ty=std::pair<std::wstring,double>,
+              _Alnode=std::allocator<std::_List_node<std::pair<const std::wstring,int>,std::_Default_allocator_traits<std::allocator<std::pair<const std::wstring,int>>>::void_pointer>>
+          ]
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\list(585,25):
+          컴파일되는 함수 템플릿 인스턴스화 'void std::_Default_allocator_traits<_Alloc>::construct<_Ty,std::pair<_Kty,double>>(_Alloc &,_Objty *const ,std::pair<_Kty,double> &&)'에 대한 참조를 확인하세요.
+          with
+          [
+              _Alloc=std::allocator<std::_List_node<std::pair<const std::wstring,int>,std::_Default_allocator_traits<std::allocator<std::pair<const std::wstring,int>>>::void_pointer>>,
+              _Ty=std::pair<const std::wstring,int>,
+              _Kty=std::wstring,
+              _Objty=std::pair<const std::wstring,int>
+          ]
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xmemory(698,14):
+          컴파일되는 함수 템플릿 인스턴스화 '_Ty *std::construct_at<_Objty,std::pair<_Kty,double>>(_Ty *const ,std::pair<_Kty,double> &&) noexcept'에 대한 참조를 확인하세요.
+          with
+          [
+              _Ty=std::pair<const std::wstring,int>,
+              _Objty=std::pair<const std::wstring,int>,
+              _Kty=std::wstring
+          ]
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xutility(393,90):
+          컴파일되는 함수 템플릿 인스턴스화 'std::pair<const std::wstring,int>::pair<_Kty,_Ty,0>(std::pair<_Kty,_Ty> &&) noexcept'에 대한 참조를 확인하세요.
+          with
+          [
+              _Kty=std::wstring,
+              _Ty=double
+          ]
+  
+  코드를 생성하고 있습니다...
   CVM.vcxproj -> C:\Users\user\source\repos\Chestnut\x64\Debug\CVM.exe

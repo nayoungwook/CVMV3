@@ -19,7 +19,7 @@ FunctionFrame::~FunctionFrame() {
 	delete stack;
 }
 
-const inline std::wstring get_type_string_of_operand(Operand* op) {
+const inline std::wstring get_type_name_of_operand(Operand* op) {
 	std::wstring type_string_operand = L"";
 
 	Operand* extracted_op = op;
@@ -65,6 +65,8 @@ void add_parameter(bool is_defined_function, FunctionFrame* frame, FunctionFrame
 		for (int i = 0; i < parameter_count; i++) {
 			Operand* op = caller_frame->stack->peek();
 			caller_frame->stack->pop();
+
+			// TODO : do some type checking for parameters.
 			/*
 
 				std::wstring type_string_of_operand = get_type_string_of_operand(op);
@@ -201,7 +203,7 @@ Memory* create_object(CVM* vm, std::unordered_map<unsigned int, CMClass*>::itera
 	return memory;
 }
 
-bool operand_compare(Operand* op1, Operand* op2) {
+bool compare_operand(Operand* op1, Operand* op2) {
 
 	if (op1->get_type() != op2->get_type()) return false;
 
@@ -241,7 +243,7 @@ Operand* cast_operand(Operator* op, std::wstring cast_type, Operand* target) {
 	bool primitive_casted = false;
 	Memory* target_memory = nullptr;
 
-	if (cast_type == get_type_string_of_operand(target)) {
+	if (cast_type == get_type_name_of_operand(target)) {
 		return copy_operand(target);
 	}
 
@@ -316,7 +318,7 @@ Operand* cast_operand(Operator* op, std::wstring cast_type, Operand* target) {
 	}
 
 	if (result == nullptr) {
-		CHESTNUT_THROW_ERROR(L"Failed to cast " + get_type_string_of_operand(target) + L" into " + cast_type,
+		CHESTNUT_THROW_ERROR(L"Failed to cast " + get_type_name_of_operand(target) + L" into " + cast_type,
 			"FAILED_TO_CAST", "0x12", op->get_line_number());
 	}
 
@@ -324,141 +326,15 @@ Operand* cast_operand(Operator* op, std::wstring cast_type, Operand* target) {
 	return result;
 }
 
-void FunctionFrame::object_builtin_render(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
-	CMObject* caller_object = (CMObject*)caller_class->get_cm_class();
-
-	Memory* shader_memory = ((Memory*)vm->global_area[SHADER_MEMORY]->data);
-	CMShader* shader_cm = (CMShader*)shader_memory->get_cm_class();
-
-	Operand* texture_op = caller_class->member_variables[OBJECT_SPRITE];
-
-	if (texture_op->get_type() == operand_null) {
-		std::wstring name = caller_class->get_cm_class()->name;
-		CHESTNUT_THROW_ERROR(L"Failed to render " + std::wstring(name.begin(), name.end()) + L". You must assing texture for it.",
-			"RUNTIME_NO_TEXTURE_FOR_OBJECT", "0x03", 0);
-	}
-
-	Operand* position_op = caller_class->member_variables[OBJECT_POSITION];
-
-	float _x = (position_op->get_vector_elements()->at(0))->get_number_data<float>(),
-		_y = (position_op->get_vector_elements()->at(1))->get_number_data<float>();
-
-	Operand* width_op = caller_class->member_variables[OBJECT_WIDTH];
-	Operand* height_op = caller_class->member_variables[OBJECT_HEIGHT];
-
-	float f_width = (width_op)->get_number_data<float>()
-		, f_height = (height_op)->get_number_data<float>();
-
-	Operand* rotation_op = caller_class->member_variables[OBJECT_ROTATION];
-	float f_rotation = (rotation_op)->get_number_data<float>();
-
-	std::wstring image_name = (texture_op)->get_string_data<std::wstring>();
-	std::unordered_map<std::wstring, CMImage*>::iterator image_data_iter = vm->resources.find(image_name);
-
-	assert(image_data_iter != vm->resources.end());
-
-	CMImage* image_data = image_data_iter->second;
-
-	render_image(shader_cm, image_data->get_texture(), image_data->get_vao(),
-		_x, _y, f_width, f_height, f_rotation, vm->proj_width, vm->proj_height);
-}
-
-void FunctionFrame::run_builtin(code_type cm_type, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
-
-	switch (cm_type) {
-	case code_render: {
-		object_builtin_render(vm, caller, caller_class);
-		break;
-	}
-
-	case code_array_push: {
-		Operand* target_element = this->stack->peek();
-		this->stack->pop();
-
-		((ArrayMemory*)caller_class)->array_elements->push_back(target_element);
-
-		if (target_element->get_type() == operand_address) {
-			// modifying nodes for attr
-			gc_nodes[caller_class]->childs.push_back(gc_nodes[target_element->get_memory_data()]);
-		}
-		break;
-	}
-
-	case code_array_size: {
-		int size_wstr = (int)((ArrayMemory*)caller_class)->array_elements->size();
-		Operand* result = new Operand(size_wstr);
-		caller->stack->push(result);
-		break;
-	}
-
-	case code_array_remove: {
-
-		Operand* target_element = this->stack->peek();
-		this->stack->pop();
-
-		std::vector<Operand*>* _array = ((ArrayMemory*)caller_class)->array_elements;
-
-		int index = 0;
-
-		for (Operand* _element : (*_array)) {
-			if (operand_compare((_element), target_element)) {
-				break;
-			}
-			index++;
-		}
-
-		if (index == _array->size()) { // Failed to find element in array.
-			delete this;
-			return;
-		}
-
-		if (target_element->get_type() == operand_address) {
-			disconnectNode(caller_class, (Memory*)target_element);
-		}
-
-		_array->erase(_array->begin() + index);
-
-		break;
-	}
-
-	case code_array_set: {
-		Operand* target_element = this->stack->peek();
-		this->stack->pop();
-
-		Operand* _index = this->stack->peek();
-		this->stack->pop();
-
-		std::vector<Operand*>* _array = ((ArrayMemory*)caller_class)->array_elements;
-
-		int index = _index->get_number_data<int>();
-
-		if (_array->at(index)->get_type() == operand_address) {
-			disconnectNode(caller_class, _array->at(index)->get_memory_data());
-		}
-
-		_array->at(index) = target_element;
-
-		if (target_element->get_type() == operand_address) {
-			// modifying nodes for attr
-			gc_nodes[caller_class]->childs.push_back(gc_nodes[target_element->get_memory_data()]);
-		}
-		break;
-	}
-
-	}
-
-	delete this;
-	return;
-}
-
 //#define OPERATOR_TIME_STAMP
 
 void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 	code_type cm_type = this->get_code_memory()->get_type();
-	bool is_builtin = !(cm_type == code_function || cm_type == code_initialize || cm_type == code_constructor);
 
+	bool is_builtin = !(cm_type == code_function || cm_type == code_initialize || cm_type == code_constructor);
 	if (is_builtin) {
-		return this->run_builtin(cm_type, vm, caller, caller_class);
+		// not for direct builtin function call.
+		return this->run_member_builtin(cm_type, vm, caller, caller_class);
 	}
 
 	vm->stack_area.push_back(this);
@@ -775,8 +651,8 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 					this->stack->push(new Operand(calculated_vector, operand_vector));
 				}
 				else {
-					std::wstring lhs_str = get_type_string_of_operand(rhs);
-					std::wstring rhs_str = get_type_string_of_operand(lhs);
+					std::wstring lhs_str = get_type_name_of_operand(rhs);
+					std::wstring rhs_str = get_type_name_of_operand(lhs);
 					CHESTNUT_THROW_ERROR(L"Failed to calculate " + std::wstring(lhs_str.begin(), lhs_str.end())
 						+ L" " + std::wstring(rhs_str.begin(), rhs_str.end()),
 						"TRIED_TO_CALCULATE_DIFFERENT_TYPES", "0x11", op->get_line_number());
@@ -874,12 +750,12 @@ void FunctionFrame::run(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
 			}
 
 			case op_equal: {
-				result = new Operand(operand_compare(rhs, lhs));
+				result = new Operand(compare_operand(rhs, lhs));
 				break;
 			}
 
 			case op_not_equal: {
-				result = new Operand(!operand_compare(rhs, lhs));
+				result = new Operand(!compare_operand(rhs, lhs));
 				break;
 			}
 

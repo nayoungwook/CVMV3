@@ -144,7 +144,7 @@ void FunctionFrame::print_operand(Operand* data) {
 
 	case operand_address: {
 		Memory* memory = (Memory*)(data->data);
-		if (memory->get_cm_class()->get_type() == code_array) {
+		if (memory->get_cm_class()->get_type() == code_member_array) {
 			ArrayMemory* arr_memory = (ArrayMemory*)memory;
 			std::cout << "[";
 			for (int i = 0; i < arr_memory->array_elements->size(); i++) {
@@ -304,6 +304,133 @@ void FunctionFrame::builtin_random_range(Operator* op, CVM* vm, FunctionFrame* c
 
 	delete _v1;
 	delete _v2;
+}
+
+void FunctionFrame::object_builtin_render(CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	CMObject* caller_object = (CMObject*)caller_class->get_cm_class();
+
+	Memory* shader_memory = ((Memory*)vm->global_area[SHADER_MEMORY]->data);
+	CMShader* shader_cm = (CMShader*)shader_memory->get_cm_class();
+
+	Operand* texture_op = caller_class->member_variables[OBJECT_SPRITE];
+
+	if (texture_op->get_type() == operand_null) {
+		std::wstring name = caller_class->get_cm_class()->name;
+		CHESTNUT_THROW_ERROR(L"Failed to render " + std::wstring(name.begin(), name.end()) + L". You must assing texture for it.",
+			"RUNTIME_NO_TEXTURE_FOR_OBJECT", "0x03", 0);
+	}
+
+	Operand* position_op = caller_class->member_variables[OBJECT_POSITION];
+
+	float _x = (position_op->get_vector_elements()->at(0))->get_number_data<float>(),
+		_y = (position_op->get_vector_elements()->at(1))->get_number_data<float>();
+
+	Operand* width_op = caller_class->member_variables[OBJECT_WIDTH];
+	Operand* height_op = caller_class->member_variables[OBJECT_HEIGHT];
+
+	float f_width = (width_op)->get_number_data<float>()
+		, f_height = (height_op)->get_number_data<float>();
+
+	Operand* rotation_op = caller_class->member_variables[OBJECT_ROTATION];
+	float f_rotation = (rotation_op)->get_number_data<float>();
+
+	std::wstring image_name = (texture_op)->get_string_data<std::wstring>();
+	std::unordered_map<std::wstring, CMImage*>::iterator image_data_iter = vm->resources.find(image_name);
+
+	assert(image_data_iter != vm->resources.end());
+
+	CMImage* image_data = image_data_iter->second;
+
+	render_image(shader_cm, image_data->get_texture(), image_data->get_vao(),
+		_x, _y, f_width, f_height, f_rotation, vm->proj_width, vm->proj_height);
+}
+
+// Builtin Functions for in class
+void FunctionFrame::run_member_builtin(code_type cm_type, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
+	switch (cm_type) {
+	case code_member_render: {
+		object_builtin_render(vm, caller, caller_class);
+		break;
+	}
+
+	case code_member_array_push: {
+		Operand* target_element = this->stack->peek();
+		this->stack->pop();
+
+		((ArrayMemory*)caller_class)->array_elements->push_back(target_element);
+
+		if (target_element->get_type() == operand_address) {
+			// modifying nodes for attr
+			gc_nodes[caller_class]->childs.push_back(gc_nodes[target_element->get_memory_data()]);
+		}
+		break;
+	}
+
+	case code_member_array_size: {
+		int size_wstr = (int)((ArrayMemory*)caller_class)->array_elements->size();
+		Operand* result = new Operand(size_wstr);
+		caller->stack->push(result);
+		break;
+	}
+
+	case code_member_array_remove: {
+
+		Operand* target_element = this->stack->peek();
+		this->stack->pop();
+
+		std::vector<Operand*>* _array = ((ArrayMemory*)caller_class)->array_elements;
+
+		int index = 0;
+
+		for (Operand* _element : (*_array)) {
+			if (compare_operand((_element), target_element)) {
+				break;
+			}
+			index++;
+		}
+
+		if (index == _array->size()) { // Failed to find element in array.
+			delete this;
+			return;
+		}
+
+		if (target_element->get_type() == operand_address) {
+			disconnectNode(caller_class, (Memory*)target_element);
+		}
+
+		_array->erase(_array->begin() + index);
+
+		break;
+	}
+
+	case code_member_array_set: {
+		Operand* target_element = this->stack->peek();
+		this->stack->pop();
+
+		Operand* _index = this->stack->peek();
+		this->stack->pop();
+
+		std::vector<Operand*>* _array = ((ArrayMemory*)caller_class)->array_elements;
+
+		int index = _index->get_number_data<int>();
+
+		if (_array->at(index)->get_type() == operand_address) {
+			disconnectNode(caller_class, _array->at(index)->get_memory_data());
+		}
+
+		_array->at(index) = target_element;
+
+		if (target_element->get_type() == operand_address) {
+			// modifying nodes for attr
+			gc_nodes[caller_class]->childs.push_back(gc_nodes[target_element->get_memory_data()]);
+		}
+		break;
+	}
+
+	}
+
+	delete this;
+	return;
 }
 
 void FunctionFrame::run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {

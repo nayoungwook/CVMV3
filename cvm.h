@@ -15,9 +15,11 @@
 #include "engine/engine.h"
 #include "sys_logger.h"
 #include "code_memory/cm_shader.h"
+//#include "code_memory/cm_camera.h"
 #include "gc/gc.h"
 
 static const int SHADER_MEMORY = 0;
+static const int CAMERA_MEMORY = 1;
 
 static const int BUILTIN_PRINT = 0;
 static const int BUILTIN_WINDOW = 1;
@@ -71,6 +73,7 @@ public:
 
 	unsigned int array_code_memory_id = 0;
 
+	// for color() function
 	unsigned int r = 255, g = 255, b = 255;
 
 	unsigned int fps = 0;

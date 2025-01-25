@@ -1,7 +1,7 @@
 #include "cm_array.h"
 
 CMArray::CMArray(unsigned int id, unsigned int parent_id) : CMClass(id, parent_id, 0, 0, 0) {
-	this->type = code_array;
+	this->type = code_member_array;
 	this->name = L"array";
 
 	std::vector<Operator*> operators;
@@ -20,20 +20,20 @@ CMArray::CMArray(unsigned int id, unsigned int parent_id) : CMClass(id, parent_i
 
 CMArrayPush::CMArrayPush(std::vector<Operator*>& operators, unsigned int id,
 	std::vector<std::wstring>& param_types) : CMFunction(L"push", operators, id, L"void", param_types, L"public") {
-	this->type = code_array_push;
+	this->type = code_member_array_push;
 }
 
 CMArrayRemove::CMArrayRemove(std::vector<Operator*>& operators, unsigned int id,
 	std::vector<std::wstring>& param_types) : CMFunction(L"remove", operators, id, L"void", param_types, L"public") {
-	this->type = code_array_remove;
+	this->type = code_member_array_remove;
 }
 
 CMArraySize::CMArraySize(std::vector<Operator*>& operators, unsigned int id,
 	std::vector<std::wstring>& param_types) : CMFunction(L"size", operators, id, L"number", param_types, L"public") {
-	this->type = code_array_size;
+	this->type = code_member_array_size;
 }
 
 CMArraySet::CMArraySet(std::vector<Operator*>& operators, unsigned int id,
 	std::vector<std::wstring>& param_types) : CMFunction(L"set", operators, id, L"void", param_types, L"public") {
-	this->type = code_array_set;
+	this->type = code_member_array_set;
 }
