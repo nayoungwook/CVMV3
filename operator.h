@@ -75,5 +75,6 @@ public:
 	int get_line_number() const;
 	operator_type get_type() const;
 	std::vector<Token*> operands;
-	Operator(operator_type type, std::vector<Token*>& operands, int line_number);
+	std::vector<int> numeric_operands;
+	Operator(operator_type type, std::vector<Token*>& operands, std::vector<int>& numeric_opernds, int line_number);
 };

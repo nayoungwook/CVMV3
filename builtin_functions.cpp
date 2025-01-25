@@ -1,7 +1,7 @@
 #include "function_frame.h"
 
 void FunctionFrame::builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
-	int parameter_count = std::stoi(op->operands[1]->identifier);
+	int parameter_count = op->numeric_operands[1];
 	Operand* image = this->stack->peek(); // wstring data.
 	this->stack->pop();
 
@@ -49,7 +49,7 @@ void FunctionFrame::builtin_image(Operator* op, CVM* vm, FunctionFrame* caller, 
 }
 
 void FunctionFrame::builtin_text(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
-	int parameter_count = std::stoi(op->operands[1]->identifier);
+	int parameter_count = op->numeric_operands[1];
 
 	Operand* font = this->stack->peek(); // wstring data.
 	this->stack->pop();
@@ -95,7 +95,7 @@ void FunctionFrame::builtin_text(Operator* op, CVM* vm, FunctionFrame* caller, M
 
 
 void FunctionFrame::builtin_color(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
-	int parameter_count = std::stoi(op->operands[1]->identifier);
+	int parameter_count = op->numeric_operands[1];
 
 	Operand* r = this->stack->peek(); // r
 	this->stack->pop();
@@ -179,7 +179,7 @@ void FunctionFrame::print_operand(Operand* data) {
 }
 
 void FunctionFrame::builtin_print(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
-	int parameter_count = std::stoi(op->operands[1]->identifier);
+	int parameter_count = op->numeric_operands[1];
 
 	for (int i = 0; i < parameter_count; i++) {
 		Operand* _data = this->stack->peek();
@@ -194,7 +194,7 @@ void FunctionFrame::builtin_print(Operator* op, CVM* vm, FunctionFrame* caller, 
 }
 
 void FunctionFrame::builtin_window(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
-	int parameter_count = std::stoi(op->operands[1]->identifier);
+	int parameter_count = op->numeric_operands[1];
 
 	std::wstring title;
 	int width = 0, height = 0;
@@ -227,7 +227,7 @@ void FunctionFrame::builtin_window(Operator* op, CVM* vm, FunctionFrame* caller,
 extern std::unordered_map<Memory*, Node*> gc_nodes;
 
 void FunctionFrame::builtin_load_scene(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
-	int parameter_count = std::stoi(op->operands[1]->identifier);
+	int parameter_count = op->numeric_operands[1];
 
 	for (int i = 0; i < parameter_count; i++) {
 		Operand* _target = this->stack->peek();
@@ -250,7 +250,7 @@ void FunctionFrame::builtin_load_scene(Operator* op, CVM* vm, FunctionFrame* cal
 }
 
 void FunctionFrame::builtin_background(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
-	int parameter_count = std::stoi(op->operands[1]->identifier);
+	int parameter_count = op->numeric_operands[1];
 
 	Operand* r = this->stack->peek(); // r
 	this->stack->pop();
@@ -307,8 +307,8 @@ void FunctionFrame::builtin_random_range(Operator* op, CVM* vm, FunctionFrame* c
 }
 
 void FunctionFrame::run_builtin(Operator* op, CVM* vm, FunctionFrame* caller, Memory* caller_class) {
-	unsigned int id = std::stoi(op->operands[0]->identifier);
-	int parameter_count = std::stoi(op->operands[1]->identifier);
+	unsigned int id = op->numeric_operands[0];
+	int parameter_count = op->numeric_operands[1];
 
 	switch (id) {
 	case BUILTIN_PRINT: // print

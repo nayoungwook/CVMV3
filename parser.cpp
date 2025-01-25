@@ -5,6 +5,7 @@ Operator* get_operator(CVM* vm, std::unordered_map<std::wstring, unsigned int>* 
 
 	Operator* result = nullptr;
 	std::vector<Token*> operands;
+	std::vector<int> numeric_operands;
 	operator_type type = op_none;
 
 	if (token->identifier == L"@PUSH_STRING") {
@@ -52,48 +53,48 @@ Operator* get_operator(CVM* vm, std::unordered_map<std::wstring, unsigned int>* 
 	else if (token->identifier == L"@STORE_GLOBAL") {
 		type = op_store_global;
 
-		operands.push_back(pull_token(tokens)); // id
+		numeric_operands.push_back(std::stoi(pull_token(tokens)->identifier)); // id
 		pull_token(tokens);
 	}
 	else if (token->identifier == L"@STORE_CLASS") {
 		type = op_store_class;
 
-		operands.push_back(pull_token(tokens)); // id
+		numeric_operands.push_back(std::stoi(pull_token(tokens)->identifier)); // id
 		operands.push_back(pull_token(tokens)); // ( name )
 	}
 	else if (token->identifier == L"@STORE_ATTR") {
 		type = op_store_attr;
 
-		operands.push_back(pull_token(tokens)); // id
+		numeric_operands.push_back(std::stoi(pull_token(tokens)->identifier)); // id
 		operands.push_back(pull_token(tokens)); // name
 	}
 	else if (token->identifier == L"@STORE_LOCAL") {
 		type = op_store_local;
 
-		operands.push_back(pull_token(tokens)); // id
+		numeric_operands.push_back(std::stoi(pull_token(tokens)->identifier)); // id
 		operands.push_back(pull_token(tokens)); // name
 	}
 	else if (token->identifier == L"@LOAD_GLOBAL") {
 		type = op_load_global;
 
-		operands.push_back(pull_token(tokens)); // id
+		numeric_operands.push_back(std::stoi(pull_token(tokens)->identifier)); // id
 		operands.push_back(pull_token(tokens)); // name
 	}
 	else if (token->identifier == L"@LOAD_LOCAL") {
 		type = op_load_local;
 
-		operands.push_back(pull_token(tokens)); // id
+		numeric_operands.push_back(std::stoi(pull_token(tokens)->identifier)); // id
 		operands.push_back(pull_token(tokens)); // name
 	}
 	else if (token->identifier == L"@SUPER_CALL") {
 		type = op_super_call;
 
-		operands.push_back(pull_token(tokens)); // parameter_count
+		numeric_operands.push_back(std::stoi(pull_token(tokens)->identifier)); // parameter_count
 	}
 	else if (token->identifier == L"@LOAD_CLASS") {
 		type = op_load_class;
 
-		operands.push_back(pull_token(tokens)); // id
+		numeric_operands.push_back(std::stoi(pull_token(tokens)->identifier)); // id
 		pull_token(tokens);
 	}
 	else if (token->identifier == L"@ADD") {
@@ -171,13 +172,13 @@ Operator* get_operator(CVM* vm, std::unordered_map<std::wstring, unsigned int>* 
 	else if (token->identifier == L"@LOAD_ATTR") {
 		type = op_load_attr;
 
-		operands.push_back(pull_token(tokens)); // id
+		numeric_operands.push_back(std::stoi(pull_token(tokens)->identifier)); // id
 		operands.push_back(pull_token(tokens)); // name
 	}
 	else if (token->identifier == L"@ARRAY") {
 		type = op_array;
 
-		operands.push_back(pull_token(tokens)); // array size
+		numeric_operands.push_back(std::stoi(pull_token(tokens)->identifier)); // array size
 	}
 	else if (token->identifier == L"@ARRAY_GET") {
 		type = op_array_get;
@@ -189,15 +190,15 @@ Operator* get_operator(CVM* vm, std::unordered_map<std::wstring, unsigned int>* 
 	else if (token->identifier == L"@NEW") {
 		type = op_new;
 
-		operands.push_back(pull_token(tokens)); // id
+		numeric_operands.push_back(std::stoi(pull_token(tokens)->identifier)); // id
 		pull_token(tokens); // ( name )
 
-		operands.push_back(pull_token(tokens)); // constructor parameter count
+		numeric_operands.push_back(std::stoi(pull_token(tokens)->identifier)); // constructor parameter count
 	}
 	else if (token->identifier == L"@VECTOR") {
 		type = op_vector;
 
-		operands.push_back(pull_token(tokens)); // vector size
+		numeric_operands.push_back(std::stoi(pull_token(tokens)->identifier)); // vector size
 	}
 	else if (token->identifier == L"@CALL_BUILTIN" || token->identifier == L"@CALL_GLOBAL" || token->identifier == L"@CALL_ATTR" || token->identifier == L"@CALL_CLASS") {
 		if (token->identifier == L"@CALL_BUILTIN")
@@ -209,9 +210,9 @@ Operator* get_operator(CVM* vm, std::unordered_map<std::wstring, unsigned int>* 
 		else if (token->identifier == L"@CALL_CLASS")
 			type = op_call_class;
 
-		operands.push_back(pull_token(tokens)); // id
+		numeric_operands.push_back(std::stoi(pull_token(tokens)->identifier)); // id
 		pull_token(tokens); // ( name )
-		operands.push_back(pull_token(tokens)); // parameter_count
+		numeric_operands.push_back(std::stoi(pull_token(tokens)->identifier)); // parameter_count
 	}
 	else if (token->identifier == L"@KEYBOARD") {
 		operands.push_back(pull_token(tokens)); // key
@@ -228,7 +229,7 @@ Operator* get_operator(CVM* vm, std::unordered_map<std::wstring, unsigned int>* 
 			if (incre_decre_string == L"@DECRE")
 				type = op_decre_global;
 
-			operands.push_back(pull_token(tokens)); // id
+			numeric_operands.push_back(std::stoi(pull_token(tokens)->identifier)); // id
 			operands.push_back(pull_token(tokens)); // name
 		}
 		else if (scope_string == L"_LOCAL") {
@@ -237,7 +238,7 @@ Operator* get_operator(CVM* vm, std::unordered_map<std::wstring, unsigned int>* 
 			if (incre_decre_string == L"@DECRE")
 				type = op_decre_local;
 
-			operands.push_back(pull_token(tokens)); // id
+			numeric_operands.push_back(std::stoi(pull_token(tokens)->identifier)); // id
 			operands.push_back(pull_token(tokens)); // name
 		}
 		else if (scope_string == L"_ARRAY") {
@@ -252,7 +253,7 @@ Operator* get_operator(CVM* vm, std::unordered_map<std::wstring, unsigned int>* 
 			if (incre_decre_string == L"@DECRE")
 				type = op_decre_class;
 
-			operands.push_back(pull_token(tokens)); // id
+			numeric_operands.push_back(std::stoi(pull_token(tokens)->identifier)); // id
 			pull_token(tokens);
 		}
 	}
@@ -260,7 +261,7 @@ Operator* get_operator(CVM* vm, std::unordered_map<std::wstring, unsigned int>* 
 	std::wstring line_number_str = pull_token(tokens)->identifier;
 
 	int code_line_number = std::stoi(line_number_str);
-	result = new Operator(type, operands, code_line_number);
+	result = new Operator(type, operands, numeric_operands, code_line_number);
 
 	assert(result != nullptr);
 
