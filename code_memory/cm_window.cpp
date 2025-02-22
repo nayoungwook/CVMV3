@@ -322,6 +322,19 @@ SDL_Window* CMWindow::get_window() {
 	return this->_window;
 }
 
+void load_camera(CVM* vm) {
+	unsigned int builtin_id = vm->builtin_class.size();
+
+	CMCamera* cm = new CMCamera(builtin_id, vm->proj_width, vm->proj_height);
+
+	vm->builtin_class.insert(std::make_pair(builtin_id, cm));
+
+	Memory* shader_memory = new Memory(vm->builtin_class.find(builtin_id));
+
+	vm->global_area.insert(std::make_pair(CAMERA_MEMORY, create_address_operand(shader_memory)));
+}
+
+
 void load_default_shader(CVM* vm) {
 	unsigned int builtin_id = vm->builtin_class.size();
 
@@ -365,6 +378,7 @@ CMWindow::CMWindow(unsigned int id, CVM* vm, std::wstring const& title, int widt
 	load_images(vm->load_queue, vm->resources);
 	load_fonts(vm->font_queue, vm->font_resources);
 	load_default_shader(vm);
+	load_camera(vm);
 
 	load_builtin_variables(vm);
 

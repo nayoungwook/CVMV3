@@ -7,6 +7,7 @@
 #include "cm_function.h"
 #include "cm_class.h"
 #include "cm_scene.h"
+#include "cm_camera.h"
 #include "memory.h"
 #include "../cvm.h"
 #include "../function_frame.h"
@@ -31,6 +32,7 @@ static SDL_GLContext context;
 SDL_Window* create_window(std::wstring const& title, int width, int height);
 void window_loop(CVM* vm, SDL_Window* window);
 void load_default_shader(CVM* vm);
+void load_camera(CVM* vm);
 void load_builtin_variables(CVM* vm);
 
 static std::vector<std::wstring> changed_files;

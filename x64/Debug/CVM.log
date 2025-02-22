@@ -1,13 +1,40 @@
-﻿  cm_window.cpp
-C:\Users\user\source\repos\Chestnut\CVM\FileWatcher.hpp(247,9): warning C4068: 알 수 없는 pragma 'mark'
-  (소스 파일 'code_memory/cm_window.cpp'을(를) 컴파일하는 중)
+﻿  builtin_functions.cpp
+C:\Users\nayou\Desktop\ChestnutV3\CVM\FileWatcher.hpp(247,9): warning C4068: 알 수 없는 pragma 'mark'
+  (소스 파일 'builtin_functions.cpp'을(를) 컴파일하는 중)
   
-C:\Users\user\source\repos\Chestnut\CVM\code_memory\cm_window.cpp(326,26): warning C4267: '초기화 중': 'size_t'에서 'unsigned int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\builtin_functions.cpp(219,26): warning C4267: '초기화 중': 'size_t'에서 'unsigned int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  builtin_math.cpp
+C:\Users\nayou\Desktop\ChestnutV3\CVM\FileWatcher.hpp(247,9): warning C4068: 알 수 없는 pragma 'mark'
+  (소스 파일 'builtin_math.cpp'을(를) 컴파일하는 중)
+  
+  cm_array.cpp
+  cm_camera.cpp
+C:\Users\nayou\Desktop\ChestnutV3\CVM\FileWatcher.hpp(247,9): warning C4068: 알 수 없는 pragma 'mark'
+  (소스 파일 'code_memory/cm_camera.cpp'을(를) 컴파일하는 중)
+  
+  cm_class.cpp
+  cm_function.cpp
+  cm_image.cpp
+C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_image.cpp(38,11): warning C4477: 'printf' : 서식 문자열 '%s'에 'char *' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'const _Elem *'입니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_image.cpp(38,11): warning C4477:         with
+C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_image.cpp(38,11): warning C4477:         [
+C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_image.cpp(38,11): warning C4477:             _Elem=wchar_t
+C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_image.cpp(38,11): warning C4477:         ]
+      C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_image.cpp(38,11):
+      서식 문자열에서 '%ls'을(를) 사용하는 것이 좋습니다.
+      C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_image.cpp(38,11):
+      서식 문자열에서 '%lls'을(를) 사용하는 것이 좋습니다.
+      C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_image.cpp(38,11):
+      서식 문자열에서 '%Ls'을(를) 사용하는 것이 좋습니다.
+      C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_image.cpp(38,11):
+      서식 문자열에서 '%ws'을(를) 사용하는 것이 좋습니다.
+  
+C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_image.cpp(62,17): warning C4101: 'bytes' :참조되지 않은 지역 변수입니다.
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xutility(4710,18): warning C4244: '=': 'wchar_t'에서 'char'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  (소스 파일 'code_memory/cm_window.cpp'을(를) 컴파일하는 중)
+  (소스 파일 'code_memory/cm_image.cpp'을(를) 컴파일하는 중)
       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xutility(4710,18):
       템플릿 인스턴스화 컨텍스트(가장 오래된 인스턴스화 컨텍스트)가
-          C:\Users\user\source\repos\Chestnut\CVM\code_memory\cm_window.cpp(195,24):
+          C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_image.cpp(35,44):
           컴파일되는 함수 템플릿 인스턴스화 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)'에 대한 참조를 확인하세요.
           with
           [
@@ -15,7 +42,82 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.3443
               _Iter=std::_String_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
               _Alloc=std::allocator<char>
           ]
-              C:\Users\user\source\repos\Chestnut\CVM\code_memory\cm_window.cpp(195,12):
+              C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_image.cpp(35,18):
+              'load_fonts'에서 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string'에 대한 첫 번째 참조를 확인하세요.
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xstring(793,17):
+          컴파일되는 함수 템플릿 인스턴스화 'void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<wchar_t*,wchar_t*,_Size_type>(_Iter,const _Sent,_Size)'에 대한 참조를 확인하세요.
+          with
+          [
+              _Size_type=unsigned __int64,
+              _Iter=wchar_t *,
+              _Sent=wchar_t *,
+              _Size=unsigned __int64
+          ]
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xstring(949,18):
+          컴파일되는 함수 템플릿 인스턴스화 '_OutIt *std::_Copy_n_unchecked4<wchar_t*,_Size,char*>(_InIt,_SizeTy,_OutIt)'에 대한 참조를 확인하세요.
+          with
+          [
+              _OutIt=char *,
+              _Size=unsigned __int64,
+              _InIt=wchar_t *,
+              _SizeTy=unsigned __int64
+          ]
+  
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xutility(4710,18): warning C4244: '=': 'const wchar_t'에서 'char'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  (소스 파일 'code_memory/cm_image.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xutility(4710,18):
+      템플릿 인스턴스화 컨텍스트(가장 오래된 인스턴스화 컨텍스트)가
+          C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_image.cpp(124,31):
+          컴파일되는 함수 템플릿 인스턴스화 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_const_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)'에 대한 참조를 확인하세요.
+          with
+          [
+              _Elem=wchar_t,
+              _Iter=std::_String_const_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
+              _Alloc=std::allocator<char>
+          ]
+              C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_image.cpp(124,8):
+              'create_texture_id'에서 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string'에 대한 첫 번째 참조를 확인하세요.
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xstring(793,17):
+          컴파일되는 함수 템플릿 인스턴스화 'void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<const wchar_t*,const wchar_t*,_Size_type>(_Iter,const _Sent,_Size)'에 대한 참조를 확인하세요.
+          with
+          [
+              _Size_type=unsigned __int64,
+              _Iter=const wchar_t *,
+              _Sent=const wchar_t *,
+              _Size=unsigned __int64
+          ]
+          C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xstring(949,18):
+          컴파일되는 함수 템플릿 인스턴스화 '_OutIt *std::_Copy_n_unchecked4<const wchar_t*,_Size,char*>(_InIt,_SizeTy,_OutIt)'에 대한 참조를 확인하세요.
+          with
+          [
+              _OutIt=char *,
+              _Size=unsigned __int64,
+              _InIt=const wchar_t *,
+              _SizeTy=unsigned __int64
+          ]
+  
+  cm_object.cpp
+  cm_scene.cpp
+  cm_shader.cpp
+  cm_window.cpp
+C:\Users\nayou\Desktop\ChestnutV3\CVM\FileWatcher.hpp(247,9): warning C4068: 알 수 없는 pragma 'mark'
+  (소스 파일 'code_memory/cm_window.cpp'을(를) 컴파일하는 중)
+  
+C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_window.cpp(326,26): warning C4267: '초기화 중': 'size_t'에서 'unsigned int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_window.cpp(339,26): warning C4267: '초기화 중': 'size_t'에서 'unsigned int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xutility(4710,18): warning C4244: '=': 'wchar_t'에서 'char'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  (소스 파일 'code_memory/cm_window.cpp'을(를) 컴파일하는 중)
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xutility(4710,18):
+      템플릿 인스턴스화 컨텍스트(가장 오래된 인스턴스화 컨텍스트)가
+          C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_window.cpp(195,24):
+          컴파일되는 함수 템플릿 인스턴스화 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)'에 대한 참조를 확인하세요.
+          with
+          [
+              _Elem=wchar_t,
+              _Iter=std::_String_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
+              _Alloc=std::allocator<char>
+          ]
+              C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_window.cpp(195,12):
               'window_loop::<lambda_1>::operator ()'에서 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string'에 대한 첫 번째 참조를 확인하세요.
           C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xstring(793,17):
           컴파일되는 함수 템플릿 인스턴스화 'void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<wchar_t*,wchar_t*,_Size_type>(_Iter,const _Sent,_Size)'에 대한 참조를 확인하세요.
@@ -40,7 +142,7 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.3443
   (소스 파일 'code_memory/cm_window.cpp'을(를) 컴파일하는 중)
       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xutility(4710,18):
       템플릿 인스턴스화 컨텍스트(가장 오래된 인스턴스화 컨텍스트)가
-          C:\Users\user\source\repos\Chestnut\CVM\code_memory\cm_window.cpp(298,51):
+          C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_window.cpp(298,51):
           컴파일되는 함수 템플릿 인스턴스화 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_const_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)'에 대한 참조를 확인하세요.
           with
           [
@@ -48,7 +150,7 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.3443
               _Iter=std::_String_const_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
               _Alloc=std::allocator<char>
           ]
-              C:\Users\user\source\repos\Chestnut\CVM\code_memory\cm_window.cpp(298,21):
+              C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_window.cpp(298,21):
               'create_window'에서 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string'에 대한 첫 번째 참조를 확인하세요.
           C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\xstring(793,17):
           컴파일되는 함수 템플릿 인스턴스화 'void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<const wchar_t*,const wchar_t*,_Size_type>(_Iter,const _Sent,_Size)'에 대한 참조를 확인하세요.
@@ -69,11 +171,49 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.3443
               _SizeTy=unsigned __int64
           ]
   
+  code_memory.cpp
   cvm.cpp
-C:\Users\user\source\repos\Chestnut\CVM\FileWatcher.hpp(247,9): warning C4068: 알 수 없는 pragma 'mark'
+C:\Users\nayou\Desktop\ChestnutV3\CVM\FileWatcher.hpp(247,9): warning C4068: 알 수 없는 pragma 'mark'
   (소스 파일 'cvm.cpp'을(를) 컴파일하는 중)
   
-C:\Users\user\source\repos\Chestnut\CVM\cvm.cpp(31,26): warning C4267: '초기화 중': 'size_t'에서 'unsigned int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\cvm.cpp(31,26): warning C4267: '초기화 중': 'size_t'에서 'unsigned int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  engine.cpp
+C:\Users\nayou\Desktop\ChestnutV3\CVM\engine\engine.cpp(33,79): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\engine\engine.cpp(33,67): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\engine\engine.cpp(47,22): warning C4838: 'int'에서 'Uint8'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\engine\engine.cpp(47,26): warning C4838: 'int'에서 'Uint8'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\engine\engine.cpp(47,30): warning C4838: 'int'에서 'Uint8'(으)로의 변환에는 축소 변환이 필요합니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\engine\engine.cpp(101,89): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\engine\engine.cpp(101,65): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\engine\engine.cpp(105,79): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\engine\engine.cpp(105,67): warning C4244: '인수': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  stb_image.cpp
+  sys_error.cpp
+  function_frame.cpp
+C:\Users\nayou\Desktop\ChestnutV3\CVM\FileWatcher.hpp(247,9): warning C4068: 알 수 없는 pragma 'mark'
+  (소스 파일 'function_frame.cpp'을(를) 컴파일하는 중)
+  
+C:\Users\nayou\Desktop\ChestnutV3\CVM\function_frame.cpp(115,35): error C3861: 'min': 식별자를 찾을 수 없습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\function_frame.cpp(150,19): warning C4244: 'return': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\function_frame.cpp(645,28): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  gc.cpp
+C:\Users\nayou\Desktop\ChestnutV3\CVM\FileWatcher.hpp(247,9): warning C4068: 알 수 없는 pragma 'mark'
+  (소스 파일 'gc/gc.cpp'을(를) 컴파일하는 중)
+  
+  Math.cpp
+  memory.cpp
+C:\Users\nayou\Desktop\ChestnutV3\CVM\memory.cpp(50,16): warning C4129: '.': 인식할 수 없는 문자 이스케이프 시퀀스입니다.
+  코드를 생성하고 있습니다...
+C:\Users\nayou\Desktop\ChestnutV3\CVM\code_memory\cm_camera.cpp(6,1): error C4716: 'CMCamera::get_proj_matrix': 값을 반환해야 합니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\operand.h(74,1): warning C4715: 'Operand::get_number_data<float>': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\operand.h(74,1): warning C4715: 'Operand::get_number_data<double>': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\operand.h(74,1): warning C4715: 'Operand::get_number_data<float>': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\operand.h(82,1): warning C4715: 'Operand::get_string_data<std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t> > >': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\operand.h(74,1): warning C4715: 'Operand::get_number_data<int>': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\operand.h(74,1): warning C4715: 'Operand::get_number_data<double>': 모든 제어 경로에서 값을 반환하지는 않습니다.
+  컴파일하고 있습니다...
+  operand.cpp
+  operator.cpp
   parser.cpp
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\utility(292,61): warning C4244: '초기화 중': '_Ty'에서 '_Ty2'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\utility(292,61): warning C4244:         with
@@ -87,7 +227,7 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.3443
   (소스 파일 'parser.cpp'을(를) 컴파일하는 중)
       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\utility(292,61):
       템플릿 인스턴스화 컨텍스트(가장 오래된 인스턴스화 컨텍스트)가
-          C:\Users\user\source\repos\Chestnut\CVM\parser.cpp(29,26):
+          C:\Users\nayou\Desktop\ChestnutV3\CVM\parser.cpp(29,26):
           컴파일되는 함수 템플릿 인스턴스화 'std::pair<std::_List_iterator<std::_List_val<std::_List_simple_types<_Ty>>>,bool> std::unordered_map<std::wstring,int,std::hash<std::wstring>,std::equal_to<std::wstring>,std::allocator<_Ty>>::insert<std::pair<_Kty,double>,0>(_Valty &&)'에 대한 참조를 확인하세요.
           with
           [
@@ -95,7 +235,7 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.3443
               _Kty=std::wstring,
               _Valty=std::pair<std::wstring,double>
           ]
-              C:\Users\user\source\repos\Chestnut\CVM\parser.cpp(29,32):
+              C:\Users\nayou\Desktop\ChestnutV3\CVM\parser.cpp(29,32):
               'get_operator'에서 'std::unordered_map<std::wstring,int,std::hash<std::wstring>,std::equal_to<std::wstring>,std::allocator<std::pair<const std::wstring,int>>>::insert'에 대한 첫 번째 참조를 확인하세요.
           C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.34433\include\unordered_map(271,22):
           컴파일되는 함수 템플릿 인스턴스화 'std::pair<std::_List_iterator<std::_List_val<std::_List_simple_types<_Ty>>>,bool> std::_Hash<std::_Umap_traits<_Kty,int,std::_Uhash_compare<_Kty,_Hasher,_Keyeq>,_Alloc,false>>::emplace<std::pair<_Kty,double>>(std::pair<_Kty,double> &&)'에 대한 참조를 확인하세요.
@@ -140,5 +280,15 @@ C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.42.3443
               _Ty=double
           ]
   
+  stack.cpp
+  sys_file.cpp
+  sys_logger.cpp
+C:\Users\nayou\Desktop\ChestnutV3\CVM\sys_logger.cpp(10,8): warning C4101: 'time_str' :참조되지 않은 지역 변수입니다.
+  sys_util.cpp
   코드를 생성하고 있습니다...
-  CVM.vcxproj -> C:\Users\user\source\repos\Chestnut\x64\Debug\CVM.exe
+C:\Users\nayou\Desktop\ChestnutV3\CVM\operand.cpp(75,1): warning C4715: 'Operand::get_memory_data': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\operand.cpp(82,1): warning C4715: 'Operand::get_bool_data': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\operand.h(74,1): warning C4715: 'Operand::get_number_data<double>': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\operand.h(74,1): warning C4715: 'Operand::get_number_data<float>': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\operand.h(74,1): warning C4715: 'Operand::get_number_data<int>': 모든 제어 경로에서 값을 반환하지는 않습니다.
+C:\Users\nayou\Desktop\ChestnutV3\CVM\operand.h(82,1): warning C4715: 'Operand::get_string_data<std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t> > >': 모든 제어 경로에서 값을 반환하지는 않습니다.

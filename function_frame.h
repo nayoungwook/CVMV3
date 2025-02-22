@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <random>
 #include <chrono>
+#include <cmath>
 
 #include "code_memory/cm_function.h"
 #include "code_memory/cm_window.h"
